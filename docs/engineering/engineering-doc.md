@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | 0.1, draft for owner approval |
+| **Version** | 0.2, draft for owner approval (0.2 applies the owner's decisions on OD-01, OD-03, OD-06 and OD-09) |
 | **Status** | **Draft. No implementation begins until the owner approves this document.** |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
@@ -34,9 +34,16 @@
 | 7 | Owner metrics are SQL views in a `metrics` schema, read in the Supabase SQL editor. There is no in-app owner page. |
 | 8 | **Latency is a soft limit.** The generation pipeline follows PRD §8.4 exactly as written. The UI shows a "Still working…" state after 8 s, and the server stops at 20 s with `GENERATION_FAILED` (§8.10). Design changes for speed are considered only after Phase 0 provides real data. |
 | 9 | Defaults approved with the stack: the edit-mode time check (V-8), the Reset diversity relaxation (V-9), idempotency keys, the `planner_opened` client event, and the Claude refusal fallback (Appendix A, D-04 to D-08). |
+| 10 | **D-26** If AG-2 fails on a note, the plan is generated without the note, as PRD §8.15 says (OD-01). |
+| 11 | **D-27** `SIGNUP_NOTICE` gets one added sentence about AI processing (OD-03). |
+| 12 | **D-28** Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP (OD-06). The built-in sender only delivers to members of the Supabase organisation, so Phase 1 delivery to friends is still open; see OD-06 in §20.2. |
+| 13 | Interpretations D-11 to D-19 approved as recommended (OD-09). This also settles OD-02 and OD-04. |
 
 ### 0.3 What still needs the owner
-See §20.2 (open decisions OD-01 to OD-09). None blocks the start of implementation except OD-06 (the sending domain for auth emails), which blocks F-03 in production.
+See §20.2.
+- **Decided on 2026-10-24:** OD-01, OD-02, OD-03, OD-04 and OD-09 (Appendix A, D-11 to D-19 and D-26 to D-28).
+- **Still open:** OD-05 (UI copy), OD-06 (how friends receive auth emails in Phase 1), OD-07 (sign-in after verification) and OD-08 (reviews the PRD requires).
+- None of these blocks the start of implementation. **OD-06 must be settled before Phase 1**, because Supabase's built-in sender only delivers to members of the Supabase organisation.
 
 ---
 
@@ -103,7 +110,7 @@ flowchart LR
         STO["Storage: exercise-images<br/>(public, reference data only)"]
     end
     ANT["Anthropic Claude API<br/>Sonnet 5.5 / Haiku 5.5"]
-    RES["Resend (SMTP)"]
+    RES["Supabase built-in<br/>email sender (D-28)"]
 
     UI -- "HTTPS, cookies" --> RSC
     UI -- "HTTPS JSON / multipart" --> API
@@ -123,7 +130,7 @@ flowchart LR
 | App framework | Next.js 16 (App Router) on Vercel | Native to Vercel. API keys stay on the server. One deploy. |
 | API | REST Route Handlers under `/api/v1` | Explicit contracts. Testable over plain HTTP. |
 | Data | Supabase Postgres via Drizzle ORM, server only, RLS on every user table | The browser cannot reach app tables, so "only the orchestrator writes" (§8.6) holds at the network level. RLS backs FR-5 against server bugs. |
-| Auth | Supabase Auth (email + password), Resend SMTP | PRD §12.1. |
+| Auth | Supabase Auth (email + password) with Supabase's built-in email sender | PRD §12.1. Resend is parked (D-28). |
 | LLM | `@anthropic-ai/sdk`, structured outputs, prompt caching | PRD §12.2. |
 | Jobs | `pg_cron` inside Postgres | Expiry and retention run next to the data. |
 | Logs / metrics | Own `agent_logs` table (30 days) and SQL views | Health text stays in one store we control. |
@@ -263,7 +270,7 @@ All `/api/v1/*` calls carry the Supabase session cookie. Message codes in code f
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
 | 1 | Opens the shared link `/sign-up` | Renders email, password and confirm-password fields, and shows `SIGNUP_NOTICE` above the submit button | — | — | Form shown |
-| 2 | Submits | Zod validation: valid email; password 8–72 characters; passwords match. Calls `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL + '/auth/confirm?next=/onboarding' } })` from the browser. | Supabase Auth creates an unconfirmed user and sends the verification email through Resend SMTP. It returns the same response whether or not the email already exists (no account enumeration). | `auth.users` insert (`email_confirmed_at = null`) | Redirect to `/verify-email` ("Check your inbox", UI copy) with a "Resend email" button (`supabase.auth.resend`) |
+| 2 | Submits | Zod validation: valid email; password 8–72 characters; passwords match. Calls `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL + '/auth/confirm?next=/onboarding' } })` from the browser. | Supabase Auth creates an unconfirmed user and sends the verification email through the project's email sender (the built-in sender for the MVP, D-28). It returns the same response whether or not the email already exists (no account enumeration). | `auth.users` insert (`email_confirmed_at = null`) | Redirect to `/verify-email` ("Check your inbox", UI copy) with a "Resend email" button (`supabase.auth.resend`) |
 | 3 | Clicks the email link | Browser opens `/auth/confirm?token_hash=…&type=signup&next=/onboarding` | Route Handler `src/app/auth/confirm/route.ts` calls `supabase.auth.verifyOtp({ type, token_hash })` and sets the session cookies | `auth.users.email_confirmed_at` set | Redirect to `/onboarding`, signed in (D-09: verification signs the user in, so a separate login step is unnecessary) |
 | 4 | Link expired or already used | — | `verifyOtp` returns an error | — | Redirect to `/log-in?error=link_invalid` with UI copy and a "Resend verification email" action |
 
@@ -280,7 +287,7 @@ All `/api/v1/*` calls carry the Supabase session cookie. Message codes in code f
 
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
-| 1 | Taps "Forgot password?" and enters an email | `supabase.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL + '/auth/confirm?next=/update-password' })` | Supabase sends the reset email through Resend. Same response for unknown emails. | `auth.users.recovery_sent_at` | "Check your inbox" (UI copy) |
+| 1 | Taps "Forgot password?" and enters an email | `supabase.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL + '/auth/confirm?next=/update-password' })` | Supabase sends the reset email through the project's email sender (D-28). Same response for unknown emails. | `auth.users.recovery_sent_at` | "Check your inbox" (UI copy) |
 | 2 | Clicks the link | Opens `/auth/confirm?type=recovery&token_hash=…` | `verifyOtp({ type: 'recovery' })` creates a session | `auth.sessions` | Redirect to `/update-password` |
 | 3 | Enters a new password twice | Zod validation; `supabase.auth.updateUser({ password })` | Supabase updates the hash | `auth.users.encrypted_password` | Redirect to `/plan` |
 
@@ -586,6 +593,7 @@ Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages e
 - **Agent-facing messages (FR-46):** `src/shared/messages/catalog.ts` holds every Appendix A code and its template. The server returns `{code, params}`. The client renders it with `renderMessage(code, params)`. No component shows a string that came from an LLM. Exercise and routine names come from the database by ID.
 - **UI copy** (labels, empty states, network errors, `STILL_WORKING`) lives in `src/shared/messages/ui-copy.ts`. It isn't agent text, so FR-46 doesn't restrict it. It's kept in one file so the owner can review the wording (OD-05).
 - `STILL_WORKING` (UI copy, proposed): "Still working on your workout…"
+- **Amended Appendix A text (D-27):** `SIGNUP_NOTICE` reads "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic."
 
 ### 5.7 Photo capture and resizing (D-01)
 1. `<input type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple>`. HTML can't cap the count, so selecting more than 5 is rejected in code (FR-21).
@@ -1808,7 +1816,7 @@ The pipeline is PRD §8.4 unchanged. Latency is handled by a request deadline an
 |-|-|-|-|-|
 | AG-3 output fails validation twice | Validator | Suggest: no plan. Edit: previous plan kept. | `GENERATION_FAILED` | No |
 | AG-3 API error, 429 after retries, timeout, refusal, `max_tokens` | `runAgent` outcome | Same as above | `GENERATION_FAILED` | No |
-| AG-2 schema-invalid, API error, refusal | `runAgent` outcome | Note: generate **without** the note (PRD §8.15; see OD-01). Edit: unchanged. | `NOT_UNDERSTOOD_NOTE` / `NOT_UNDERSTOOD` | Edit: no (system failure) |
+| AG-2 schema-invalid, API error, refusal | `runAgent` outcome | Note: generate **without** the note (PRD §8.15; owner decision D-26). Edit: unchanged. | `NOT_UNDERSTOOD_NOTE` / `NOT_UNDERSTOOD` | Edit: no (system failure) |
 | AG-1 API error, timeout, refusal | `runAgent` outcome | Selection unchanged | `PHOTO_NONE` | No |
 | AG-1 found nothing above the threshold | Post-processing | Selection unchanged | `PHOTO_NONE` | Yes |
 | Spend cap reached | Spend guard or provider error | No LLM calls; non-LLM features keep working | `SPEND_CAP` | — |
@@ -2268,14 +2276,14 @@ flowchart LR
   - Sign-up with `SIGNUP_NOTICE`, verify-email, login, logout, forgot and update password, and `/auth/confirm`.
   - Session refresh in `proxy.ts`.
   - Supabase Auth settings: confirm email on, minimum password length 8, redirect allowlist.
-  - Resend SMTP.
+  - Email through Supabase's built-in sender (D-28); local development and CI use Mailpit.
 - **Acceptance criteria:**
   - E2E: sign-up → email (local Mailpit) → click link → lands on `/onboarding`, signed in.
   - An unverified user can't log in and sees the resend option.
   - Password reset E2E works.
-  - `SIGNUP_NOTICE` text is visible on `/sign-up` (snapshot of the exact catalog string).
+  - `SIGNUP_NOTICE` text, as amended by D-27, is visible on `/sign-up` (snapshot of the exact catalog string).
   - `/auth/confirm` rejects an absolute or external `next`.
-- **Dependencies:** F-01; OD-06 (sending domain) for production email.
+- **Dependencies:** F-01. Email delivery to friends in Phase 1 depends on OD-06.
 
 ### F-04 Profile and onboarding (FR-10 – FR-12, FR-20, FR-25)
 - **Description:** onboarding wizard, API-01, API-02, API-03, API-04, API-05, the profile page and the equipment page.
@@ -2427,7 +2435,7 @@ flowchart LR
 ### F-18 Agent logs, retention and metrics (FR-6, PRD §5, PRD §9.5, PRD §12.6)
 - **Description:** `agent_logs` and `server_errors` writers, `app_events`, the purge jobs, the `metrics` views (§18.3), `docs/runbooks/weekly-review.sql`.
 - **Acceptance criteria:**
-  - Each PRD §5 metric and §9.5 signal has a view that returns a correct result on a seeded fixture (integration test against known numbers).
+  - Each PRD §5 metric and PRD §9.5 signal has a view that returns a correct result on a seeded fixture (integration test against known numbers).
   - Logs older than 30 days are removed by the job.
   - No `app_events.properties` value contains a key outside the allowlist (Zod plus a DB test).
 - **Dependencies:** F-08, F-09.
@@ -2446,13 +2454,13 @@ flowchart LR
 - **Description:** production environment, smoke test, runbooks, the owner's Phase 0 checklist.
 - **Acceptance criteria:**
   - Production is deployed in `bom1` with Supabase `ap-south-1`.
-  - Resend sends from the verified domain.
+  - The owner receives verification and reset emails from production through the built-in sender (D-28).
   - Anthropic prod workspace limit is $60 and dev is $15.
   - `LLM_MONTHLY_BUDGET_USD = 58` in prod.
   - The E2E smoke test passes against production with a test account, which is then deleted.
   - Runbooks exist (§18.5).
   - Supabase is moved to Pro before Phase 1 (PRD §12.1).
-- **Dependencies:** all of the above; OD-06.
+- **Dependencies:** all of the above. OD-06 must be settled before Phase 1; it doesn't block Phase 0.
 
 ---
 
@@ -2999,7 +3007,8 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | **Supabase Postgres** | All app data (§7) | App data | `DATABASE_URL` (`gc_app` through the transaction pooler); CI migration URL (`postgres`) | 500 `INTERNAL`; no LLM call is made if tx 1 fails |
 | **Supabase Storage** | Public exercise images (reference data only) | Images from free-exercise-db | Secret key, used only by `scripts/upload-exercise-images.ts` | Missing image → the card shows the text how-to only |
 | **Anthropic Claude API** | AG-1, AG-2, AG-3; the EV-2 judge in evals | Photos (AG-1); note and edit text with the plan item names (AG-2); structured planning context with no user text (AG-3) | `ANTHROPIC_API_KEY` per environment, from two workspaces | §8.11 |
-| **Resend** | Delivery of Supabase Auth emails (PRD §12.1) | Recipient email; verification and reset links | Resend API key, stored **only** in the Supabase Auth SMTP settings | Supabase reports the failure; the user can resend (AUTH-07) |
+| **Supabase built-in email sender** | Delivery of Supabase Auth emails for the MVP (D-28) | Recipient email; verification and reset links | None (part of Supabase) | Delivers **only to members of the Supabase organisation**, about 2 emails an hour (§15.1). Supabase reports failures; the user can resend (AUTH-07). |
+| Resend | **Parked** for a later build (D-28) | — | — | — |
 | **Vercel** | Hosting, builds, previews, runtime logs | App code; request logs (no bodies) | Vercel account; `VERCEL_TOKEN` for CI deploys | Instant rollback (§17.6) |
 | **GitHub** | Repository and CI (`dbaid-code/fitness-coach`) | Code and test fixtures (no real user data) | GitHub Actions secrets (§17.3) | — |
 | **free-exercise-db** | Exercise source (PRD §10.1), Unlicense | Imported at build time from a pinned commit | None (public) | Import is offline from the app; the app never calls GitHub at runtime |
@@ -3014,8 +3023,8 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | Minimum password length | 8 |
 | JWT signing keys | Asymmetric signing keys (the default on new projects), so `getClaims()` verifies locally |
 | Email templates | Confirm-signup and reset-password templates using `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=<type>&next=<path>` (kept in `supabase/templates/`) |
-| Custom SMTP | Resend SMTP: host `smtp.resend.com`, user `resend`, password = Resend API key; sender `Gym Coach <no-reply@<owner-domain>>` (from memory; check against Resend's docs at setup). The domain needs Resend's SPF and DKIM DNS records (**OD-06**). |
-| Email rate limit | Checked after enabling custom SMTP. The pilot needs about 20 sign-ups plus occasional resets. |
+| Email sender | **Supabase built-in sender** (D-28). No custom SMTP; Resend is parked. |
+| Email limits | The built-in sender delivers only to members of the Supabase organisation, about 2 emails an hour, and is meant for testing (Supabase's Auth SMTP docs). This is enough for Phase 0 if the owner signs up with the address of their Supabase organisation login, or adds the address they use as a member. **It isn't enough for Phase 1:** friends would get no verification or reset emails (OD-06). Inviting friends into the Supabase organisation is ruled out, because it would give them dashboard access to every user's data and logs. |
 
 ### 15.2 Supabase Postgres connections
 
@@ -3056,7 +3065,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 - Secrets live only in:
   - Vercel environment variables (scoped Preview vs Production);
   - GitHub Actions environment secrets (`production` requires the owner's approval);
-  - the Supabase dashboard (the Resend SMTP password);
+  - the Supabase dashboard (project settings and keys);
   - a local `.env.local`, which is git-ignored (`.env.*` is already in `.gitignore`).
 - `.env.example` lists every variable without values.
 - **Rotation runbook:** `docs/runbooks/key-rotation.md`. To rotate the Anthropic key:
@@ -3097,7 +3106,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 
 | Commitment | Implementation |
 |-|-|
-| Disclosure at sign-up | `SIGNUP_NOTICE` on `/sign-up` (FR-3); wording gap in OD-03 |
+| Disclosure at sign-up | `SIGNUP_NOTICE` on `/sign-up` (FR-3), including the AI-processing sentence added by D-27 |
 | Health info only for the current session; never in profile or history | §16.4; the `trg_plans__clear_context` trigger; EV-6 scan test |
 | Red flags stop the plan | §8.8; EV-3 |
 | Adjustments only remove, swap or lighten | AG-3 rule + candidate filter + V-3; EV-4 |
@@ -3127,8 +3136,8 @@ Pilot users are in India, so India's Digital Personal Data Protection Act, 2023 
 |-|-|-|-|-|-|
 | **Local** | `pnpm dev` (localhost:3000) | Supabase CLI local stack (Docker), Mailpit for email | Dev workspace key, or `AGENTS_MODE=fake` | Mailpit | Development and tests |
 | **CI** | `next start` in GitHub Actions | Supabase CLI local stack | `AGENTS_MODE=fake` (tests); dev key (evals workflow only) | Mailpit | Automated checks |
-| **Preview** | Vercel Preview deployment per PR | **Dev** Supabase project (free tier, `ap-south-1`) | Dev workspace key | Dev project SMTP | Owner review of a PR |
-| **Production** | Vercel Production, region **`bom1`** | **Prod** Supabase project (`ap-south-1`; **Pro before Phase 1**) | Prod workspace key | Resend from the owner's domain | Phase 0 and Phase 1 |
+| **Preview** | Vercel Preview deployment per PR | **Dev** Supabase project (free tier, `ap-south-1`) | Dev workspace key | Dev project built-in sender (organisation members only) | Owner review of a PR |
+| **Production** | Vercel Production, region **`bom1`** | **Prod** Supabase project (`ap-south-1`; **Pro before Phase 1**) | Prod workspace key | Built-in sender (D-28): organisation members only; Phase 1 per OD-06 | Phase 0 and Phase 1 |
 
 From memory, free Supabase projects pause after a period of inactivity, so the dev project may need resuming before a preview review.
 
@@ -3140,7 +3149,7 @@ flowchart TB
     VE --> VF["Vercel Functions<br/>bom1 Mumbai<br/>Next.js 16 / Node 24"]
     VF -->|"Supavisor :6543<br/>(gc_app)"| SP[("Supabase prod<br/>ap-south-1 Mumbai<br/>Postgres + Auth + Storage")]
     VF -->|HTTPS| AN["Anthropic API<br/>(prod workspace, $60 cap)"]
-    SP -->|SMTP| RS["Resend"]
+    SP -->|"built-in sender (D-28)"| RS["Auth emails"]
     RS --> M["User inbox"]
     GH["GitHub Actions"] -->|"session pooler :5432<br/>(migrations)"| SP
     GH -->|"vercel deploy --prod"| VF
@@ -3214,8 +3223,7 @@ flowchart LR
 | Supabase Pro (prod), from Phase 0 / before Phase 1 | ~$25 |
 | Supabase free (dev) | $0 |
 | Vercel Hobby | $0 (personal, non-commercial use) |
-| Resend free tier | $0 |
-| Domain for email (OD-06) | ~$1 (annual fee ÷ 12; owner-provided) |
+| Email (Supabase built-in sender; Resend parked, D-28) | $0 |
 | LLM (Appendix C) | prod ≤ $60, dev ≤ $15 |
 
 ---
@@ -3253,7 +3261,7 @@ flowchart LR
 ### 18.4 Weekly review procedure (PRD §13.3)
 1. Run `docs/runbooks/weekly-review.sql` in the Supabase SQL editor (prod).
 2. Read `metrics.weekly_review`, then the drill-down views.
-3. Sample about 10 `agent_logs` rows, including **every** row with `response->>'category' in ('red_flag','out_of_scope_fitness','unrelated')` from the past week.
+3. Sample about 10 `agent_logs` rows, including **every** row with `response->>'category' in ('red_flag','out_of_scope_fitness','unrelated')` from the past week. Also review **every** AG-2 note call (`mode = 'classify_note'`) whose `outcome` isn't `ok`. Under D-26 those plans were generated without the note, so check that none of the notes held a red flag.
 4. Compare spend with the budget: `metrics.llm_cost_monthly` against the Anthropic Console.
 5. Log any safety miss in `docs/runbooks/safety-miss.md` and add it as an EV-3 or EV-4 case before the next release.
 
@@ -3282,7 +3290,7 @@ There is no paging for the pilot. Passive signals:
 | P-1 | Create the Supabase **dev** project in `ap-south-1` (free) | M0 |
 | P-2 | Create the Vercel project linked to `dbaid-code/fitness-coach`; set the function region to `bom1` | M0 |
 | P-3 | Create the Anthropic workspaces `gym-coach-dev` ($15 limit) and `gym-coach-prod` ($60 limit); create the keys; enable spend notifications | M0 (dev), M7 (prod) |
-| P-4 | Provide a domain for email and verify it in Resend (OD-06) | M7 |
+| P-4 | Sign up in production with the address of your Supabase organisation login (the built-in sender only delivers to organisation members, D-28). Settle OD-06 before Phase 1. | M7 (sign-up), before Phase 1 (OD-06) |
 | P-5 | Create the Supabase **prod** project in `ap-south-1`; upgrade to Pro before Phase 1 | M7 |
 | P-6 | Add the GitHub Actions secrets and the `production` environment with the owner as required reviewer | M0 |
 
@@ -3296,9 +3304,9 @@ There is no paging for the pilot. Passive signals:
 | **M4 Plan changes and lifecycle** | F-11, F-12, F-13, F-14, F-15 | Every UF-8 – UF-14 E2E passes; EV-6 passes | — |
 | **M5 Photos** | F-05 | EV-5 passes; threshold tuned and recorded | Review the photo-case truth lists |
 | **M6 Evals, logs, metrics** | F-18, F-19 | EV-1 – EV-8 all pass; `latest.json` committed; metrics views tested | Review 20% of judged plans (≥ 80% agreement) |
-| **M7 Release readiness** | F-20 | Production deployed in Mumbai; email from the domain; spend caps set; smoke test passes | P-3 (prod), P-4, P-5 |
+| **M7 Release readiness** | F-20 | Production deployed in Mumbai; the owner receives auth emails; spend caps set; smoke test passes | P-3 (prod), P-4, P-5 |
 | **Phase 0** (owner, 2 weeks, PRD §13.1) | — | ≥ 4 workouts completed by the owner; no blocking bugs; **report of cost per workout and p50/p95 latency per agent and end to end**; Supabase on Pro | Use the app; review the report; decide on any latency or cost changes from real data |
-| **Phase 1** (≤ 20 users, 4 weeks) | — | Weekly reviews done (§18.4); main metric measured; next build chosen from PRD §15 | Weekly review |
+| **Phase 1** (≤ 20 users, 4 weeks) | — | **Entry:** OD-06 settled, so friends receive verification and reset emails. **Exit:** weekly reviews done (§18.4); main metric measured; next build chosen from PRD §15. | Settle OD-06; weekly review |
 
 ### 19.3 Definition of Done (each feature)
 - Acceptance criteria in §10 met, with tests named by spec ID (§12.9).
@@ -3319,11 +3327,11 @@ There is no paging for the pilot. Passive signals:
 | R-03 | The validator retry rate is high (strict V-7 progression targets and the V-8 window) | Medium / Medium | `metrics.generation_quality`; per-check failure counts in `agent_logs.validator_result`; the guardrail is ≤ 10% (PRD §5) |
 | R-04 | Running RLS through the pooler is mis-implemented and leaks across users | Low / High | `gc_app` has no privileges of its own (fails closed); RLS integration tests for every table and endpoint |
 | R-05 | AG-2 misses a red flag | Low / High | 100% recall bar (EV-3); lean-to-red-flag rule; weekly review of every red-flag and out-of-scope log |
-| R-06 | AG-2 **fails** (error or schema) on a note that contained a red flag, and the PRD's fallback plans without the note | Low / High | **OD-01** |
+| R-06 | AG-2 **fails** (error or schema) on a note that contained a red flag, and the fallback plans without the note (PRD §8.15) | Low / High | **Accepted by the owner (D-26).** SDK retries make failures rare. Every AG-2 note failure is reviewed weekly (§18.4), and any miss becomes an EV-3 case. |
 | R-07 | LLM-drafted `body_areas_stressed` or equipment tags are wrong | Medium / High | Owner 10% spot-check; EV-4; `validate-seed.ts`; fixes from reports |
 | R-08 | Structured-output schema features differ from what Zod generates (e.g., the discriminated union) | Low / Low | Canonical flattened fallback (§8.4.2); Zod re-validation |
 | R-09 | iOS Safari quirks: HEIC, viewport height, focus zoom | Medium / Low | §5.5 and §5.7 rules; WebKit E2E |
-| R-10 | The sending domain isn't ready, so production auth email fails | Medium / High | OD-06; Supabase's built-in sender only for testing |
+| R-10 | The built-in sender delivers only to Supabase organisation members, at about 2 emails an hour, so friends can't verify their email or reset passwords in Phase 1 | **Certain without action** / High | Settle OD-06 before Phase 1. Phase 0 (owner only) is unaffected. |
 | R-11 | The free dev Supabase project pauses and breaks previews | Medium / Low | Resume on demand; production is on Pro |
 | R-12 | A provider spend-limit error isn't recognised and shows as `GENERATION_FAILED` instead of `SPEND_CAP` | Low / Low | The app-side guard triggers first at $58; the error shape is captured during F-16 |
 
@@ -3331,15 +3339,15 @@ There is no paging for the pilot. Passive signals:
 
 | ID | Decision needed | Options | Recommendation | Default in this document |
 |-|-|-|-|-|
-| **OD-01** | When AG-2 **fails** (API error, schema-invalid, refusal) on a **note**, PRD §8.15 says to plan without the note (`NOT_UNDERSTOOD_NOTE`). If the note held a red flag, the user gets a plan anyway, which would be a safety miss. | (a) Keep the PRD behaviour. (b) Show `GENERATION_FAILED`, plan nothing, and let the user retry. | **(b).** It costs the user a retry and closes a path to a safety miss. | (a), per the PRD, until decided |
-| **OD-02** | What counts toward the 10-plans limit (FR-80) | (a) Successful generations only. (b) Every Suggest tap that reached AG-3. | (a) | (a) (D-11) |
-| **OD-03** | `SIGNUP_NOTICE` doesn't say that notes, edit requests and photos are sent to a third-party AI provider (Anthropic), although PRD §14.1 lists photos as "disclosed at sign-up" | Add a sentence (owner wording), or keep as is | Add: "Your notes and photos are processed by our AI provider, Anthropic." | Unchanged text |
-| **OD-04** | What happens on history deletion (FR-71) | (a) Hard-delete the workout and keep a content-free completion event for the metrics. (b) Delete everything, including the event. | (a). Otherwise the main metric drops whenever someone tidies their history. | (a) (D-14) |
+| **OD-01** | When AG-2 **fails** (API error, schema-invalid, refusal) on a **note**, PRD §8.15 says to plan without the note (`NOT_UNDERSTOOD_NOTE`). If the note held a red flag, the user gets a plan anyway, which would be a safety miss. | (a) Keep the PRD behaviour. (b) Show `GENERATION_FAILED`, plan nothing, and let the user retry. | **(b).** It costs the user a retry and closes a path to a safety miss. | **Decided 2026-10-24: (a), keep the PRD behaviour (D-26)** |
+| **OD-02** | What counts toward the 10-plans limit (FR-80) | (a) Successful generations only. (b) Every Suggest tap that reached AG-3. | (a) | **Decided: (a)** (D-11, via OD-09) |
+| **OD-03** | `SIGNUP_NOTICE` doesn't say that notes, edit requests and photos are sent to a third-party AI provider (Anthropic), although PRD §14.1 lists photos as "disclosed at sign-up" | Add a sentence (owner wording), or keep as is | Add: "Your notes and photos are processed by our AI provider, Anthropic." | **Decided: add the sentence** (D-27) |
+| **OD-04** | What happens on history deletion (FR-71) | (a) Hard-delete the workout and keep a content-free completion event for the metrics. (b) Delete everything, including the event. | (a). Otherwise the main metric drops whenever someone tidies their history. | **Decided: (a)** (D-14, via OD-09) |
 | **OD-05** | UI copy outside Appendix A: `STILL_WORKING`, empty states, network errors (`src/shared/messages/ui-copy.ts`). Also a missing `RECENCY_STRIP` variant for "history exists, but nothing in the last 14 days". | Owner reviews the wording | Variant: "Last trained: nothing in the last 14 days" | Proposed copy in §5.6 |
-| **OD-06** | Domain for sending auth email through Resend | Owner provides a domain or subdomain | — | **Blocks production email (F-03, F-20)** |
+| **OD-06** | **Reopened for Phase 1.** Resend is parked and auth emails use Supabase's built-in sender (D-28). That sender delivers only to members of the Supabase organisation, at about 2 emails an hour: fine for the owner in Phase 0, but friends would get no verification or reset emails. | (a) Point Supabase's custom SMTP setting at a **dedicated** Gmail account with an app password. No domain and no new vendor; a settings change, no code. Gmail SMTP and app-password details are from memory, so check Google's current rules. (b) The owner creates each friend's account in the Supabase dashboard (auto-confirmed) and handles password resets by hand. Self-service sign-up and reset (FR-1, FR-2) wouldn't work as specified. (c) Bring Resend back with a domain before Phase 1. | **(a)**, with a dedicated Gmail account rather than your personal one, because the app password stored in Supabase gives access to that mailbox | Built-in sender; **must be settled before Phase 1** |
 | **OD-07** | After clicking the verification link, the user is signed in straight away (D-09). PRD §6.1 says "verify … then log in". | (a) Sign in automatically. (b) Send them to the login page. | (a): one step fewer, same security | (a) |
 | **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook v1 (PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | Drafts per the PRD |
-| **OD-09** | Confirm the interpretations D-11 – D-19 (Appendix A) in one go when approving this document | Approve or amend | Approve | As listed |
+| **OD-09** | Confirm the interpretations D-11 – D-19 (Appendix A) in one go when approving this document | Approve or amend | Approve | **Decided: approved** (D-11 – D-19) |
 
 ---
 
@@ -3357,21 +3365,24 @@ There is no paging for the pilot. Passive signals:
 | D-08 | Server-side refusal fallback (`fallbacks: "default"`) on Sonnet 5.5 calls; the served model is logged | **Approved** | 2026-10-24 | AG-1, AG-3 |
 | D-09 | The verification link signs the user in | Proposed (OD-07) | 2026-10-24 | FR-1 |
 | D-10 | Latency soft limit: "Still working…" at 8 s; server deadline 20 s (generate and edit) and 30 s (scan); client abort at 25 s and 35 s | **Approved** (owner chose the soft limit; the numbers sit within the agreed 15–20 s range) | 2026-10-24 | PRD §5, PRD §12.3 |
-| D-11 | FR-80 counts successful generations only (not retries, edits, red flags, failures or deadlines) | Proposed (OD-02) | 2026-10-24 | FR-80 |
-| D-12 | A photo scan counts when AG-1 returned a response (including `PHOTO_NONE`); API errors and timeouts don't count | Proposed (OD-09) | 2026-10-24 | FR-81 |
-| D-13 | A text edit counts once AG-2 has classified it (any category, including red flag, out of scope and not understood); system failures and `GENERATION_FAILED` don't count | Proposed (OD-09) | 2026-10-24 | FR-82 |
-| D-14 | History deletion hard-deletes the plan; a content-free `workout_completed` event stays for the metrics | Proposed (OD-04) | 2026-10-24 | FR-71, PRD §5 |
-| D-15 | V-7 also enforces the rulebook ranges for new exercises, and fixed values for continuous cardio sets | Proposed (OD-09) | 2026-10-24 | PRD §8.13 check 7 |
-| D-16 | V-11 is added to enforce FR-53 (direct edits preserved in text edits) | Proposed (OD-09) | 2026-10-24 | FR-53 |
-| D-17 | No column outside `planning_context`, `agent_logs` and `idempotency_keys` stores health data, AG-2 categories or status codes. A plan discarded by a red flag records no cause. | Proposed (OD-09) | 2026-10-24 | PRD §10.6, PRD §11 |
-| D-18 | Frequency style in stated mode: ≤ 2 days a week → full body, otherwise split | Proposed (OD-09) | 2026-10-24 | PRD §8.10 |
-| D-19 | In note mode, exercise-targeted intents carry the user's term (`target_term`), since there are no plan items yet | Proposed (OD-09) | 2026-10-24 | PRD §8.11 |
+| D-11 | FR-80 counts successful generations only (not retries, edits, red flags, failures or deadlines) | **Approved** (OD-09) | 2026-10-24 | FR-80 |
+| D-12 | A photo scan counts when AG-1 returned a response (including `PHOTO_NONE`); API errors and timeouts don't count | **Approved** (OD-09) | 2026-10-24 | FR-81 |
+| D-13 | A text edit counts once AG-2 has classified it (any category, including red flag, out of scope and not understood); system failures and `GENERATION_FAILED` don't count | **Approved** (OD-09) | 2026-10-24 | FR-82 |
+| D-14 | History deletion hard-deletes the plan; a content-free `workout_completed` event stays for the metrics | **Approved** (OD-09) | 2026-10-24 | FR-71, PRD §5 |
+| D-15 | V-7 also enforces the rulebook ranges for new exercises, and fixed values for continuous cardio sets | **Approved** (OD-09) | 2026-10-24 | PRD §8.13 check 7 |
+| D-16 | V-11 is added to enforce FR-53 (direct edits preserved in text edits) | **Approved** (OD-09) | 2026-10-24 | FR-53 |
+| D-17 | No column outside `planning_context`, `agent_logs` and `idempotency_keys` stores health data, AG-2 categories or status codes. A plan discarded by a red flag records no cause. | **Approved** (OD-09) | 2026-10-24 | PRD §10.6, PRD §11 |
+| D-18 | Frequency style in stated mode: ≤ 2 days a week → full body, otherwise split | **Approved** (OD-09) | 2026-10-24 | PRD §8.10 |
+| D-19 | In note mode, exercise-targeted intents carry the user's term (`target_term`), since there are no plan items yet | **Approved** (OD-09) | 2026-10-24 | PRD §8.11 |
 | D-20 | Stack: Next.js 16 / React 19 / TypeScript, Tailwind v4 + shadcn/ui, TanStack Query, Drizzle + postgres.js, Supabase (Auth, Postgres, Storage), `@anthropic-ai/sdk`, Vitest + Playwright, GitHub Actions + Vercel | **Approved** | 2026-10-24 | All |
 | D-21 | App tables in a non-exposed `app` schema; the server connects as `gc_app` and switches to `authenticated` with the JWT claims for RLS | **Approved** (part of the stack) | 2026-10-24 | FR-5, PRD §8.6 |
 | D-22 | Hosting in Mumbai (Vercel `bom1`, Supabase `ap-south-1`) | **Approved** | 2026-10-24 | PRD §12.1 |
 | D-23 | Online only; no offline mode | **Approved** | 2026-10-24 | — |
 | D-24 | Owner metrics as SQL views in `metrics`; no in-app page | **Approved** | 2026-10-24 | PRD §12.6 |
 | D-25 | The generation pipeline follows PRD §8.4 as written; latency changes wait for Phase 0 data | **Approved** | 2026-10-24 | PRD §8.4 |
+| D-26 | When AG-2 fails on a note (API error, schema-invalid or refusal), the plan is generated without the note and shows `NOT_UNDERSTOOD_NOTE`, as PRD §8.15 says. The residual risk is accepted (R-06) and offset by a weekly review step (§18.4). | **Approved** (OD-01) | 2026-10-24 | PRD §8.15 |
+| D-27 | `SIGNUP_NOTICE` reads: "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic." | **Approved** (OD-03) | 2026-10-24 | FR-3, PRD Appendix A |
+| D-28 | Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP, although PRD §12.1 reserved it for testing. How friends receive emails in Phase 1 is OD-06. | **Approved** (OD-06) | 2026-10-24 | PRD §12.1, FR-1, FR-2 |
 
 ## Appendix B. Configuration constants
 
