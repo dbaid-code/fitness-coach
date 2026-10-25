@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | 0.2, draft for owner approval (0.2 applies the owner's decisions on OD-01, OD-03, OD-06 and OD-09) |
+| **Version** | 0.3, draft for owner approval (0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applies OD-05, OD-07 and OD-08 and defers OD-06 to Phase 1) |
 | **Status** | **Draft. No implementation begins until the owner approves this document.** |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
@@ -38,12 +38,15 @@
 | 11 | **D-27** `SIGNUP_NOTICE` gets one added sentence about AI processing (OD-03). |
 | 12 | **D-28** Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP (OD-06). The built-in sender only delivers to members of the Supabase organisation, so Phase 1 delivery to friends is still open; see OD-06 in §20.2. |
 | 13 | Interpretations D-11 to D-19 approved as recommended (OD-09). This also settles OD-02 and OD-04. |
+| 14 | **D-29** The proposed UI copy is approved, including a `RECENCY_STRIP` variant for history that is older than 14 days (OD-05). |
+| 15 | **D-09** The verification link confirms the email, then sends the user to the login page; it doesn't sign them in (OD-07). |
+| 16 | The PRD-required owner reviews happen at the milestones listed in §19.2 (OD-08). |
+| 17 | Phase 1 email delivery (OD-06) is deferred until Phase 1 is reached. |
 
 ### 0.3 What still needs the owner
 See §20.2.
-- **Decided on 2026-10-24:** OD-01, OD-02, OD-03, OD-04 and OD-09 (Appendix A, D-11 to D-19 and D-26 to D-28).
-- **Still open:** OD-05 (UI copy), OD-06 (how friends receive auth emails in Phase 1), OD-07 (sign-in after verification) and OD-08 (reviews the PRD requires).
-- None of these blocks the start of implementation. **OD-06 must be settled before Phase 1**, because Supabase's built-in sender only delivers to members of the Supabase organisation.
+- **Decided:** OD-01 to OD-05 and OD-07 to OD-09 (Appendix A).
+- **Deferred:** OD-06 (how friends receive auth emails), until Phase 1 is reached. It doesn't block implementation or Phase 0. It **must be settled before Phase 1 starts**, because Supabase's built-in sender only delivers to members of the Supabase organisation (§19.2, Phase 1 entry).
 
 ---
 
@@ -270,8 +273,8 @@ All `/api/v1/*` calls carry the Supabase session cookie. Message codes in code f
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
 | 1 | Opens the shared link `/sign-up` | Renders email, password and confirm-password fields, and shows `SIGNUP_NOTICE` above the submit button | — | — | Form shown |
-| 2 | Submits | Zod validation: valid email; password 8–72 characters; passwords match. Calls `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL + '/auth/confirm?next=/onboarding' } })` from the browser. | Supabase Auth creates an unconfirmed user and sends the verification email through the project's email sender (the built-in sender for the MVP, D-28). It returns the same response whether or not the email already exists (no account enumeration). | `auth.users` insert (`email_confirmed_at = null`) | Redirect to `/verify-email` ("Check your inbox", UI copy) with a "Resend email" button (`supabase.auth.resend`) |
-| 3 | Clicks the email link | Browser opens `/auth/confirm?token_hash=…&type=signup&next=/onboarding` | Route Handler `src/app/auth/confirm/route.ts` calls `supabase.auth.verifyOtp({ type, token_hash })` and sets the session cookies | `auth.users.email_confirmed_at` set | Redirect to `/onboarding`, signed in (D-09: verification signs the user in, so a separate login step is unnecessary) |
+| 2 | Submits | Zod validation: valid email; password 8–72 characters; passwords match. Calls `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL + '/auth/confirm' } })` from the browser. | Supabase Auth creates an unconfirmed user and sends the verification email through the project's email sender (the built-in sender for the MVP, D-28). It returns the same response whether or not the email already exists (no account enumeration). | `auth.users` insert (`email_confirmed_at = null`) | Redirect to `/verify-email` ("Check your inbox", UI copy) with a "Resend email" button (`supabase.auth.resend`) |
+| 3 | Clicks the email link | Browser opens `/auth/confirm?token_hash=…&type=signup` | Route Handler `src/app/auth/confirm/route.ts` calls `supabase.auth.verifyOtp({ type, token_hash })`, which confirms the email and creates a session. Because `type = 'signup'`, the handler then calls `supabase.auth.signOut({ scope: 'local' })`, so no session cookie is left (D-09). | `auth.users.email_confirmed_at` set; the new session is revoked | Redirect to `/log-in?verified=1`, which shows "Email verified. Log in to continue." (UI copy). Logging in (UF-2) then leads to `/onboarding`. |
 | 4 | Link expired or already used | — | `verifyOtp` returns an error | — | Redirect to `/log-in?error=link_invalid` with UI copy and a "Resend verification email" action |
 
 ### UF-2 Log in, session refresh, log out
@@ -500,7 +503,7 @@ stateDiagram-v2
 | `/log-in` | `(auth)` | Client form | Login | FR-1 |
 | `/forgot-password` | `(auth)` | Client form | Request a reset email | FR-2 |
 | `/update-password` | `(auth)` | Client form | Set a new password after the reset link | FR-2 |
-| `/auth/confirm` | — | Route Handler | Exchange `token_hash` for a session | FR-1, FR-2 |
+| `/auth/confirm` | — | Route Handler | Verify `token_hash`. Sign-up → sign out and redirect to `/log-in?verified=1` (D-09). Recovery → keep the session and redirect to `/update-password`. | FR-1, FR-2 |
 | `/onboarding` | `(app)` | Server shell + client wizard | Profile and equipment | FR-10, FR-20, FR-21 |
 | `/plan` | `(app)` | Server prefetch + client | Planner, or the active plan | FR-30 – FR-66 |
 | `/history` | `(app)` | Server prefetch + client | History list | FR-70 – FR-72 |
@@ -591,8 +594,10 @@ Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages e
 
 ### 5.6 Messages and UI copy
 - **Agent-facing messages (FR-46):** `src/shared/messages/catalog.ts` holds every Appendix A code and its template. The server returns `{code, params}`. The client renders it with `renderMessage(code, params)`. No component shows a string that came from an LLM. Exercise and routine names come from the database by ID.
-- **UI copy** (labels, empty states, network errors, `STILL_WORKING`) lives in `src/shared/messages/ui-copy.ts`. It isn't agent text, so FR-46 doesn't restrict it. It's kept in one file so the owner can review the wording (OD-05).
-- `STILL_WORKING` (UI copy, proposed): "Still working on your workout…"
+- **UI copy** (labels, empty states, network errors, `STILL_WORKING`) lives in `src/shared/messages/ui-copy.ts`. It isn't agent text, so FR-46 doesn't restrict it. It's kept in one file so the owner can review the wording. The owner approved the proposed copy (D-29).
+- `STILL_WORKING` (UI copy, approved D-29): "Still working on your workout…"
+- `EMAIL_VERIFIED` (UI copy, on `/log-in?verified=1`, D-09): "Email verified. Log in to continue."
+- **`RECENCY_STRIP` variant (D-29):** when completed workouts exist but none in the last 14 days, the strip reads "Last trained: nothing in the last 14 days". The catalog keeps both variants under `RECENCY_STRIP`.
 - **Amended Appendix A text (D-27):** `SIGNUP_NOTICE` reads "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic."
 
 ### 5.7 Photo capture and resizing (D-01)
@@ -1621,7 +1626,8 @@ A **planning session** begins when a plan row is created and ends when the plan 
 - **Recency strip (FR-32):**
   - lists groups trained in the last 14 days, most recent first;
   - labels are `today`, `yesterday` and `N days ago`;
-  - with no history at all: "No workouts logged yet".
+  - with no history at all: "No workouts logged yet";
+  - with history but nothing in the last 14 days: "Last trained: nothing in the last 14 days" (D-29).
 - **Frequency (PRD §8.10):**
 
   | Completed workouts in total | Mode | Style |
@@ -1962,7 +1968,7 @@ type HistoryEntryDto = {
 | ID | Call | Purpose | Request | Success | Errors → UI copy |
 |-|-|-|-|-|-|
 | AUTH-01 | `supabase.auth.signUp` | Sign up (FR-1) | `{email, password (8–72), options.emailRedirectTo}` | User created and email sent → `/verify-email` | Weak password → "Use at least 8 characters"; rate limited → "Too many attempts, try again later" |
-| AUTH-02 | `GET /auth/confirm?token_hash&type&next` (our Route Handler) | Verify email or recovery link | Query: `token_hash` (string), `type` ∈ {`signup`, `recovery`, `email_change`}, `next` (relative path only; open redirects rejected) | Session cookies set → redirect to `next` | Invalid or expired → `/log-in?error=link_invalid` |
+| AUTH-02 | `GET /auth/confirm?token_hash&type&next` (our Route Handler) | Verify email or recovery link | Query: `token_hash` (string), `type` ∈ {`signup`, `recovery`, `email_change`}, `next` (relative path only; open redirects rejected) | `signup`: email confirmed, the session is signed out, redirect to `/log-in?verified=1` (D-09). `recovery`: session kept, redirect to `next` (`/update-password`). `email_change`: redirect to `next`. | Invalid or expired → `/log-in?error=link_invalid` |
 | AUTH-03 | `supabase.auth.signInWithPassword` | Log in | `{email, password}` | Session → `/` | Invalid credentials → "Email or password is wrong"; unconfirmed → "Verify your email first" and a resend button |
 | AUTH-04 | `supabase.auth.signOut` | Log out | — | Cookies cleared | — |
 | AUTH-05 | `supabase.auth.resetPasswordForEmail` | Reset email (FR-2) | `{email, redirectTo}` | Always "Check your inbox" | Rate limited |
@@ -2278,7 +2284,7 @@ flowchart LR
   - Supabase Auth settings: confirm email on, minimum password length 8, redirect allowlist.
   - Email through Supabase's built-in sender (D-28); local development and CI use Mailpit.
 - **Acceptance criteria:**
-  - E2E: sign-up → email (local Mailpit) → click link → lands on `/onboarding`, signed in.
+  - E2E: sign-up → email (local Mailpit) → click link → lands on `/log-in` showing "Email verified", **not** signed in → log in → `/onboarding` (D-09).
   - An unverified user can't log in and sees the resend option.
   - Password reset E2E works.
   - `SIGNUP_NOTICE` text, as amended by D-27, is visible on `/sign-up` (snapshot of the exact catalog string).
@@ -3343,10 +3349,10 @@ There is no paging for the pilot. Passive signals:
 | **OD-02** | What counts toward the 10-plans limit (FR-80) | (a) Successful generations only. (b) Every Suggest tap that reached AG-3. | (a) | **Decided: (a)** (D-11, via OD-09) |
 | **OD-03** | `SIGNUP_NOTICE` doesn't say that notes, edit requests and photos are sent to a third-party AI provider (Anthropic), although PRD §14.1 lists photos as "disclosed at sign-up" | Add a sentence (owner wording), or keep as is | Add: "Your notes and photos are processed by our AI provider, Anthropic." | **Decided: add the sentence** (D-27) |
 | **OD-04** | What happens on history deletion (FR-71) | (a) Hard-delete the workout and keep a content-free completion event for the metrics. (b) Delete everything, including the event. | (a). Otherwise the main metric drops whenever someone tidies their history. | **Decided: (a)** (D-14, via OD-09) |
-| **OD-05** | UI copy outside Appendix A: `STILL_WORKING`, empty states, network errors (`src/shared/messages/ui-copy.ts`). Also a missing `RECENCY_STRIP` variant for "history exists, but nothing in the last 14 days". | Owner reviews the wording | Variant: "Last trained: nothing in the last 14 days" | Proposed copy in §5.6 |
-| **OD-06** | **Reopened for Phase 1.** Resend is parked and auth emails use Supabase's built-in sender (D-28). That sender delivers only to members of the Supabase organisation, at about 2 emails an hour: fine for the owner in Phase 0, but friends would get no verification or reset emails. | (a) Point Supabase's custom SMTP setting at a **dedicated** Gmail account with an app password. No domain and no new vendor; a settings change, no code. Gmail SMTP and app-password details are from memory, so check Google's current rules. (b) The owner creates each friend's account in the Supabase dashboard (auto-confirmed) and handles password resets by hand. Self-service sign-up and reset (FR-1, FR-2) wouldn't work as specified. (c) Bring Resend back with a domain before Phase 1. | **(a)**, with a dedicated Gmail account rather than your personal one, because the app password stored in Supabase gives access to that mailbox | Built-in sender; **must be settled before Phase 1** |
-| **OD-07** | After clicking the verification link, the user is signed in straight away (D-09). PRD §6.1 says "verify … then log in". | (a) Sign in automatically. (b) Send them to the login page. | (a): one step fewer, same security | (a) |
-| **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook v1 (PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | Drafts per the PRD |
+| **OD-05** | UI copy outside Appendix A: `STILL_WORKING`, empty states, network errors (`src/shared/messages/ui-copy.ts`). Also a missing `RECENCY_STRIP` variant for "history exists, but nothing in the last 14 days". | Owner reviews the wording | Variant: "Last trained: nothing in the last 14 days" | **Decided: approved as proposed** (D-29) |
+| **OD-06** | **Reopened for Phase 1.** Resend is parked and auth emails use Supabase's built-in sender (D-28). That sender delivers only to members of the Supabase organisation, at about 2 emails an hour: fine for the owner in Phase 0, but friends would get no verification or reset emails. | (a) Point Supabase's custom SMTP setting at a **dedicated** Gmail account with an app password. No domain and no new vendor; a settings change, no code. Gmail SMTP and app-password details are from memory, so check Google's current rules. (b) The owner creates each friend's account in the Supabase dashboard (auto-confirmed) and handles password resets by hand. Self-service sign-up and reset (FR-1, FR-2) wouldn't work as specified. (c) Bring Resend back with a domain before Phase 1. | **(a)**, with a dedicated Gmail account rather than your personal one, because the app password stored in Supabase gives access to that mailbox | **Deferred by the owner until Phase 1 is reached.** Built-in sender meanwhile; must be settled before Phase 1 starts. |
+| **OD-07** | Whether the verification link signs the user in or sends them to the login page. PRD §6.1 says "verify … then log in". | (a) Sign in automatically. (b) Send them to the login page. | (a): one step fewer, same security | **Decided: (b)**, send them to the login page (D-09) |
+| **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook v1 (PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | **Agreed:** reviews at M1, M3, M5 and M6 (§19.2) |
 | **OD-09** | Confirm the interpretations D-11 – D-19 (Appendix A) in one go when approving this document | Approve or amend | Approve | **Decided: approved** (D-11 – D-19) |
 
 ---
@@ -3363,7 +3369,7 @@ There is no paging for the pilot. Passive signals:
 | D-06 | Idempotency keys on API-06, API-08, API-11 and API-14; 1-hour lifetime | **Approved** | 2026-10-24 | FR-80, reliability |
 | D-07 | `planner_opened` client event for the time-to-plan metric | **Approved** | 2026-10-24 | PRD §5 |
 | D-08 | Server-side refusal fallback (`fallbacks: "default"`) on Sonnet 5.5 calls; the served model is logged | **Approved** | 2026-10-24 | AG-1, AG-3 |
-| D-09 | The verification link signs the user in | Proposed (OD-07) | 2026-10-24 | FR-1 |
+| D-09 | The verification link confirms the email, signs the new session out and redirects to `/log-in?verified=1`, so the user logs in themselves (PRD §6.1). Password-recovery links keep their session so the user can set a new password. | **Approved** (OD-07, option b) | 2026-10-25 | FR-1, FR-2 |
 | D-10 | Latency soft limit: "Still working…" at 8 s; server deadline 20 s (generate and edit) and 30 s (scan); client abort at 25 s and 35 s | **Approved** (owner chose the soft limit; the numbers sit within the agreed 15–20 s range) | 2026-10-24 | PRD §5, PRD §12.3 |
 | D-11 | FR-80 counts successful generations only (not retries, edits, red flags, failures or deadlines) | **Approved** (OD-09) | 2026-10-24 | FR-80 |
 | D-12 | A photo scan counts when AG-1 returned a response (including `PHOTO_NONE`); API errors and timeouts don't count | **Approved** (OD-09) | 2026-10-24 | FR-81 |
@@ -3382,7 +3388,8 @@ There is no paging for the pilot. Passive signals:
 | D-25 | The generation pipeline follows PRD §8.4 as written; latency changes wait for Phase 0 data | **Approved** | 2026-10-24 | PRD §8.4 |
 | D-26 | When AG-2 fails on a note (API error, schema-invalid or refusal), the plan is generated without the note and shows `NOT_UNDERSTOOD_NOTE`, as PRD §8.15 says. The residual risk is accepted (R-06) and offset by a weekly review step (§18.4). | **Approved** (OD-01) | 2026-10-24 | PRD §8.15 |
 | D-27 | `SIGNUP_NOTICE` reads: "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic." | **Approved** (OD-03) | 2026-10-24 | FR-3, PRD Appendix A |
-| D-28 | Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP, although PRD §12.1 reserved it for testing. How friends receive emails in Phase 1 is OD-06. | **Approved** (OD-06) | 2026-10-24 | PRD §12.1, FR-1, FR-2 |
+| D-28 | Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP, although PRD §12.1 reserved it for testing. How friends receive emails in Phase 1 is OD-06, deferred by the owner until Phase 1 is reached (2026-10-25). | **Approved** (OD-06) | 2026-10-24 | PRD §12.1, FR-1, FR-2 |
+| D-29 | The proposed UI copy in `src/shared/messages/ui-copy.ts` (§5.5, §5.6) is approved, together with the `RECENCY_STRIP` variant "Last trained: nothing in the last 14 days" for history older than 14 days | **Approved** (OD-05) | 2026-10-25 | FR-32, FR-46 |
 
 ## Appendix B. Configuration constants
 
