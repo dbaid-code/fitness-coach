@@ -1,9 +1,9 @@
 # Gym Coach Implementation Plan
 
-**Overall Progress:** `12%`
+**Overall Progress:** `14%`
 
 ## TLDR
-Build and ship the Gym Coach MVP as specified in `docs/engineering/engineering-doc.md` (v0.4), which implements `docs/gym-coach-prd.md` (v1.1). The visual design is the Claude Design handoff in `docs/design/handoff/`, built from `docs/design/design-brief.md` (v0.2). The work runs in this order: approvals → design (done apart from exporting the icon files) → milestones M0–M7 (features F-01 to F-20) → production in Mumbai → Phase 0 (owner only, 2 weeks) → Phase 1 (up to 20 friends, 4 weeks). The pilot's outcome is a decision on the next build.
+Build and ship the Gym Coach MVP as specified in `docs/engineering/engineering-doc.md` (v1.0, approved), which implements `docs/gym-coach-prd.md` (v1.1). The visual design is the Claude Design handoff in `docs/design/handoff/`, built from `docs/design/design-brief.md` (v0.2). The work runs in this order: approvals → design (done apart from exporting the icon files) → milestones M0–M7 (features F-01 to F-20) → production in Mumbai → Phase 0 (owner only, 2 weeks) → Phase 1 (up to 20 friends, 4 weeks). The pilot's outcome is a decision on the next build.
 
 ## Critical Decisions
 Key architectural/implementation choices, from the engineering doc and the owner's answers on 2026-10-25:
@@ -13,16 +13,16 @@ Key architectural/implementation choices, from the engineering doc and the owner
 - Privacy: photos are never stored (D-01); health data lives only in `planning_context`, `agent_logs` and `idempotency_keys` (D-02, D-17).
 - Build order follows §19.2 (M0–M7); every feature meets the §19.3 Definition of Done - keeps dependencies in the §10 graph satisfied.
 - **Design before UI (owner, 2026-10-25), now met:** the Claude Design handoff (`docs/design/handoff/`, direction 1b) has the chosen direction, tokens (`globals.css`), component sheet, every screen and state, and a prototype. It is adopted as D-30 – D-35, which bring in the "Edit with AI" and "Accept" labels, Reset as a status-row icon, the top bar from 640 px, per-row edit controls and the profile layout. Subtasks marked *(UI)* follow the handoff README. The owner approved its new UI copy (OD-11) and the app icon and wordmark export (OD-10) on 2026-10-25 (D-36, D-37).
-- **Full evals only once development is done (owner, 2026-10-25):** the real-model suites (EV-1 to EV-5) run in full for the first time in M6, after every feature is built. Until then, development uses the smoke subset (about 10 cases, PRD §9.4) and the fixture suites EV-6 to EV-8, which cost nothing and run in CI. The eval-gate joins CI in M6 and blocks merges from then on. After that, every change to a prompt, model, rulebook or dataset needs a passing full run before release (PRD §9.4). This replaces the earlier "report-only from M3" answer, and it deviates from §13.6 and the M3/M5 exit criteria in §19.2 as written.
-- **Supabase Pro just before Phase 1 (owner, 2026-10-25):** Phase 0 runs on the free tier with no guaranteed backups. This settles the conflict between F-20/P-5 and §19.2/§17.8.
+- **Full evals only once development is done (owner, 2026-10-25):** the real-model suites (EV-1 to EV-5) run in full for the first time in M6, after every feature is built. Until then, development uses the smoke subset (about 10 cases, PRD §9.4) and the fixture suites EV-6 to EV-8, which cost nothing and run in CI. The eval-gate joins CI in M6 and blocks merges from then on. After that, every change to a prompt, model, rulebook or dataset needs a passing full run before release (PRD §9.4). This replaces the earlier "report-only from M3" answer. Recorded in the engineering doc as D-38.
+- **Supabase Pro just before Phase 1 (owner, 2026-10-25):** Phase 0 runs on the free tier with no guaranteed backups. Recorded as D-40.
 - Deployment: a preview per PR against the dev project; production only through `deploy.yml` (migrate → seed → deploy) after owner approval; rollback = Vercel instant rollback plus database forward-fix (§17.5, §17.6).
 - Email: Supabase's built-in sender for M7 and Phase 0 (D-28); OD-06 must be settled before Phase 1.
-- **LLM budget (owner, 2026-10-25):** the dev Anthropic cap rises from $15 to $25 (app guard 24) and stays there through Phase 1. That covers the one-time seed curation (M1), the final eval runs (M6) and fix-and-re-run rounds during the pilot. Prod stays at $60 (guard 58). In Phase 1 the limits total up to $110 a month ($60 + $25 + $25 for Supabase Pro). The owner accepts this deviation from the PRD's $100 (PRD §12.4).
+- **LLM budget (owner, 2026-10-25):** the dev Anthropic cap rises from $15 to $25 (app guard 24) and stays there through Phase 1. That covers the one-time seed curation (M1), the final eval runs (M6) and fix-and-re-run rounds during the pilot. Prod stays at $60 (guard 58). In Phase 1 the limits total up to $110 a month ($60 + $25 + $25 for Supabase Pro). The owner accepts this deviation from the PRD's $100 (PRD §12.4). Recorded as D-39.
 
 ## Tasks:
 
-- [ ] 🟥 **Step 1: Approvals and owner setup**
-  - [ ] 🟥 Owner approves the engineering doc (v0.4 already includes the design handoff); bump it to v1.0 and record the other 2026-10-25 decisions (full evals at the end of development, $25 dev cap with limits up to $110 a month in Phase 1, Pro timing) in §0.2, §8.9.3, §13.6, §15.3, §17.3, §17.8, §19.2 and Appendix A
+- [ ] 🟨 **Step 1: Approvals and owner setup**
+  - [x] 🟩 Owner approved the engineering doc; bumped to v1.0 with the other 2026-10-25 decisions recorded (D-38 full evals at the end of development, D-39 $25 dev cap with Phase 1 limits up to $110, D-40 Supabase Pro just before Phase 1)
   - [ ] 🟥 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment
 
 - [ ] 🟨 **Step 2: Design in Claude Design (runs alongside Steps 3–4)**

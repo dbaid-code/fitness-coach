@@ -3,8 +3,8 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | 0.3, draft for owner approval (0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applies OD-05, OD-07 and OD-08 and defers OD-06 to Phase 1; 0.4 applies the Claude Design handoff and its approvals, D-30 – D-37) |
-| **Status** | **Draft. No implementation begins until the owner approves this document.** |
+| **Version** | **1.0**, approved by the owner (2026-10-25); records D-38 – D-40. History: 0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applied OD-05, OD-07 and OD-08 and deferred OD-06 to Phase 1; 0.4 applied the Claude Design handoff and its approvals (D-30 – D-37). |
+| **Status** | **Approved by the owner (2026-10-25). Implementation may begin with M0 (§19).** |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
 | **Date** | 2026-10-25 |
@@ -45,6 +45,10 @@
 | 17 | Phase 1 email delivery (OD-06) is deferred until Phase 1 is reached. |
 | 18 | **D-30 – D-35** The Claude Design handoff (`docs/design/handoff/`) is adopted for layout, look, tokens and UI labels. Its doc changes: the **Edit with AI** and **Accept** labels; Reset as an icon in the plan status row; one discard dialog for accepted plans; a top bar from 640 px; per-row edit controls; and the profile layout (2026-10-25). |
 | 19 | **D-36, D-37** The app icon and wordmark export (OD-10) and the handoff's new UI copy (OD-11) are approved (2026-10-25). |
+| 20 | **D-38** Full real-model eval runs (EV-1 to EV-5) start once all features are built, in M6. Until then, development uses the smoke subset and the fixture suites EV-6 to EV-8. The `eval-gate` joins CI in M6 and blocks merges from then on (2026-10-25). |
+| 21 | **D-39** The dev Anthropic workspace limit is **$25 a month** (app guard 24) through the build, Phase 0 and Phase 1. In Phase 1 the limits total up to **$110 a month** ($60 prod + $25 dev + $25 Supabase Pro), which the owner accepts over PRD §12.4's $100 (2026-10-25). |
+| 22 | **D-40** Production moves to Supabase Pro **just before Phase 1**. Phase 0 runs on the free tier, without guaranteed backups (2026-10-25). |
+| 23 | This document is approved as **v1.0** (2026-10-25). |
 
 ### 0.3 What still needs the owner
 See §20.2.
@@ -1805,10 +1809,10 @@ All models have a 1M-token context window, so context size is never the constrai
   - The 1.25× write multiplier and Haiku's cache-read price follow Anthropic's standard cache multipliers. Verify them against claude.com/pricing at build.
 - **App-side guard:** before **every** LLM call, `app_private.month_to_date_spend_usd()` (UTC calendar month, from `llm_spend_daily`) is compared with `LLM_MONTHLY_BUDGET_USD`:
   - prod: **58**, just below the $60 Anthropic production-workspace limit;
-  - dev: **14**, below $15.
+  - dev: **24**, below $25 (D-39).
 
   At or above the budget → `SPEND_CAP` and no call is made.
-- **Provider-side cap:** spend limits on two separate Anthropic workspaces (prod $60, dev $15), set in the Anthropic Console by the owner. If the API refuses a call because the limit is reached, `runAgent()` maps that error to `SPEND_CAP`. The exact error shape is confirmed during F-16 by setting a tiny limit on the dev workspace.
+- **Provider-side cap:** spend limits on two separate Anthropic workspaces (prod $60, dev $25), set in the Anthropic Console by the owner. If the API refuses a call because the limit is reached, `runAgent()` maps that error to `SPEND_CAP`. The exact error shape is confirmed during F-16 by setting a tiny limit on the dev workspace.
 - **What still works under `SPEND_CAP`:** viewing plans and history, direct edits, accepting, resetting and completing (PRD §8.15).
 
 #### 8.9.4 Cost estimate
@@ -1868,7 +1872,8 @@ The pipeline is PRD §8.4 unchanged. Latency is handled by a request deadline an
   - the seed files in `data/seed/`.
 
   `pnpm evals:full` writes `evals/results/latest.json` with that hash and each suite's result. The CI job `eval-gate` fails if the current hash doesn't match `latest.json`, or if any suite in it is below its bar. Merging to `main` therefore requires a passing full run for the exact prompts, models, rulebook and dataset being shipped.
-- **Smoke subset.** `pnpm evals:smoke` (~10 cases from EV-1 to EV-4) for day-to-day development. It doesn't satisfy the gate.
+- **When the gate starts (D-38).** The first full run happens in M6, once every feature is built, and `eval-gate` joins CI then as a blocking check. Before M6 nothing has been released, so PRD §9.4 ("must pass before release") is still met. From M6 on, every change to a prompt, model, rulebook or dataset needs a passing full run before it merges.
+- **Smoke subset.** `pnpm evals:smoke` (~10 cases from EV-1 to EV-4) for day-to-day development, and the only real-model check before M6. It doesn't satisfy the gate.
 
 ---
 
@@ -2324,7 +2329,7 @@ flowchart LR
   - `PHOTO_PARTIAL {n}` / `PHOTO_NONE` behave per FR-23.
   - The 6th scan in a local day returns `PHOTO_LIMIT`.
   - An integration test asserts **no file is written** (the Storage client is never called) and `agent_logs.request` holds no image bytes.
-  - EV-5 passes.
+  - EV-5 passes (first full run in M6, F-19, D-38).
 - **Dependencies:** F-04, F-08 (agent runtime), F-16.
 
 ### F-06 Planner screen (FR-12, FR-30 – FR-33)
@@ -2358,13 +2363,13 @@ flowchart LR
   - Every call writes one `agent_logs` row and a spend upsert.
   - `temperature`, `top_p` and `top_k` are absent from every request (unit test on the request builder).
   - The refusal fallback is present on Sonnet requests.
-  - EV-3 passes: red-flag recall 100%, ≥ 90% labelled correctly, out-of-scope never changes a plan.
+  - The EV-3 smoke cases pass against the real model. The full EV-3 bar (red-flag recall 100%, ≥ 90% labelled correctly, out-of-scope never changes a plan) is met in M6 (F-19, D-38).
 - **Dependencies:** F-01, F-16 (the spend guard is called first).
 
 ### F-09 Plan generation: orchestrator and AG-3 (FR-40, FR-42, FR-44 – FR-46, FR-80; PRD §8.4)
 - **Description:** API-08 and the `plan-generation.service` pipeline: AG-2 for the note → engines → AG-3 → validator → one retry → persist. AG-3 prompt and schema. Deadline. Idempotency.
 - **Acceptance criteria:**
-  - The UF-7 sequence works end to end with fake agents (integration) and real agents (EV-1, EV-2).
+  - The UF-7 sequence works end to end with fake agents (integration) and with real agents on the smoke subset. Full EV-1 and EV-2 runs follow in M6 (D-38).
   - Red-flag note → no plan, not counted.
   - Out-of-scope or not-understood note → plan plus the matching status.
   - The validator retry is used once at most.
@@ -2474,7 +2479,7 @@ flowchart LR
 - **Acceptance criteria:**
   - Production is deployed in `bom1` with Supabase `ap-south-1`.
   - The owner receives verification and reset emails from production through the built-in sender (D-28).
-  - Anthropic prod workspace limit is $60 and dev is $15.
+  - Anthropic prod workspace limit is $60 and dev is $25 (D-39).
   - `LLM_MONTHLY_BUDGET_USD = 58` in prod.
   - The E2E smoke test passes against production with a test account, which is then deleted.
   - Runbooks exist (§18.5).
@@ -2805,7 +2810,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | Unit | **Vitest** (`node` env for server and shared; `jsdom` + Testing Library for components and hooks) | Domain engines, time model, schemas, status resolver, message rendering, reducers, the `runAgent` outcome mapping (mocked SDK) | Every push (CI) and locally |
 | Integration | **Vitest** (`node`) against the **Supabase CLI local stack** (Docker), with **fake agents** (`AGENTS_MODE=fake`) | Route Handlers called in-process with real `Request` objects → services → Postgres with RLS. Lifecycle, limits, idempotency, deletion cascade, cron SQL, metrics views. | Every PR (CI) |
 | End-to-end | **Playwright** (Chromium Pixel 7 profile on every PR; WebKit iPhone 15 profile on `main` and nightly), plus `@axe-core/playwright` | Real browser → `next start` → local Supabase and Mailpit → fake agents | PR (smoke set), `main` (full set) |
-| Agent evaluations | `evals/run-evals.ts` (TypeScript, run with `tsx`) using the **production agent code** and the **dev Anthropic key** | EV-1 to EV-5 against real models | Full run: on every change to prompts, models, rulebook or dataset (PRD §9.4), enforced by `eval-gate`. Smoke run: during development. |
+| Agent evaluations | `evals/run-evals.ts` (TypeScript, run with `tsx`) using the **production agent code** and the **dev Anthropic key** | EV-1 to EV-5 against real models | Full run: first in M6, once every feature is built; from then on, on every change to prompts, models, rulebook or dataset (PRD §9.4), enforced by `eval-gate` (D-38). Smoke run: during development. |
 
 ### 13.2 Unit tests: what and targets
 | Module | Must cover | Coverage target |
@@ -2866,7 +2871,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | EV-8 | Vitest unit and integration (limits, catalog) | Fixtures | **100%** |
 
 - **Test data** is generated by the coding agent and the labels are reviewed by the owner (PRD §9.1). It holds no real user data. Photos are synthetic or from safe sources, with no people.
-- **Budget:** a full run is ~$3–5 against a $15/month dev allowance (PRD §9.4). The runner prints the run's cost from token usage and aborts if a run exceeds $8.
+- **Budget:** a full run is ~$3–5 against a $25/month dev allowance (D-39; PRD §9.4 assumed $15). The runner prints the run's cost from token usage and aborts if a run exceeds $8.
 - **Live-signal follow-up:** any safety miss found in production is added to EV-3 or EV-4 before the next release (PRD §9.5, PRD §13.3).
 
 ### 13.6 CI gates (`.github/workflows/ci.yml`)
@@ -2880,7 +2885,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | E2E smoke (Chromium) | ✅ | — |
 | E2E full (Chromium + WebKit) + axe | — | ✅ |
 | `pnpm build` | ✅ | ✅ |
-| `eval-gate` (hash matches `evals/results/latest.json` and all suites pass) | ✅ (required to merge) | ✅ |
+| `eval-gate` (hash matches `evals/results/latest.json` and all suites pass) | ✅ from M6 (required to merge, D-38) | ✅ from M6 |
 | Dependency audit (`pnpm audit --prod`, high or above fails) and secret scan (gitleaks) | ✅ | ✅ |
 
 ---
@@ -3062,7 +3067,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | Workspace | Used by | Spend limit (Anthropic Console) | App budget (`LLM_MONTHLY_BUDGET_USD`) |
 |-|-|-|-|
 | `gym-coach-prod` | Vercel Production | **$60 / month** | 58 |
-| `gym-coach-dev` | Local, Vercel Preview, CI evals, seed curation | **$15 / month** | 14 |
+| `gym-coach-dev` | Local, Vercel Preview, CI evals, seed curation | **$25 / month** (D-39) | 24 |
 
 ---
 
@@ -3189,7 +3194,7 @@ flowchart TB
 | `DATABASE_URL` | **no** | local | dev pooler, `gc_app` | prod pooler, `gc_app` | Transaction pooler, port 6543 |
 | `ANTHROPIC_API_KEY` | **no** | dev key | dev key | prod key | |
 | `ANTHROPIC_API_BASE_URL` | **no** | optional | — | — | Defaults to `https://api.anthropic.com` |
-| `LLM_MONTHLY_BUDGET_USD` | **no** | 14 | 14 | 58 | FR-83 |
+| `LLM_MONTHLY_BUDGET_USD` | **no** | 24 | 24 | 58 | FR-83, D-39 |
 | `APP_ENV` | **no** | `local` | `preview` | `production` | |
 | `AGENTS_MODE` | **no** | `real` / `fake` | `real` | `real` (fake is rejected in production) | |
 
@@ -3213,7 +3218,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    PR[Pull request] --> CI["ci.yml<br/>lint · typecheck · unit · seed check<br/>integration · e2e smoke · build · eval-gate · audit"]
+    PR[Pull request] --> CI["ci.yml<br/>lint · typecheck · unit · seed check<br/>integration · e2e smoke · build · eval-gate (from M6) · audit"]
     PR --> PV["Vercel Preview<br/>(dev Supabase, dev key)"]
     CI -->|all green + review| MG[Merge to main]
     MG --> CIM["ci.yml on main<br/>+ full e2e (WebKit) + axe"]
@@ -3236,6 +3241,7 @@ flowchart LR
 
 ### 17.7 Backups and recovery
 - Supabase Pro includes daily backups. From memory, they're retained for 7 days on Pro; confirm in the dashboard.
+- **Phase 0 runs on the free tier (D-40)**, so production has no guaranteed backups until the move to Pro just before Phase 1. The owner accepts that Phase 0 data (the owner's own workouts) could be lost.
 - The free dev project has no guaranteed backups and is treated as disposable. Reference data can always be rebuilt from `data/seed/`.
 - Recovery objectives for the pilot: data loss of up to 24 h is acceptable (daily backups); restore within 1 business day.
 
@@ -3243,11 +3249,12 @@ flowchart LR
 
 | Item | Monthly |
 |-|-|
-| Supabase Pro (prod), from Phase 0 / before Phase 1 | ~$25 |
+| Supabase Pro (prod), from just before Phase 1 (D-40); free tier during Phase 0 | ~$25 |
 | Supabase free (dev) | $0 |
 | Vercel Hobby | $0 (personal, non-commercial use) |
 | Email (Supabase built-in sender; Resend parked, D-28) | $0 |
-| LLM (Appendix C) | prod ≤ $60, dev ≤ $15 |
+| LLM (Appendix C) | prod ≤ $60, dev ≤ $25 (D-39) |
+| **Limits total** | Build and Phase 0: up to $85. Phase 1: up to **$110** ($60 + $25 + $25), accepted by the owner over PRD §12.4's $100 (D-39). These are caps; Appendix C estimates actual prod LLM spend at about $41. |
 
 ---
 
@@ -3312,7 +3319,7 @@ There is no paging for the pilot. Passive signals:
 |-|-|-|
 | P-1 | Create the Supabase **dev** project in `ap-south-1` (free) | M0 |
 | P-2 | Create the Vercel project linked to `dbaid-code/fitness-coach`; set the function region to `bom1` | M0 |
-| P-3 | Create the Anthropic workspaces `gym-coach-dev` ($15 limit) and `gym-coach-prod` ($60 limit); create the keys; enable spend notifications | M0 (dev), M7 (prod) |
+| P-3 | Create the Anthropic workspaces `gym-coach-dev` ($25 limit, D-39) and `gym-coach-prod` ($60 limit); create the keys; enable spend notifications | M0 (dev), M7 (prod) |
 | P-4 | Sign up in production with the address of your Supabase organisation login (the built-in sender only delivers to organisation members, D-28). Settle OD-06 before Phase 1. | M7 (sign-up), before Phase 1 (OD-06) |
 | P-5 | Create the Supabase **prod** project in `ap-south-1`; upgrade to Pro before Phase 1 | M7 |
 | P-6 | Add the GitHub Actions secrets and the `production` environment with the owner as required reviewer | M0 |
@@ -3323,13 +3330,13 @@ There is no paging for the pilot. Passive signals:
 | **M0 Foundation** | F-01 | CI green; preview deploys; health check | P-1, P-2, P-3 (dev), P-6 |
 | **M1 Data and engines** | F-02, F-07, F-16 | Migrations and seed apply; RLS tests pass; domain engines at 100% branch coverage; EV-7 and EV-8 pass | Spot-check the 10% exercise sample; approve the equipment list, muscle-group map and rulebook v1 (OD-08) |
 | **M2 Accounts and profile** | F-03, F-04, F-17 | Sign-up → onboarding E2E; deletion cascade test | — (handoff UI copy approved, D-37) |
-| **M3 Agents and generation** | F-08, F-06, F-09, F-10 | Suggest Workout E2E with fake agents; EV-3 passes with real AG-2; first EV-1 and EV-2 runs | Review the EV-3 labels |
+| **M3 Agents and generation** | F-08, F-06, F-09, F-10 | Suggest Workout E2E with fake agents; eval runner and smoke subset working against the real models; no full runs yet (D-38) | Review the EV-3 labels |
 | **M4 Plan changes and lifecycle** | F-11, F-12, F-13, F-14, F-15 | Every UF-8 – UF-14 E2E passes; EV-6 passes | — |
-| **M5 Photos** | F-05 | EV-5 passes; threshold tuned and recorded | Review the photo-case truth lists |
-| **M6 Evals, logs, metrics** | F-18, F-19 | EV-1 – EV-8 all pass; `latest.json` committed; metrics views tested | Review 20% of judged plans (≥ 80% agreement) |
+| **M5 Photos** | F-05 | Photo flow E2E and the photo-privacy test pass; EV-5 and threshold tuning move to M6 (D-38) | Review the photo-case truth lists |
+| **M6 Evals, logs, metrics** | F-18, F-19 | First full real-model run; EV-1 – EV-8 all pass; photo threshold tuned and recorded; `latest.json` committed; `eval-gate` turned on as blocking (D-38); metrics views tested | Review 20% of judged plans (≥ 80% agreement) |
 | **M7 Release readiness** | F-20 | Production deployed in Mumbai; the owner receives auth emails; spend caps set; smoke test passes | P-3 (prod), P-4, P-5 |
-| **Phase 0** (owner, 2 weeks, PRD §13.1) | — | ≥ 4 workouts completed by the owner; no blocking bugs; **report of cost per workout and p50/p95 latency per agent and end to end**; Supabase on Pro | Use the app; review the report; decide on any latency or cost changes from real data |
-| **Phase 1** (≤ 20 users, 4 weeks) | — | **Entry:** OD-06 settled, so friends receive verification and reset emails. **Exit:** weekly reviews done (§18.4); main metric measured; next build chosen from PRD §15. | Settle OD-06; weekly review |
+| **Phase 0** (owner, 2 weeks, PRD §13.1) | — | ≥ 4 workouts completed by the owner; no blocking bugs; **report of cost per workout and p50/p95 latency per agent and end to end** | Use the app; review the report; decide on any latency or cost changes from real data |
+| **Phase 1** (≤ 20 users, 4 weeks) | — | **Entry:** OD-06 settled, so friends receive verification and reset emails; production on Supabase Pro (D-40). **Exit:** weekly reviews done (§18.4); main metric measured; next build chosen from PRD §15. | Settle OD-06; weekly review |
 
 ### 19.3 Definition of Done (each feature)
 - Acceptance criteria in §10 met, with tests named by spec ID (§12.9).
@@ -3358,6 +3365,8 @@ There is no paging for the pilot. Passive signals:
 | R-11 | The free dev Supabase project pauses and breaks previews | Medium / Low | Resume on demand; production is on Pro |
 | R-12 | A provider spend-limit error isn't recognised and shows as `GENERATION_FAILED` instead of `SPEND_CAP` | Low / Low | The app-side guard triggers first at $58; the error shape is captured during F-16 |
 | R-13 | Users don't find the icon-only Reset in the plan status row (D-32) | Medium / Low | Watch it in Phase 0 and Phase 1 (weekly review, reset rate). Fallback from the handoff: a "Reset" text label next to the icon in the same row. |
+| R-14 | Prompt or agent problems surface late, because the first full real-model eval run is in M6 (D-38) | Medium / Medium | Smoke subset during development; the owner reviews the EV-3 labels in M3 and the photo truth lists in M5; plan time in M6 for fix-and-re-run rounds within the $25 dev limit |
+| R-15 | Production data is lost during Phase 0, which runs on the free tier with no guaranteed backups (D-40) | Low / Low | Only the owner's own data is at risk; reference data rebuilds from `data/seed/`; Pro and daily backups start before Phase 1 |
 
 ### 20.2 Open decisions for the owner
 
@@ -3418,6 +3427,9 @@ There is no paging for the pilot. Passive signals:
 | D-35 | Profile: **Save changes** sits under the Equipment row, always visible, disabled until a field changes; Log out and Delete account are text links at the bottom | **Approved** (owner, during design) | 2026-10-25 | FR-4, FR-11 |
 | D-36 | The app icon ("GC" in the wordmark face, `primary-foreground` on `primary`, square; 512, 180, 32 and 16 px) and the wordmark exported as SVG outlines | **Approved** (OD-10) | 2026-10-25 | Branding, `public/icons/` |
 | D-37 | The UI copy added by the design handoff (screen titles, helper lines, Reset and Discard bodies, toasts, "{n} plans left today") goes into `ui-copy.ts` as written in the handoff README | **Approved** (OD-11) | 2026-10-25 | FR-46 (UI copy, not agent text) |
+| D-38 | Full real-model eval runs (EV-1 to EV-5) start in M6, once every feature is built. Before that, only the smoke subset and the fixture suites EV-6 to EV-8 run. `eval-gate` joins CI in M6 as a blocking check; from then on, every change to a prompt, model, rulebook or dataset needs a passing full run. | **Approved** (owner) | 2026-10-25 | PRD §9.4, §13, §19.2 |
+| D-39 | The dev Anthropic workspace limit is $25 a month (app guard 24) through the build, Phase 0 and Phase 1. In Phase 1 the monthly limits total up to $110 ($60 prod + $25 dev + $25 Supabase Pro), over PRD §12.4's $100. | **Approved** (owner; deviation from PRD §12.4) | 2026-10-25 | PRD §9.4, PRD §12.4, FR-83 |
+| D-40 | Production moves to Supabase Pro just before Phase 1; Phase 0 runs on the free tier without guaranteed backups | **Approved** (owner) | 2026-10-25 | PRD §12.1, §17.7, §19.2 |
 
 ## Appendix B. Configuration constants
 
@@ -3453,7 +3465,7 @@ There is no paging for the pilot. Passive signals:
 | `DIRECT_EDIT_DEBOUNCE_MS` | 600 | §5.3 | `shared/constants.ts` |
 | `IDEMPOTENCY_TTL_MIN`, `INFLIGHT_WINDOW_S` | 60, 60 | D-06 | `server/config/app-config.ts` |
 | `LOG_RETENTION_DAYS` | 30 | FR-6 | migration (cron SQL) |
-| `LLM_MONTHLY_BUDGET_USD` | prod 58, dev 14 | FR-83 | env |
+| `LLM_MONTHLY_BUDGET_USD` | prod 58, dev 24 | FR-83, D-39 | env |
 | `REFERENCE_CACHE_TTL_S` | 600 | §6.2.9 | `server/config/app-config.ts` |
 
 ## Appendix C. Cost model (estimate; Phase 0 replaces it with measured numbers)
