@@ -21,7 +21,12 @@ Read these before you write any code. Precedence follows engineering doc §0.1 a
    - `Gym Coach Design System.dc.html` is design history only. Its early turns predate two audit fixes, so don't take values from it.
    - The handoff README's "Open items for the owner" are already settled (D-36, D-37, PRD v1.1, engineering doc v0.4+). Its version line is out of date.
    - `docs/design/design-brief.md` is superseded. Don't build from it.
-6. **Security**: `docs/specs/security-and-privacy.md` (threats and controls, headers and CSP, cookies, secrets, data inventory, PR checklist, dependencies) and engineering doc §16 (§16.1 threat model, §16.2 secrets, §16.3 web controls, §16.4 data inventory, §16.5 privacy commitments, §16.7 PR checklist).
+6. **Security**, in three documents:
+   - **`docs/security/security-plan.md`** is the security plan. Every control it lists is a requirement. If it is missing when you start, stop and ask the owner.
+   - `docs/specs/security-and-privacy.md`: threats and controls, headers and CSP, cookies, secrets, data inventory, PR checklist, dependencies.
+   - Engineering doc §16: §16.1 threat model, §16.2 secrets, §16.3 web controls, §16.4 data inventory, §16.5 privacy commitments, §16.7 PR checklist.
+
+   Where the security plan asks for more than the spec or §16, build the stricter control. Where it contradicts them or a D- decision, ask the owner.
 7. **Always-included artifacts**:
    - `docs/specs/supabase-schema.sql`: the complete database. Your migrations must reproduce it exactly (`database-access-layer.md` §2).
    - `.env.example`: every environment variable.
@@ -39,11 +44,12 @@ If you find a real conflict this order doesn't settle, don't guess. Record it an
    - §11 folder structure, §12 naming, §13 testing and CI gates, §14 canonical files and traceability, §16 security, §17 deployment
    - §19.1 owner prerequisites, §19.2 milestones, §19.3 Definition of Done
    - Appendix A decision log, Appendix B configuration constants
-2. Read the PRD, every spec, the handoff README and `globals.css`, and open the Prototype and Foundations files.
+2. Read the PRD, the security plan, every spec, the handoff README and `globals.css`, and open the Prototype and Foundations files.
 3. Write `docs/engineering/build-notes.md`, under two pages, covering:
    - the architecture in your own words
    - the M0 to M6 build order
    - the ID families you will trace: FR, UF, F, API, AUTH, AG, V, EV, D
+   - each security-plan control, and the milestone where you will build it
    - owner items still open: P-1, P-2, P-3 (dev) and P-6 for M0; the icon export to `public/icons/` (D-36)
    - any conflicts or gaps you found
 4. Stop and show the owner the notes. Start M0 only when the owner says go.
@@ -120,7 +126,7 @@ For each milestone:
 11. Never disable or bypass RLS. Never expose the `app` schema, and never query app tables from request code as `postgres` or with the secret key. The server connects as `gc_app` and acts as `authenticated`, so a query that forgets the user fails closed (D-21).
 12. Never ship a server-only variable to the client. Those are `SUPABASE_SECRET_KEY`, `DATABASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_API_BASE_URL`, `LLM_MONTHLY_BUDGET_USD`, `APP_ENV` and `AGENTS_MODE`. Only `NEXT_PUBLIC_*` values may reach the browser, and none of them may hold a secret.
 13. Never commit secrets, a filled `.env` or `.env.local`, real user data or real photos. Use synthetic data for dev and evals.
-14. Never loosen the CSP, security headers, cookie settings, auth rules or limits. Auth rules: email verification, minimum 8-character password, relative-only redirects. Limits: 10 generations a day, 5 text edits per plan, 5 photo scans a day, one in-flight generation per user.
+14. Never loosen the CSP, security headers, cookie settings, auth rules, limits, or any control in the security plan. Auth rules: email verification, minimum 8-character password, relative-only redirects. Limits: 10 generations a day, 5 text edits per plan, 5 photo scans a day, one in-flight generation per user.
 
 **Cost and environments**
 15. Use fake agents (`AGENTS_MODE=fake`) in tests, CI and local development by default. Before M6, the real API may be called only for the smoke subset (about 10 cases) and the M1 seed curation (`pnpm seed:curate`). Full EV-1 to EV-5 runs wait for M6 (D-38).
@@ -159,7 +165,7 @@ When every milestone is built, prove the prototype against the requirements. Wri
    - integration tests: cross-user RLS and API isolation, `gc_app` fail-closed, cron and purges, the one-active-plan index, the account-deletion cascade, the `app_events` allowlist, photo privacy, schema parity with `supabase-schema.sql`
    - E2E in Chromium and WebKit with axe
    - `evals/results/latest.json` checked against every EV bar
-4. **Security check** against `security-and-privacy.md` and §16.7:
+4. **Security check** against the security plan, `security-and-privacy.md` and §16.7. Every security-plan control gets a row with its code location, how it was verified, and pass or fail. Also cover:
    - gitleaks, `pnpm audit --prod --audit-level high` and `scripts/check-client-bundle.ts`
    - CSP and headers verified on a running build
    - cookie flags
