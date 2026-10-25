@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&amp;display=swap">
+<style>body{margin:0;background:#E6E3DC;color:#14171A;font-family:Barlow,system-ui,sans-serif;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}a{color:#0A7A3A;text-underline-offset:3px}a:hover{color:#0B1A10}button{font:inherit;-webkit-tap-highlight-color:transparent}button:disabled{cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #14171A;outline-offset:2px}input::placeholder,textarea::placeholder{color:#767A80}@keyframes gc-shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}@keyframes gc-spin{to{transform:rotate(360deg)}}@keyframes gc-pulse{0%{background-color:#B8F0CC}100%{background-color:#E9FBEF}}@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style>
+</helmet>
+<div style="{{ outerStyle }}">
+<div ref="{{ rootRef }}" style="{{ appStyle }}">
+
+<sc-if value="{{ phone }}" hint-placeholder-val="{{ true }}"><div style="height:47px;flex:none;display:flex;align-items:flex-end;padding:0 28px 6px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px">9:41</div></sc-if>
+
+<sc-if value="{{ mobileHeader }}" hint-placeholder-val="{{ true }}"><div style="height:52px;flex:none;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #E3DFD6"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-style:italic;font-weight:800;font-size:21px;text-transform:uppercase">Gym Coach</span></div></sc-if>
+
+<sc-if value="{{ desktopHeader }}"><div style="height:64px;flex:none;display:flex;align-items:center;gap:28px;padding:0 32px;border-bottom:1px solid #E3DFD6;background:#FFFFFF"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase">Gym Coach</span>
+<sc-if value="{{ inApp }}"><nav style="height:100%;display:flex;gap:4px">
+<button onClick="{{ goPlan }}" aria-current="{{ tabs.plan.cur }}" style="height:100%;padding:0 14px;border:0;background:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.plan.fg }};font-weight:{{ tabs.plan.fw }};box-shadow:{{ tabs.plan.dsh }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>Plan</button>
+<button onClick="{{ goHistory }}" aria-current="{{ tabs.history.cur }}" style="height:100%;padding:0 14px;border:0;background:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.history.fg }};font-weight:{{ tabs.history.fw }};box-shadow:{{ tabs.history.dsh }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>History</button>
+<button onClick="{{ goProfile }}" aria-current="{{ tabs.profile.cur }}" style="height:100%;padding:0 14px;border:0;background:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.profile.fg }};font-weight:{{ tabs.profile.fw }};box-shadow:{{ tabs.profile.dsh }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profile</button>
+</nav></sc-if>
+</div></sc-if>
+
+<div style="flex:1;min-height:0;display:flex;justify-content:center;background:#EFECE5">
+<div style="width:100%;max-width:480px;min-height:0;display:flex;flex-direction:column;background:#F7F5F0;box-shadow:1px 0 0 #E3DFD6,-1px 0 0 #E3DFD6">
+<div style="flex:1;min-height:0;overflow-y:auto;padding:18px 12px 24px;display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{ sSignup }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Create your account</h1>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="su-email" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Email</label><input id="su-email" type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="su-pw" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Password</label><input id="su-pw" type="password" value="{{ pw }}" onChange="{{ onPw }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"><span style="padding-left:4px;font-size:14px;color:#5E6166">At least 8 characters</span></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="su-pw2" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Confirm password</label><input id="su-pw2" type="password" value="{{ pw2 }}" onChange="{{ onPw2 }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"><sc-if value="{{ pwMismatch }}"><span style="padding-left:4px;font-size:14px;color:#8F1D1D">Passwords don't match</span></sc-if></div>
+<div style="flex:none;padding:12px 14px;border-radius:6px;background:#F0EEE8;font-size:15px;line-height:1.45;color:#3A3D42">Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic.</div>
+</sc-if>
+
+<sc-if value="{{ sVerify }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Check your inbox</h1>
+<p style="flex:none;margin:0;padding:0 4px;font-size:16px;line-height:1.5">We sent a verification link to <strong>{{ email }}</strong>. Open it, then log in.</p>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:6px;box-shadow:inset 0 0 0 1px #8F8A7E;border:0"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Prototype only</span><button onClick="{{ openVerifyLink }}" style="align-self:flex-start;padding:0;border:0;background:transparent;color:#0A7A3A;text-decoration:underline;text-underline-offset:3px;font-size:16px;cursor:pointer;min-height:44px">Open the verification link</button></div>
+</sc-if>
+
+<sc-if value="{{ sLogin }}">
+<sc-if value="{{ verified }}"><div role="status" style="flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;background:#14171A;color:#FFFFFF;font-size:16px;line-height:1.4"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:#2CD36A;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg><span>Email verified. Log in to continue.</span></div></sc-if>
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Log in</h1>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="li-email" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Email</label><input id="li-email" type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="li-pw" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Password</label><input id="li-pw" type="password" value="{{ pw }}" onChange="{{ onPw }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+<button onClick="{{ goForgot }}" style="flex:none;align-self:flex-start;min-height:44px;padding:0 4px;border:0;background:transparent;color:#0A7A3A;text-decoration:underline;text-underline-offset:3px;font-size:16px;cursor:pointer">Forgot password?</button>
+</sc-if>
+
+<sc-if value="{{ sForgot }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Reset your password</h1>
+<p style="flex:none;margin:0;padding:0 4px;font-size:16px;line-height:1.5">Enter your email and we'll send you a link to set a new password.</p>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="fp-email" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Email</label><input id="fp-email" type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+</sc-if>
+
+<sc-if value="{{ sForgotSent }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Check your inbox</h1>
+<p style="flex:none;margin:0;padding:0 4px;font-size:16px;line-height:1.5">If there's an account for <strong>{{ email }}</strong>, we sent a link to reset your password.</p>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:6px;box-shadow:inset 0 0 0 1px #8F8A7E"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Prototype only</span><button onClick="{{ openResetLink }}" style="align-self:flex-start;padding:0;border:0;background:transparent;color:#0A7A3A;text-decoration:underline;text-underline-offset:3px;font-size:16px;cursor:pointer;min-height:44px">Open the reset link</button></div>
+</sc-if>
+
+<sc-if value="{{ sUpdatePw }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Set a new password</h1>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="up-pw" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">New password</label><input id="up-pw" type="password" value="{{ pw }}" onChange="{{ onPw }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"><span style="padding-left:4px;font-size:14px;color:#5E6166">At least 8 characters</span></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="up-pw2" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Confirm password</label><input id="up-pw2" type="password" value="{{ pw2 }}" onChange="{{ onPw2 }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"><sc-if value="{{ pwMismatch }}"><span style="padding-left:4px;font-size:14px;color:#8F1D1D">Passwords don't match</span></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ sOnbProfile }}">
+<div style="flex:none;display:flex;flex-direction:column;gap:2px;padding:0 4px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Step 1 of 2</span><h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Set up your profile</h1></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="ob-name" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Name</label><input id="ob-name" value="{{ onb.name }}" onChange="{{ onOnbName }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+<div role="radiogroup" aria-label="Goal" style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Goal</span>
+<sc-for list="{{ onbGoal }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:{{ o.sh }};cursor:pointer;text-align:left;font-size:16px;color:#14171A"><span style="width:22px;height:22px;flex:none;border-radius:50%;box-shadow:{{ o.dot }}"></span>{{ o.label }}</button></sc-for></div>
+<div role="radiogroup" aria-label="Experience" style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Experience</span>
+<sc-for list="{{ onbExp }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:{{ o.sh }};cursor:pointer;text-align:left;font-size:16px;color:#14171A"><span style="width:22px;height:22px;flex:none;border-radius:50%;box-shadow:{{ o.dot }}"></span>{{ o.label }}</button></sc-for></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Workout days per week</span>
+<div role="radiogroup" aria-label="Workout days per week" style="display:flex;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;overflow:hidden"><sc-for list="{{ onbDays }}" as="o" hint-placeholder-count="7"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="flex:1;height:44px;border:0;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-variant-numeric:tabular-nums;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};box-shadow:{{ o.div }}">{{ o.label }}</button></sc-for></div></div>
+</sc-if>
+
+<sc-if value="{{ equipScreen }}">
+<sc-if value="{{ tEquip }}"><button onClick="{{ goProfile }}" style="flex:none;align-self:flex-start;height:44px;margin:-8px 0 -8px -4px;padding:0 8px 0 0;border:0;background:transparent;display:flex;align-items:center;gap:2px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:16px;color:#14171A"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Profile</button></sc-if>
+<div style="flex:none;display:flex;flex-direction:column;gap:2px;padding:0 4px"><sc-if value="{{ sOnbEquip }}"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Step 2 of 2</span></sc-if><h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Your equipment</h1><p style="margin:4px 0 0;font-size:16px;line-height:1.45;color:#3A3D42">{{ equipIntro }}</p></div>
+<sc-for list="{{ equipBanners }}" as="bn" hint-placeholder-count="0"><div role="status" style="flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;font-size:16px;line-height:1.4;background:{{ bn.bg }};color:{{ bn.fg }};box-shadow:{{ bn.sh }}"><sc-if value="{{ bn.iCheck }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:#2CD36A;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{ bn.iInfo }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></sc-if><sc-if value="{{ bn.iClock }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><span style="flex:1">{{ bn.text }}</span></div></sc-for>
+<button onClick="{{ openPhoto }}" style="flex:none;height:48px;padding:0 16px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;color:#14171A" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Detect from photos</button>
+<div style="flex:none;display:flex;align-items:baseline;justify-content:space-between;padding:0 4px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Equipment list</span><span style="font-size:15px;color:#5E6166;font-variant-numeric:tabular-nums">{{ equipCount }}</span></div>
+<sc-if value="{{ bodyweightOnly }}"><div style="flex:none;padding:12px 14px;border-radius:6px;background:#F0EEE8;font-size:15px;line-height:1.4">Bodyweight only. Bodyweight exercises are always included.</div></sc-if>
+<div style="flex:none;display:flex;flex-direction:column;gap:1px;background:#E3DFD6;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px #E3DFD6">
+<sc-for list="{{ equipRows }}" as="e" hint-placeholder-count="8"><button role="checkbox" aria-checked="{{ e.sel }}" onClick="{{ e.onToggle }}" style="width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:0;background:#FFFFFF;cursor:pointer;text-align:left;font-size:16px;color:#14171A" style-hover="background:#FBFAF7"><span style="width:24px;height:24px;flex:none;border-radius:4px;display:flex;align-items:center;justify-content:center;background:{{ e.boxBg }};box-shadow:{{ e.boxSh }}"><sc-if value="{{ e.sel }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#FFFFFF;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span><span style="flex:1">{{ e.name }}</span><sc-if value="{{ e.found }}"><span style="height:22px;padding:0 7px;border-radius:4px;background:#E9FBEF;color:#0A6A33;box-shadow:inset 0 0 0 1px #0A6A33;display:inline-flex;align-items:center;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap">Found in photos</span></sc-if></button></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPlanner }}">
+<sc-for list="{{ plannerBanners }}" as="bn" hint-placeholder-count="0"><div role="status" style="flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;font-size:16px;line-height:1.4;background:{{ bn.bg }};color:{{ bn.fg }};box-shadow:{{ bn.sh }}"><sc-if value="{{ bn.iCheck }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:#2CD36A;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{ bn.iInfo }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></sc-if><sc-if value="{{ bn.iClock }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{ bn.iOct }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 16h.01"></path><path d="M12 8v4"></path><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"></path></svg></sc-if><span style="flex:1">{{ bn.text }}</span><sc-if value="{{ bn.dismiss }}"><button onClick="{{ bn.onDismiss }}" aria-label="Dismiss" style="width:44px;height:44px;margin:-12px -12px -12px 0;flex:none;border:0;border-radius:6px;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></sc-if></div></sc-for>
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Plan today's workout</h1>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Session length</span>
+<div role="radiogroup" aria-label="Session length" style="display:flex;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;overflow:hidden"><sc-for list="{{ lenOpts }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="flex:1;height:44px;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};box-shadow:{{ o.div }}"><sc-if value="{{ o.sel }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>{{ o.label }}</button></sc-for></div></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Focus</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ focusChips }}" as="o" hint-placeholder-count="9"><button aria-pressed="{{ o.sel }}" onClick="{{ o.onClick }}" style="height:44px;padding:0 12px;border:0;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }}"><sc-if value="{{ o.sel }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#2CD36A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>{{ o.label }}</button></sc-for></div></div>
+<div style="flex:none;display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:6px;background:#F0EEE8;font-size:15px;line-height:1.4;color:#3A3D42"><svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg><span>{{ recency }}</span></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="note" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Anything for today?</label><textarea id="note" value="{{ note }}" onChange="{{ onNote }}" placeholder="e.g. knee is sore, only dumbbells today" style="width:100%;min-height:88px;padding:10px 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;line-height:1.4;color:#14171A;resize:vertical"></textarea><div style="display:flex;justify-content:space-between;padding:0 4px;font-size:13px;color:#5E6166"><span>Optional</span><span style="font-variant-numeric:tabular-nums">{{ noteCount }}</span></div></div>
+</sc-if>
+
+<sc-if value="{{ showGen }}">
+<div style="flex:none;display:flex;flex-direction:column;gap:4px;padding:0 4px" aria-live="polite"><h1 style="margin:0;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">{{ genLabel }}</h1><span style="font-size:15px;color:#5E6166">{{ genSub }}</span></div>
+{{ skeleton }}
+<sc-if value="{{ genStill }}"><div role="status" style="flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;background:#FFFFFF;color:#14171A;font-size:16px;line-height:1.4;box-shadow:inset 0 0 0 1px #8F8A7E"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>Still working on your workout…</span></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ showPlan }}">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;margin:-8px -4px -6px 0;padding-left:4px">
+<sc-if value="{{ isDraft }}"><span style="height:26px;padding:0 8px;border-radius:4px;box-shadow:inset 0 0 0 1px #8F8A7E;display:inline-flex;align-items:center;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#3A3D42">Draft</span></sc-if>
+<sc-if value="{{ isAccepted }}"><span style="height:26px;padding:0 8px;border-radius:4px;background:#14171A;color:#FFFFFF;display:inline-flex;align-items:center;gap:5px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase"><svg width="13" height="13" viewBox="0 0 24 24" style="fill:none;stroke:#2CD36A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg>Accepted</span></sc-if>
+<button onClick="{{ onReset }}" aria-label="Reset" title="Reset" style="width:44px;height:44px;flex:none;border:0;border-radius:6px;background:transparent;color:#3A3D42;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0" style-hover="background:#EFECE5"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></button>
+</div>
+<h1 tabindex="-1" style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12;text-wrap:pretty">{{ planHeader }}</h1>
+<sc-for list="{{ planBanners }}" as="bn" hint-placeholder-count="0"><div role="status" style="flex:none;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;font-size:16px;line-height:1.4;background:{{ bn.bg }};color:{{ bn.fg }};box-shadow:{{ bn.sh }}"><sc-if value="{{ bn.iCheck }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:#2CD36A;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{ bn.iInfo }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></sc-if><sc-if value="{{ bn.iClock }}"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><span style="flex:1">{{ bn.text }}</span></div></sc-for>
+<div style="flex:none;display:flex;flex-direction:column;gap:1px;background:#E3DFD6;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px #E3DFD6">
+<sc-for list="{{ rows }}" as="row" hint-placeholder-count="9">
+<sc-if value="{{ row.act }}"><button onClick="{{ row.onHowto }}" style="width:100%;display:flex;align-items:center;gap:10px;min-height:60px;padding:8px {{ row.padR }} 8px 14px;border:0;background:#F0EEE8;text-align:left;cursor:pointer;color:#14171A" style-hover="background:#EAE7E0"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">{{ row.label }}</span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:18px;line-height:1.2">{{ row.name }}</span></span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ row.time }}</span></button></sc-if>
+<sc-if value="{{ row.flat }}"><div style="display:flex;align-items:center;gap:4px;padding:0 {{ row.padRx }} 0 0;background:{{ row.bg }};box-shadow:{{ row.bar }}"><button onClick="{{ row.onHowto }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 6px 8px 14px;border:0;background:transparent;text-align:left;cursor:pointer;color:#14171A"><sc-if value="{{ showNums }}"><span style="flex:none;width:22px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px;color:#5E6166;font-variant-numeric:tabular-nums">{{ row.num }}</span></sc-if><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:18px;line-height:1.2;text-wrap:pretty">{{ row.name }}</span><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:15px;line-height:1.3;color:#4A4D52">{{ row.meta }}</span><sc-if value="{{ row.upd }}"><span style="height:22px;padding:0 7px;border-radius:4px;background:#0A6A33;color:#FFFFFF;display:inline-flex;align-items:center;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Updated</span></sc-if></span></span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ row.time }}</span></button><sc-if value="{{ row.editable }}"><button onClick="{{ row.onOpen }}" aria-expanded="false" aria-label="{{ row.aOpen }}" style="width:44px;height:44px;flex:none;border:0;border-radius:6px;background:transparent;color:#3A3D42;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0" style-hover="background:#EFECE5"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg></button></sc-if></div></sc-if>
+<sc-if value="{{ row.hot }}"><div style="display:flex;flex-direction:column;gap:10px;padding:0 4px 10px 0;background:{{ row.bg }};box-shadow:inset 0 0 0 2px #14171A">
+<div style="display:flex;align-items:center;gap:4px"><button onClick="{{ row.onHowto }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 6px 8px 14px;border:0;background:transparent;text-align:left;cursor:pointer;color:#14171A"><sc-if value="{{ showNums }}"><span style="flex:none;width:22px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px;color:#5E6166;font-variant-numeric:tabular-nums">{{ row.num }}</span></sc-if><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:18px;line-height:1.2;text-wrap:pretty">{{ row.name }}</span><span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:15px;line-height:1.3;color:#4A4D52">{{ row.meta }}</span><sc-if value="{{ row.upd }}"><span style="height:22px;padding:0 7px;border-radius:4px;background:#0A6A33;color:#FFFFFF;display:inline-flex;align-items:center;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Updated</span></sc-if></span></span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ row.time }}</span></button><button onClick="{{ row.onOpen }}" aria-expanded="true" aria-label="Close controls" style="width:44px;height:44px;flex:none;border:0;border-radius:6px;background:#14171A;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:0 10px 0 14px">
+<div style="display:flex;gap:8px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Sets</span><div style="display:flex;align-items:center;justify-content:space-between;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E"><button onClick="{{ row.onSm }}" disabled="{{ row.smDis }}" aria-label="{{ row.aSm }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.smOp }}" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M5 12h14"></path></svg></button><span aria-live="polite" style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums">{{ row.sets }}</span><button onClick="{{ row.onSp }}" disabled="{{ row.spDis }}" aria-label="{{ row.aSp }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.spOp }}" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></div></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">{{ row.bLabel }}</span><div style="display:flex;align-items:center;justify-content:space-between;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E"><button onClick="{{ row.onBm }}" disabled="{{ row.bmDis }}" aria-label="{{ row.aBm }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.bmOp }}" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M5 12h14"></path></svg></button><span aria-live="polite" style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums">{{ row.b }}</span><button onClick="{{ row.onBp }}" disabled="{{ row.bpDis }}" aria-label="{{ row.aBp }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.bpOp }}" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:2px;margin-left:-10px">
+<span aria-hidden="true" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#5E6166;cursor:grab"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="9" cy="5" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="9" cy="19" r="1.6"></circle><circle cx="15" cy="5" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="15" cy="19" r="1.6"></circle></svg></span>
+<button onClick="{{ row.onUp }}" disabled="{{ row.upDis }}" aria-label="{{ row.aUp }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.upOp }}" style-hover="background:#EFECE5"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="m18 15-6-6-6 6"></path></svg></button>
+<button onClick="{{ row.onDown }}" disabled="{{ row.downDis }}" aria-label="{{ row.aDown }}" style="width:44px;height:44px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:{{ row.downOp }}" style-hover="background:#EFECE5"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="m6 9 6 6 6-6"></path></svg></button>
+<button onClick="{{ row.onDel }}" aria-label="{{ row.aDel }}" style="margin-left:auto;height:44px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:16px" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>Delete</button>
+</div>
+</div>
+</div></sc-if>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ tHistory }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">History</h1>
+<sc-if value="{{ historyEmpty }}"><div style="flex:none;display:flex;flex-direction:column;gap:10px;padding:16px 14px;border-radius:8px;background:#FFFFFF;box-shadow:0 0 0 1px #E3DFD6"><span style="font-size:16px;line-height:1.45">No workouts logged yet. Plan one from the Plan tab.</span><button onClick="{{ goPlan }}" style="align-self:flex-start;height:44px;padding:0 14px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:16px;color:#14171A">Go to Plan</button></div></sc-if>
+<sc-for list="{{ historyRows }}" as="h" hint-placeholder-count="3"><article style="flex:none;display:flex;flex-direction:column;background:#FFFFFF;border-radius:8px;box-shadow:0 0 0 1px #E3DFD6;overflow:hidden">
+<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 6px 10px 14px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">{{ h.date }}</span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1.15">{{ h.focus }}</span><span style="display:flex;align-items:center;gap:8px;font-size:15px;color:#4A4D52"><span>{{ h.length }}</span><span style="height:22px;padding:0 7px;border-radius:4px;box-shadow:inset 0 0 0 1px #8F8A7E;display:inline-flex;align-items:center;font-family:'Barlow Semi Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A3D42">{{ h.rating }}</span></span></div><button onClick="{{ h.onDelete }}" aria-label="{{ h.aDel }}" style="width:44px;height:44px;flex:none;border:0;border-radius:6px;background:transparent;color:#3A3D42;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0" style-hover="background:#EFECE5"><svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button></div>
+<div style="display:flex;flex-direction:column;border-top:1px solid #E3DFD6;padding:6px 14px 10px"><sc-for list="{{ h.items }}" as="it" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:15px;line-height:1.3"><span style="min-width:0">{{ it.name }}</span><span style="flex:none;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;color:#3A3D42">{{ it.meta }}</span></div></sc-for></div>
+</article></sc-for>
+</sc-if>
+
+<sc-if value="{{ tProfile }}">
+<h1 style="flex:none;margin:0;padding:0 4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1.12">Profile</h1>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><label for="pf-name" style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Name</label><input id="pf-name" value="{{ prof.name }}" onChange="{{ onProfName }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div>
+<div role="radiogroup" aria-label="Goal" style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Goal</span>
+<sc-for list="{{ profGoal }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:{{ o.sh }};cursor:pointer;text-align:left;font-size:16px;color:#14171A"><span style="width:22px;height:22px;flex:none;border-radius:50%;box-shadow:{{ o.dot }}"></span>{{ o.label }}</button></sc-for></div>
+<div role="radiogroup" aria-label="Experience" style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Experience</span>
+<sc-for list="{{ profExp }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:{{ o.sh }};cursor:pointer;text-align:left;font-size:16px;color:#14171A"><span style="width:22px;height:22px;flex:none;border-radius:50%;box-shadow:{{ o.dot }}"></span>{{ o.label }}</button></sc-for></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="padding-left:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Workout days per week</span>
+<div role="radiogroup" aria-label="Workout days per week" style="display:flex;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;overflow:hidden"><sc-for list="{{ profDays }}" as="o" hint-placeholder-count="7"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="flex:1;height:44px;border:0;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-variant-numeric:tabular-nums;background:{{ o.bg }};color:{{ o.fg }};font-weight:{{ o.fw }};box-shadow:{{ o.div }}">{{ o.label }}</button></sc-for></div></div>
+<button onClick="{{ goEquip }}" style="flex:none;width:100%;min-height:60px;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border:0;border-radius:8px;background:#FFFFFF;box-shadow:0 0 0 1px #E3DFD6;cursor:pointer;text-align:left;color:#14171A" style-hover="background:#FBFAF7"><span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:18px">Equipment</span><span style="font-size:15px;color:#5E6166">{{ equipCount }}</span></span><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:#3A3D42;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg></button>
+<button onClick="{{ onProfSave }}" disabled="{{ profSaveDis }}" style="flex:none;height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:{{ profSaveOp }}" style-hover="background:#27C05F">Save changes</button>
+<div style="flex:none;display:flex;align-items:center;gap:4px;margin-top:24px;padding-top:8px;border-top:1px solid #E3DFD6">
+<button onClick="{{ onLogout }}" style="height:44px;padding:0 8px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:15px;color:#3A3D42;text-decoration:underline;text-underline-offset:3px" style-hover="background:#EFECE5">Log out</button>
+<span aria-hidden="true" style="color:#8F8A7E">·</span>
+<button onClick="{{ openDelAccount }}" style="height:44px;padding:0 8px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:15px;color:#B42318;text-decoration:underline;text-underline-offset:3px" style-hover="background:#FDECEC">Delete account</button>
+</div>
+</sc-if>
+
+</div>
+
+<div style="flex:none;position:relative">
+<sc-if value="{{ toastShow }}"><div role="status" style="position:absolute;left:12px;right:12px;bottom:calc(100% + 8px);z-index:20;display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 6px 6px 14px;border-radius:8px;background:#14171A;color:#FFFFFF;box-shadow:0 12px 32px rgba(20,23,26,.18)"><span style="flex:1;font-size:16px;line-height:1.35">{{ toastText }}</span><sc-if value="{{ toastHasAction }}"><button onClick="{{ onToastAction }}" style="height:44px;padding:0 12px;border:0;border-radius:6px;background:transparent;display:flex;align-items:center;gap:6px;cursor:pointer;color:#2CD36A;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px" style-hover="background:rgba(255,255,255,.08)"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>{{ toastAction }}</button></sc-if></div></sc-if>
+
+<sc-if value="{{ footAuth }}"><div style="background:#FFFFFF;border-top:1px solid #E3DFD6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px">
+<button onClick="{{ footPrimary.onClick }}" disabled="{{ footPrimary.dis }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:{{ footPrimary.op }}" style-hover="background:#27C05F">{{ footPrimary.label }}</button>
+<sc-if value="{{ footSecondary.show }}"><button onClick="{{ footSecondary.onClick }}" style="height:44px;width:100%;border:0;border-radius:6px;background:transparent;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:16px;color:#14171A" style-hover="background:#EFECE5">{{ footSecondary.label }}</button></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ showPlanner }}"><div style="background:#FFFFFF;border-top:1px solid #E3DFD6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px"><span style="padding:0 4px;font-size:14px;color:#5E6166">{{ plansLeftText }}</span><button onClick="{{ onSuggest }}" disabled="{{ suggestDis }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:{{ suggestOp }}" style-hover="background:#27C05F">Suggest Workout</button></div></sc-if>
+
+<sc-if value="{{ showGen }}"><div style="background:#FFFFFF;border-top:1px solid #E3DFD6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px"><span style="padding:0 4px;font-size:14px;color:#5E6166">{{ plansLeftText }}</span><button disabled="{{ true }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:.6">{{ spinner }}Suggest Workout</button></div></sc-if>
+
+<sc-if value="{{ showPlan }}"><div style="background:#FFFFFF;border-top:1px solid #E3DFD6;padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ overTime }}"><div role="status" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:6px;background:#FEF3E2;color:#92400E;font-size:15px;line-height:1.35;box-shadow:inset 0 0 0 1px #F6D9A8"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>{{ overText }}</span></div></sc-if>
+<div aria-live="polite" style="display:flex;align-items:baseline;justify-content:space-between;padding:0 4px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Total</span><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums">{{ totalText }}</span></div>
+<sc-if value="{{ isDraft }}"><div style="display:flex;gap:8px"><button onClick="{{ openEdit }}" disabled="{{ editDis }}" style="height:48px;padding:0 16px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;display:flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;color:#14171A;opacity:{{ editOp }}" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path></svg>Edit with AI</button><button onClick="{{ onAccept }}" style="flex:1;height:48px;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px" style-hover="background:#27C05F">Accept</button></div></sc-if>
+<sc-if value="{{ isAccepted }}"><button onClick="{{ openComplete }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px" style-hover="background:#27C05F">Workout completed</button></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ equipScreen }}"><div style="background:#FFFFFF;border-top:1px solid #E3DFD6;padding:10px 12px 12px"><button onClick="{{ onEquipSave }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px" style-hover="background:#27C05F">Save</button></div></sc-if>
+
+
+</div>
+
+</div>
+</div>
+
+<sc-if value="{{ mobileTabs }}"><nav style="flex:none;display:flex;border-top:1px solid #E3DFD6;background:#FFFFFF">
+<button onClick="{{ goPlan }}" aria-current="{{ tabs.plan.cur }}" style="flex:1;height:58px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.plan.fg }};font-weight:{{ tabs.plan.fw }};box-shadow:{{ tabs.plan.msh }}"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>Plan</button>
+<button onClick="{{ goHistory }}" aria-current="{{ tabs.history.cur }}" style="flex:1;height:58px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.history.fg }};font-weight:{{ tabs.history.fw }};box-shadow:{{ tabs.history.msh }}"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>History</button>
+<button onClick="{{ goProfile }}" aria-current="{{ tabs.profile.cur }}" style="flex:1;height:58px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:{{ tabs.profile.fg }};font-weight:{{ tabs.profile.fw }};box-shadow:{{ tabs.profile.msh }}"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profile</button>
+</nav></sc-if>
+<sc-if value="{{ phone }}" hint-placeholder-val="{{ true }}"><div style="height:34px;flex:none;background:#FFFFFF;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px"><span style="width:134px;height:5px;border-radius:3px;background:#14171A"></span></div></sc-if>
+
+<sc-if value="{{ sheetOpen }}"><div style="{{ overlayStyle }}">
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0"></div>
+<div role="dialog" aria-modal="true" aria-label="{{ sheetTitle }}" style="{{ panelStyle }}">
+<sc-if value="{{ grabber }}"><span style="align-self:center;width:36px;height:4px;flex:none;border-radius:2px;background:#C9C4B8"></span></sc-if>
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:22px;line-height:1.18;text-wrap:pretty">{{ sheetTitle }}</span><sc-if value="{{ sheetSubShow }}"><span style="font-size:15px;color:#5E6166">{{ sheetSub }}</span></sc-if></div><button onClick="{{ closeSheet }}" aria-label="Close" style="width:44px;height:44px;margin:-6px -10px 0 0;flex:none;border:0;border-radius:6px;background:transparent;color:#14171A;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0" style-hover="background:#EFECE5"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+
+<sc-if value="{{ shHowto }}">
+<sc-if value="{{ howto.isEx }}"><div style="aspect-ratio:4/3;border-radius:8px;background:repeating-linear-gradient(135deg,#F0EEE8 0 10px,#EAE7E0 10px 20px);display:flex;align-items:flex-end;padding:10px 12px"><span style="font:12px ui-monospace,Menlo,monospace;color:#5E6166">Exercise image from free-exercise-db</span></div></sc-if>
+<span style="font-size:16px;color:#3A3D42">{{ howto.meta }}</span>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">{{ howto.listLabel }}</span>
+<ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.45"><sc-for list="{{ howto.steps }}" as="st" hint-placeholder-count="4"><li>{{ st }}</li></sc-for></ol></div>
+</sc-if>
+
+<sc-if value="{{ shEdit }}">
+<sc-for list="{{ editBanners }}" as="bn" hint-placeholder-count="0"><div role="status" style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:6px;background:#FFFFFF;color:#14171A;font-size:16px;line-height:1.4;box-shadow:inset 0 0 0 1px #8F8A7E"><svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>{{ bn.text }}</span></div></sc-for>
+<label for="edit-text" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">What should change?</label>
+<textarea id="edit-text" value="{{ editText }}" onChange="{{ onEditText }}" disabled="{{ editLocked }}" placeholder="e.g. swap squats for lunges, fewer exercises, my wrist hurts" style="width:100%;min-height:96px;padding:10px 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;line-height:1.4;color:#14171A;resize:vertical"></textarea>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-size:13px;color:#5E6166;font-variant-numeric:tabular-nums">{{ editCount }}</span><button onClick="{{ onApply }}" disabled="{{ applyDis }}" style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:{{ applyOp }}" style-hover="background:#27C05F"><sc-if value="{{ editBusy }}">{{ spinner }}</sc-if>Apply</button></div>
+</sc-if>
+
+<sc-if value="{{ shReset }}">
+<p style="margin:0;font-size:16px;line-height:1.45;color:#3A3D42">{{ resetBody }}</p>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Why? (optional)</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ reasonChips }}" as="o" hint-placeholder-count="4"><button aria-pressed="{{ o.sel }}" onClick="{{ o.onClick }}" style="height:44px;padding:0 12px;border:0;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:16px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }}"><sc-if value="{{ o.sel }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#2CD36A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>{{ o.label }}</button></sc-for></div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ closeSheet }}" style="flex:1;height:48px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;color:#14171A" style-hover="background:#EFECE5">Cancel</button><button onClick="{{ onResetConfirm }}" style="{{ resetBtnStyle }}">{{ resetBtnLabel }}</button></div>
+</sc-if>
+
+<sc-if value="{{ shComplete }}">
+<div role="radiogroup" aria-label="How hard was it?" style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">How hard was it?</span>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><sc-for list="{{ ratingOpts }}" as="o" hint-placeholder-count="3"><button role="radio" aria-checked="{{ o.sel }}" onClick="{{ o.onClick }}" style="height:56px;border:0;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }}"><sc-if value="{{ o.sel }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#2CD36A;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>{{ o.label }}</button></sc-for></div></div>
+<button onClick="{{ onSaveRating }}" disabled="{{ saveRatingDis }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px;opacity:{{ saveRatingOp }}" style-hover="background:#27C05F">Save</button>
+</sc-if>
+
+<sc-if value="{{ shPhoto }}">
+<p style="margin:0;font-size:16px;line-height:1.45;color:#3A3D42">Take photos of the equipment. Don't include people.</p>
+<span style="font-size:14px;color:#5E6166">{{ photoHint }}</span>
+<sc-if value="{{ photoPick }}"><button onClick="{{ onPickPhotos }}" style="height:48px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;color:#14171A" style-hover="background:#EFECE5"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Choose photos</button></sc-if>
+<sc-if value="{{ photoPicked }}"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><div style="aspect-ratio:1;border-radius:6px;background:repeating-linear-gradient(135deg,#F0EEE8 0 8px,#EAE7E0 8px 16px);display:flex;align-items:flex-end;padding:6px"><span style="font:11px ui-monospace,Menlo,monospace;color:#5E6166">Photo 1</span></div><div style="aspect-ratio:1;border-radius:6px;background:repeating-linear-gradient(135deg,#F0EEE8 0 8px,#EAE7E0 8px 16px);display:flex;align-items:flex-end;padding:6px"><span style="font:11px ui-monospace,Menlo,monospace;color:#5E6166">Photo 2</span></div><div style="aspect-ratio:1;border-radius:6px;background:repeating-linear-gradient(135deg,#F0EEE8 0 8px,#EAE7E0 8px 16px);display:flex;align-items:flex-end;padding:6px"><span style="font:11px ui-monospace,Menlo,monospace;color:#5E6166">Photo 3</span></div></div>
+<button onClick="{{ onScan }}" disabled="{{ photoBusy }}" style="height:48px;width:100%;border:0;border-radius:6px;background:#2CD36A;color:#0B1A10;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:17px" style-hover="background:#27C05F"><sc-if value="{{ photoBusy }}">{{ spinner }}</sc-if>{{ scanLabel }}</button></sc-if>
+</sc-if>
+
+<sc-if value="{{ shConfirm }}">
+<p style="margin:0;font-size:16px;line-height:1.45;color:#3A3D42">{{ confirmBody }}</p>
+<sc-if value="{{ shDelAccount }}"><div style="display:flex;flex-direction:column;gap:6px"><label for="del-confirm" style="font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5E6166">Type DELETE to confirm</label><input id="del-confirm" value="{{ deleteText }}" onChange="{{ onDeleteText }}" style="width:100%;height:48px;padding:0 12px;border:0;border-radius:6px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #8F8A7E;font-family:Barlow,sans-serif;font-size:16px;color:#14171A"></div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ closeSheet }}" style="flex:1;height:48px;border:0;border-radius:6px;background:transparent;box-shadow:inset 0 0 0 1.5px #14171A;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;color:#14171A" style-hover="background:#EFECE5">Cancel</button><button onClick="{{ onConfirm }}" disabled="{{ confirmDis }}" style="flex:1;height:48px;border:0;border-radius:6px;background:#B42318;color:#FFFFFF;cursor:pointer;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:17px;opacity:{{ confirmOp }}" style-hover="background:#9A1D14">{{ confirmLabel }}</button></div>
+</sc-if>
+
+</div>
+</div></sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sign up&quot;,&quot;Log in&quot;,&quot;Onboarding&quot;,&quot;Planner&quot;,&quot;Plan draft&quot;,&quot;Plan draft (worst case)&quot;,&quot;Plan accepted&quot;,&quot;History&quot;,&quot;Profile&quot;],&quot;default&quot;:&quot;Planner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;frame&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Phone 390&quot;,&quot;Responsive&quot;],&quot;default&quot;:&quot;Phone 390&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;simulate&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;SPEND_CAP&quot;,&quot;PLAN_LIMIT&quot;,&quot;EXPIRED&quot;,&quot;GENERATION_FAILED&quot;],&quot;default&quot;:&quot;None&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;slowGeneration&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;States&quot;},&quot;showRowNumbers&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Plan rows&quot;}}">
+const TODAY = new Date(2026, 9, 25);
+const DAY = 86400000;
+const GROUPS = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Legs', 'Core', 'Cardio'];
+const GOALS = ['Build muscle', 'Lose weight', 'Stay fit'];
+const EXPS = ['Newbie', 'Moderately regular', 'Experienced'];
+const REASONS = ['Too long', 'Too hard', 'Too easy', "Don't like the exercises"];
+const RATINGS = ['Easy', 'Just right', 'Hard'];
+const EQUIP = ['Dumbbells', 'Adjustable bench', 'Flat bench', 'Barbell', 'EZ curl bar', 'Squat / power rack', 'Smith machine', 'Cable machine', 'Lat pulldown machine', 'Seated row machine', 'Chest press machine', 'Shoulder press machine', 'Pec deck', 'Leg press machine', 'Leg curl machine', 'Leg extension machine', 'Pull-up bar', 'Dip station', 'Kettlebells', 'Resistance bands', 'Medicine ball', 'Stability ball', 'Foam roller', 'Exercise mat', 'Jump rope', 'Treadmill', 'Stationary bike', 'Rowing machine', 'Elliptical', 'Stair climber'];
+const FOUND = ['Dumbbells', 'Adjustable bench', 'Flat bench', 'Cable machine', 'Lat pulldown machine', 'Treadmill'];
+const EX = {
+  'Dumbbell bench press': [4, 10], 'Incline dumbbell press': [3, 10], 'Push-up': [3, 12], 'Cable chest fly': [3, 12], 'Bench dip': [3, 12], 'Overhead dumbbell triceps extension': [3, 12], 'Plank': [3, 0, 30], 'Decline push-up': [3, 10], 'Close-grip push-up': [3, 12], 'Cable triceps pushdown': [3, 12], 'Dumbbell pullover': [3, 12],
+  'Machine chest press': [3, 10], 'Dumbbell floor press': [3, 10], 'Pec deck fly': [3, 12], 'Diamond push-up': [3, 10], 'Lying triceps extension': [3, 12], 'Side plank': [3, 0, 30], 'Single-arm seated overhead dumbbell triceps extension': [3, 12],
+  'Lat pulldown': [3, 10], 'Seated cable row': [3, 10], 'One-arm dumbbell row': [3, 10], 'Face pull': [3, 12], 'Dumbbell biceps curl': [3, 12], 'Hammer curl': [3, 12], 'Back extension': [3, 12], 'Cable biceps curl': [3, 12], 'Assisted pull-up': [3, 8], 'Chest-supported dumbbell row': [3, 10], 'Straight-arm pulldown': [3, 12], 'Reverse fly': [3, 12], 'EZ-bar curl': [3, 10], 'Incline dumbbell curl': [3, 12],
+  'Goblet squat': [3, 10], 'Romanian deadlift': [3, 10], 'Leg press': [3, 12], 'Walking lunge': [3, 10], 'Leg curl': [3, 12], 'Standing calf raise': [3, 15], 'Dead bug': [3, 10], 'Leg extension': [3, 12], 'Dumbbell split squat': [3, 10], 'Hip thrust': [3, 10], 'Step-up': [3, 10], 'Glute bridge': [3, 12], 'Seated calf raise': [3, 15], 'Bird dog': [3, 10],
+};
+const PLANS = {
+  chest: { groups: ['Chest', 'Triceps'], warm: 'Upper-body push', cool: 'Chest and arm stretch',
+    A: ['Dumbbell bench press', 'Incline dumbbell press', 'Push-up', 'Cable chest fly', 'Bench dip', 'Overhead dumbbell triceps extension', 'Plank', 'Decline push-up', 'Close-grip push-up', 'Cable triceps pushdown', 'Dumbbell pullover'],
+    B: ['Machine chest press', 'Dumbbell floor press', 'Pec deck fly', 'Diamond push-up', 'Lying triceps extension', 'Cable triceps pushdown', 'Side plank', 'Single-arm seated overhead dumbbell triceps extension', 'Decline push-up'] },
+  back: { groups: ['Back', 'Biceps'], warm: 'Upper-body pull', cool: 'Back and arm stretch',
+    A: ['Lat pulldown', 'Seated cable row', 'One-arm dumbbell row', 'Face pull', 'Dumbbell biceps curl', 'Hammer curl', 'Plank', 'Back extension', 'Cable biceps curl'],
+    B: ['Assisted pull-up', 'Chest-supported dumbbell row', 'Straight-arm pulldown', 'Reverse fly', 'EZ-bar curl', 'Incline dumbbell curl', 'Side plank', 'Back extension'] },
+  legs: { groups: ['Legs', 'Core'], warm: 'Lower-body mobility', cool: 'Leg and hip stretch',
+    A: ['Goblet squat', 'Romanian deadlift', 'Leg press', 'Walking lunge', 'Leg curl', 'Standing calf raise', 'Plank', 'Dead bug', 'Leg extension'],
+    B: ['Dumbbell split squat', 'Hip thrust', 'Step-up', 'Glute bridge', 'Seated calf raise', 'Leg extension', 'Side plank', 'Bird dog'] },
+};
+const ROUTINES = {
+  'Upper-body push': ['Arm circles', 'Band pull-apart', 'Wall push-up', 'Scapular push-up', 'Torso twist'],
+  'Chest and arm stretch': ['Doorway chest stretch', 'Overhead triceps stretch', 'Cross-body shoulder stretch', "Child's pose"],
+  'Upper-body pull': ['Arm circles', 'Cat-cow', 'Band pull-apart', 'Scapular retraction', 'Thoracic rotation'],
+  'Back and arm stretch': ['Child\'s pose', 'Lat stretch on bench', 'Biceps wall stretch', 'Thread the needle'],
+  'Lower-body mobility': ['Leg swings', 'Bodyweight squat', 'Hip circles', 'Walking knee hug', 'Ankle rocks'],
+  'Leg and hip stretch': ['Standing quad stretch', 'Seated hamstring stretch', 'Pigeon stretch', 'Calf stretch'],
+};
+const STEPS = {
+  'Dumbbell bench press': ['Lie on a flat bench holding a dumbbell in each hand at chest level.', 'Press the dumbbells up until your arms are straight.', 'Lower them slowly back to chest level.', 'Keep your feet flat and your back against the bench.'],
+  'Push-up': ['Start in a plank with your hands a little wider than your shoulders.', 'Lower your chest towards the floor, keeping your body straight.', 'Push back up until your arms are straight.'],
+  'Plank': ['Rest on your forearms and toes, elbows under your shoulders.', 'Keep your body in a straight line from head to heels.', 'Hold for the time shown, breathing steadily.'],
+};
+const RF = /chest pain|dizz|faint|breathless|short of breath|fever|\bill\b|sick|surgery|pregnan|heart|sharp pain|swell/i;
+const OOS = /diet|protein|supplement|nutrition|calorie|meal|weather|stock|invest|ignore (your|all|previous)/i;
+const AREAS = [[/lower back/i, 'lower back'], [/upper back/i, 'upper back'], [/knee/i, 'knees'], [/wrist/i, 'wrists'], [/shoulder/i, 'shoulders'], [/elbow/i, 'elbows'], [/ankle/i, 'ankles'], [/hip/i, 'hips'], [/neck/i, 'neck']];
+const TIRED = /tired|slept badly|exhausted|no energy|low energy|sleepy/i;
+const MSG = {
+  APPLIED: () => 'Done. Your workout is updated.',
+  NOTE_APPLIED: () => 'Planned with your note for today in mind.',
+  APPLIED_HEALTH_AREA: p => `Adjusted today's workout to go easy on your ${p.areas}.`,
+  APPLIED_HEALTH_LIGHTER: () => "Made today's workout lighter.",
+  PARTIAL: () => "I made the changes I could. Some didn't fit your equipment or time.",
+  NOT_POSSIBLE: () => "I couldn't make that change with your equipment or time today.",
+  NOT_UNDERSTOOD: () => "I couldn't apply that. Try something like 'swap squats for lunges' or 'fewer exercises'.",
+  NOT_UNDERSTOOD_NOTE: () => "I couldn't use your note, so I planned without it.",
+  OUT_OF_SCOPE_EDIT: () => "I can only adjust your workout plan, so I've left it as is.",
+  OUT_OF_SCOPE_NOTE: () => "I can only plan workouts, so I've set that note aside.",
+  RED_FLAG: () => "That sounds like something to check with a doctor before you train. I won't plan a workout for this session.",
+  EDIT_LIMIT: () => "You've used all 5 changes for this workout. Reset to start over.",
+  PLAN_LIMIT: () => "You've planned 10 workouts today, which is the daily limit. Try again tomorrow.",
+  PHOTO_LIMIT: () => "You've used today's 5 photo scans. Pick your equipment from the list instead.",
+  PHOTO_PARTIAL: p => `Found ${p.n} items. Check the list and add anything I missed.`,
+  GENERATION_FAILED: () => "I couldn't build a plan this time. Try again or change your inputs.",
+  SPEND_CAP: () => 'Coach is resting right now. Please try again later.',
+  EXPIRED: () => "This workout expired. Plan a new one when you're ready.",
+};
+const KIND = { RED_FLAG: 'danger', SPEND_CAP: 'outline', PLAN_LIMIT: 'outline', EDIT_LIMIT: 'outline', EXPIRED: 'outline', GENERATION_FAILED: 'outline', PHOTO_LIMIT: 'outline' };
+const CHECKS = ['APPLIED', 'NOTE_APPLIED', 'APPLIED_HEALTH_AREA', 'APPLIED_HEALTH_LIGHTER', 'PHOTO_PARTIAL'];
+const fmtGroups = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1];
+const keyFor = g => (['Chest', 'Triceps', 'Shoulders'].includes(g) ? 'chest' : ['Back', 'Biceps'].includes(g) ? 'back' : 'legs');
+const secOf = it => it.kind === 'act' ? 300 : it.kind === 'timed' ? it.sets * it.sec + (it.sets - 1) * 60 + 30 : it.sets * it.reps * 3 + (it.sets - 1) * 60 + 30;
+const metaWords = it => it.kind === 'timed' ? `${it.sets} sets · ${it.sec} s each` : `${it.sets} sets · ${it.reps} reps`;
+const metaShort = it => it.kind === 'act' ? '5 min' : it.kind === 'timed' ? `${it.sets} × ${it.sec} s` : `${it.sets} × ${it.reps}`;
+const daysAgo = d => Math.round((TODAY - d) / DAY);
+const fmtDate = d => { const n = daysAgo(d); const s = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); return n === 0 ? `Today · ${s}` : n === 1 ? `Yesterday · ${s}` : s; };
+const SC = "'Barlow Semi Condensed',sans-serif";
+
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  timers = [];
+  uid = 0;
+  toastFn = null;
+  state = this.init(this.props.startScreen ?? 'Planner');
+
+  nid() { return 'i' + (++this.uid); }
+  mk(name) { const d = EX[name] || [3, 10]; return d[2] ? { id: this.nid(), kind: 'timed', name, sets: d[0], sec: d[2] } : { id: this.nid(), kind: 'reps', name, sets: d[0], reps: d[1] }; }
+  act(label, name) { return { id: this.nid(), kind: 'act', label, name }; }
+  later(fn, ms) { const t = setTimeout(fn, ms); this.timers.push(t); }
+
+  seedHistory() {
+    const d = n => new Date(TODAY - n * DAY);
+    const L = (warm, cool, list) => [['Warm-up: ' + warm, '5 min'], ...list, ['Cool-down: ' + cool, '5 min']];
+    return [
+      { id: 'h1', date: d(2), groups: ['Legs'], length: 45, rating: 'Just right', items: L('Lower-body mobility', 'Leg and hip stretch', [['Goblet squat', '3 × 10'], ['Romanian deadlift', '3 × 10'], ['Leg press', '3 × 12'], ['Walking lunge', '3 × 10'], ['Leg curl', '3 × 12'], ['Standing calf raise', '3 × 15']]) },
+      { id: 'h2', date: d(4), groups: ['Back'], length: 45, rating: 'Hard', items: L('Upper-body pull', 'Back and arm stretch', [['Lat pulldown', '3 × 10'], ['Seated cable row', '3 × 10'], ['One-arm dumbbell row', '3 × 10'], ['Face pull', '3 × 12'], ['Back extension', '3 × 12'], ['Straight-arm pulldown', '3 × 12']]) },
+      { id: 'h3', date: d(6), groups: ['Chest'], length: 30, rating: 'Easy', items: L('Upper-body push', 'Chest and arm stretch', [['Dumbbell bench press', '3 × 10'], ['Incline dumbbell press', '3 × 10'], ['Push-up', '3 × 12'], ['Cable chest fly', '3 × 12']]) },
+      { id: 'h4', date: d(9), groups: ['Triceps'], length: 30, rating: 'Just right', items: L('Upper-body push', 'Chest and arm stretch', [['Bench dip', '3 × 12'], ['Overhead dumbbell triceps extension', '3 × 12'], ['Cable triceps pushdown', '3 × 12'], ['Close-grip push-up', '3 × 12']]) },
+    ];
+  }
+
+  buildPlan(key, poolName, length, header, groups, exclude = []) {
+    const P = PLANS[key];
+    let pool = P[poolName].filter(n => !exclude.includes(n));
+    if (pool.length < 3) pool = P[poolName];
+    const items = []; let total = 600;
+    for (const n of pool) {
+      if (total >= 0.85 * length * 60) break;
+      const it = this.mk(n); const t = secOf(it);
+      if (total + t <= length * 60) { items.push(it); total += t; }
+    }
+    const ordered = [...items.filter(i => i.kind !== 'timed'), ...items.filter(i => i.kind === 'timed')];
+    return { status: 'draft', key, pool: poolName, length, header, groups, editsLeft: 5, items: [this.act('Warm-up', P.warm), ...ordered, this.act('Cool-down', P.cool)] };
+  }
+
+  headerFor(s) {
+    if (s.focus.length) return { header: `${fmtGroups(s.focus)} · ${s.length} min`, key: keyFor(s.focus[0]), groups: s.focus };
+    if (!s.history.length) { const key = s.profile.goal === 'Lose weight' ? 'legs' : 'chest'; return { header: `First workout — starting with ${fmtGroups(PLANS[key].groups)}`, key, groups: PLANS[key].groups }; }
+    const last = this.lastTrained(s.history);
+    let best = null;
+    for (const key of ['chest', 'back', 'legs']) {
+      const n = Math.min(...PLANS[key].groups.map(g => last[g] ?? Infinity));
+      if (!best || n > best.n) best = { key, n };
+    }
+    const g = fmtGroups(PLANS[best.key].groups);
+    const header = best.n === Infinity ? `Coach picked ${g} — not trained yet` : `Coach picked ${g} — rested at least ${best.n} ${best.n === 1 ? 'day' : 'days'}`;
+    return { header, key: best.key, groups: PLANS[best.key].groups };
+  }
+
+  lastTrained(hist) {
+    const out = {};
+    for (const h of hist) { const n = daysAgo(h.date); for (const g of h.groups) if (out[g] == null) out[g] = n; }
+    return out;
+  }
+
+  init(start) {
+    const base = {
+      screen: 'app', tab: 'plan', verified: false, onboarded: true, email: 'alex@example.com', pw: 'gymcoach1', pw2: 'gymcoach1',
+      length: 45, focus: [], note: '', redFlagNote: null, plannerCodes: [], plansUsed: 2, afterReset: false, lastKeyItems: [],
+      plan: null, planCodes: [], openId: null, gen: null,
+      sheet: null, howtoId: null, editText: '', editBusy: false, reason: null, rating: null, toast: null,
+      history: this.seedHistory(), profile: { name: 'Alex Chen', goal: 'Build muscle', exp: 'Moderately regular', days: 3 },
+      prof: { name: 'Alex Chen', goal: 'Build muscle', exp: 'Moderately regular', days: 3 },
+      onb: { name: '', goal: null, exp: null, days: 3 },
+      equip: EQUIP.slice(), found: [], equipCodes: [], photoStage: 'pick', scansLeft: 5, photoCtx: 'profile_edit',
+      deleteText: '', delEntryId: null, expiredDismissed: false,
+    };
+    const s = base;
+    const fresh = () => { s.history = []; s.onboarded = false; s.photoCtx = 'onboarding'; };
+    if (start === 'Sign up') { fresh(); s.screen = 'signup'; s.pw = ''; s.pw2 = ''; }
+    else if (start === 'Log in') { s.screen = 'login'; s.pw = ''; }
+    else if (start === 'Onboarding') { fresh(); s.screen = 'onbProfile'; }
+    else if (start === 'History') s.tab = 'history';
+    else if (start === 'Profile') s.tab = 'profile';
+    else if (start === 'Plan draft' || start === 'Plan accepted') {
+      const h = this.headerFor(s);
+      s.plan = this.buildPlan(h.key, 'A', 45, h.header, h.groups);
+      if (start === 'Plan accepted') s.plan.status = 'accepted';
+    } else if (start === 'Plan draft (worst case)') {
+      const h = this.headerFor(s);
+      const names = ['Dumbbell bench press', 'Incline dumbbell press', 'Decline push-up', 'Cable chest fly', 'Dumbbell pullover', 'Bench dip', 'Single-arm seated overhead dumbbell triceps extension', 'Cable triceps pushdown', 'Close-grip push-up', 'Plank'];
+      const items = names.map(n => this.mk(n)); items[2].upd = true; items[3].upd = true;
+      s.plan = { status: 'draft', key: 'chest', pool: 'A', length: 45, header: h.header, groups: h.groups, editsLeft: 4, items: [this.act('Warm-up', PLANS.chest.warm), ...items, this.act('Cool-down', PLANS.chest.cool)] };
+      s.planCodes = [{ code: 'APPLIED' }];
+      s.openId = items[6].id;
+    }
+    return s;
+  }
+
+  componentDidMount() {
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) { this.ro = new ResizeObserver(e => { const w = Math.round(e[0].contentRect.width); if (w !== this.state.w) this.setState({ w }); }); this.ro.observe(el); }
+  }
+  componentDidUpdate(prev) {
+    if (prev.startScreen !== this.props.startScreen) { this.timers.forEach(clearTimeout); this.timers = []; this.setState({ ...this.init(this.props.startScreen ?? 'Planner') }); }
+  }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); if (this.ro) this.ro.disconnect(); }
+
+  toast(text, action = null, fn = null, ms = 4000) {
+    const id = Math.random(); this.toastFn = fn;
+    this.setState({ toast: { id, text, action } });
+    this.later(() => this.setState(s => (s.toast && s.toast.id === id ? { toast: null } : null)), ms);
+  }
+
+  classifyNote(note) {
+    const t = note.trim(); if (!t) return null;
+    if (RF.test(t)) return { code: 'RED_FLAG' };
+    if (OOS.test(t)) return { code: 'OUT_OF_SCOPE_NOTE' };
+    const areas = AREAS.filter(([re]) => re.test(t)).map(a => a[1]);
+    if (areas.length) return { code: 'APPLIED_HEALTH_AREA', params: { areas: areas.join(' and ') } };
+    if (TIRED.test(t)) return { code: 'APPLIED_HEALTH_LIGHTER' };
+    if (t.length < 4) return { code: 'NOT_UNDERSTOOD_NOTE' };
+    return { code: 'NOTE_APPLIED' };
+  }
+
+  suggest() {
+    const s = this.state; const sim = this.props.simulate ?? 'None';
+    const c = this.classifyNote(s.note);
+    if (c && c.code === 'RED_FLAG') { this.setState({ plannerCodes: [c], redFlagNote: s.note }); return; }
+    const slow = this.props.slowGeneration ?? false;
+    this.setState({ gen: { step: 0, still: false }, plannerCodes: [] });
+    const every = slow ? 2500 : 1100;
+    [1, 2].forEach(i => this.later(() => this.setState(st => (st.gen ? { gen: { ...st.gen, step: i } } : null)), every * i));
+    if (slow) this.later(() => this.setState(st => (st.gen ? { gen: { ...st.gen, still: true } } : null)), 8000);
+    this.later(() => {
+      const st = this.state;
+      if (sim === 'GENERATION_FAILED') { this.setState({ gen: null, plannerCodes: [{ code: 'GENERATION_FAILED' }] }); return; }
+      const h = this.headerFor(st);
+      const plan = this.buildPlan(h.key, st.afterReset ? (st.lastPool === 'A' ? 'B' : 'A') : 'A', st.length, h.header, h.groups);
+      if (c && c.code === 'APPLIED_HEALTH_LIGHTER') plan.items = plan.items.map(i => (i.kind === 'act' ? i : { ...i, sets: Math.max(2, i.sets - 1) }));
+      this.setState({ gen: null, plan, planCodes: c ? [c] : [], plansUsed: st.plansUsed + 1, openId: null, afterReset: false });
+    }, slow ? 11000 : 3200);
+  }
+
+  editOutcome(text, plan) {
+    if (RF.test(text)) return { discard: true };
+    if (OOS.test(text)) return { code: 'OUT_OF_SCOPE_EDIT' };
+    let items = plan.items.map(i => ({ ...i, upd: false }));
+    const inPlan = new Set(items.map(i => i.name));
+    const otherPool = PLANS[plan.key][plan.pool === 'A' ? 'B' : 'A'].filter(n => !inPlan.has(n) && !EX[n][2]);
+    const mains = () => items.map((it, i) => (it.kind === 'act' ? -1 : i)).filter(i => i >= 0);
+    const areas = AREAS.filter(([re]) => re.test(text)).map(a => a[1]);
+    if (areas.length) {
+      const m = mains().filter(i => items[i].kind === 'reps').slice(-2);
+      m.forEach((i, k) => { if (otherPool[k]) items[i] = { ...this.mk(otherPool[k]), upd: true }; });
+      return { items, code: 'APPLIED_HEALTH_AREA', params: { areas: areas.join(' and ') } };
+    }
+    if (TIRED.test(text) || /lighter|easier|less intense/i.test(text)) {
+      items = items.map(i => (i.kind !== 'act' && i.sets > 2 ? { ...i, sets: i.sets - 1, upd: true } : i));
+      return { items, code: TIRED.test(text) ? 'APPLIED_HEALTH_LIGHTER' : 'APPLIED' };
+    }
+    if (/harder|tougher|more intense/i.test(text)) {
+      items = items.map(i => (i.kind === 'reps' ? { ...i, reps: Math.min(30, i.reps + 2), upd: true } : i.kind === 'timed' ? { ...i, sec: Math.min(120, i.sec + 10), upd: true } : i));
+      return { items, code: 'APPLIED' };
+    }
+    if (/fewer|less exercise|shorter|too long/i.test(text)) {
+      const m = mains(); if (m.length <= 2) return { code: 'NOT_POSSIBLE' };
+      items.splice(m[m.length - 1], 1); return { items, code: 'APPLIED' };
+    }
+    if (/\b(more|add|longer)\b/i.test(text)) {
+      if (!otherPool[0]) return { code: 'NOT_POSSIBLE' };
+      items.splice(items.length - 1, 0, { ...this.mk(otherPool[0]), upd: true }); return { items, code: 'APPLIED' };
+    }
+    if (/swap|replace|instead|change|don't like|dont like/i.test(text)) {
+      const words = text.toLowerCase().match(/[a-z-]{4,}/g) || [];
+      const i = mains().find(j => words.some(w => items[j].name.toLowerCase().includes(w)));
+      if (i == null) return { code: 'NOT_UNDERSTOOD' };
+      if (!otherPool[0]) return { code: 'NOT_POSSIBLE' };
+      items[i] = { ...this.mk(otherPool[0]), upd: true }; return { items, code: 'APPLIED' };
+    }
+    return { code: 'NOT_UNDERSTOOD' };
+  }
+
+  apply() {
+    const s = this.state;
+    if (!s.plan || s.editBusy || !s.editText.trim() || s.plan.editsLeft <= 0) return;
+    this.setState({ editBusy: true });
+    this.later(() => {
+      const st = this.state; const r = this.editOutcome(st.editText, st.plan);
+      if (r.discard) { this.setState({ plan: null, planCodes: [], plannerCodes: [{ code: 'RED_FLAG' }], sheet: null, editBusy: false, editText: '', openId: null }); return; }
+      const plan = { ...st.plan, editsLeft: st.plan.editsLeft - 1, items: r.items || st.plan.items };
+      this.setState({ plan, planCodes: [{ code: r.code, params: r.params }], sheet: null, editBusy: false, editText: '', openId: null });
+    }, (this.props.slowGeneration ?? false) ? 9000 : 1800);
+  }
+
+  setItems(fn) { this.setState(s => (s.plan ? { plan: { ...s.plan, items: fn(s.plan.items.slice()) } } : null)); }
+  bump(id, f, d) {
+    const lim = { sets: [1, 10], reps: [1, 30], sec: [10, 120] }[f];
+    this.setItems(items => items.map(i => (i.id === id ? { ...i, [f]: Math.min(lim[1], Math.max(lim[0], i[f] + d)) } : i)));
+  }
+  move(id, dir) {
+    this.setItems(items => { const i = items.findIndex(x => x.id === id); const j = i + dir; if (!items[j] || items[j].kind === 'act') return items; [items[i], items[j]] = [items[j], items[i]]; return items; });
+  }
+  del(id) {
+    const s = this.state; const idx = s.plan.items.findIndex(i => i.id === id); const item = s.plan.items[idx];
+    this.setState({ plan: { ...s.plan, items: s.plan.items.filter(i => i.id !== id) }, openId: null });
+    this.toast(`${item.name} removed`, 'Undo', () => this.setState(st => { if (!st.plan) return null; const items = st.plan.items.slice(); items.splice(idx, 0, item); return { plan: { ...st.plan, items }, toast: null }; }), 5000);
+  }
+
+  banner(c, onDismiss) {
+    const kind = KIND[c.code] || 'ink';
+    const text = MSG[c.code] ? MSG[c.code](c.params || {}) : c.code;
+    return {
+      text, dismiss: !!onDismiss, onDismiss,
+      bg: kind === 'ink' ? '#14171A' : kind === 'danger' ? '#FDECEC' : '#FFFFFF',
+      fg: kind === 'ink' ? '#FFFFFF' : kind === 'danger' ? '#8F1D1D' : '#14171A',
+      sh: kind === 'danger' ? 'inset 0 0 0 1px #F5C7C3' : kind === 'outline' ? 'inset 0 0 0 1px #8F8A7E' : 'none',
+      iCheck: CHECKS.includes(c.code), iOct: kind === 'danger', iClock: kind === 'outline' && c.code !== 'GENERATION_FAILED',
+      iInfo: !CHECKS.includes(c.code) && kind !== 'danger' && !(kind === 'outline' && c.code !== 'GENERATION_FAILED'),
+    };
+  }
+  radio(list, cur, set) {
+    return list.map(label => { const sel = cur === label; return { label, sel, onClick: () => set(label), sh: sel ? 'inset 0 0 0 2px #14171A' : 'inset 0 0 0 1px #8F8A7E', dot: sel ? 'inset 0 0 0 7px #14171A' : 'inset 0 0 0 1.5px #8F8A7E' }; });
+  }
+  seg(list, cur, set, green) {
+    return list.map((v, i) => { const sel = cur === v; return { label: typeof v === 'number' && !green ? String(v) : `${v} min`, sel, onClick: () => set(v), bg: sel ? (green ? '#2CD36A' : '#14171A') : 'transparent', fg: sel ? (green ? '#0B1A10' : '#FFFFFF') : '#14171A', fw: sel ? 700 : 600, div: i && !sel && cur !== list[i - 1] ? 'inset 1px 0 0 #8F8A7E' : 'none' }; });
+  }
+  chip(label, sel, onClick) { return { label, sel, onClick, bg: sel ? '#14171A' : '#FFFFFF', fg: sel ? '#FFFFFF' : '#14171A', sh: sel ? 'none' : 'inset 0 0 0 1px #8F8A7E' }; }
+
+  renderVals() {
+    const s = this.state; const h = React.createElement;
+    const set = o => this.setState(o);
+    const phone = (this.props.frame ?? 'Phone 390') === 'Phone 390';
+    const showNums = this.props.showRowNumbers ?? true;
+    const sim = this.props.simulate ?? 'None';
+    const spend = sim === 'SPEND_CAP';
+    const desktop = !phone && (s.w || 0) >= 640;
+    const inApp = s.screen === 'app';
+    const authScreens = ['signup', 'verify', 'login', 'forgot', 'forgotSent', 'updatePw'];
+    const plan = s.plan;
+    const tab = s.tab;
+    const tPlan = inApp && tab === 'plan';
+    const showGen = tPlan && !!s.gen;
+    const showPlan = tPlan && !s.gen && !!plan;
+    const showPlanner = tPlan && !s.gen && !plan;
+    const isDraft = showPlan && plan.status === 'draft';
+    const isAccepted = showPlan && plan.status === 'accepted';
+    const spinner = h('svg', { width: 18, height: 18, viewBox: '0 0 24 24', style: { flex: 'none', fill: 'none', stroke: 'currentColor', strokeWidth: 2.5, strokeLinecap: 'round', animation: 'gc-spin 900ms linear infinite' } }, h('path', { d: 'M21 12a9 9 0 1 1-6.219-8.56' }));
+    const bar = (key, w, ht) => h('span', { key, style: { display: 'block', width: w, height: ht, borderRadius: 4, background: 'linear-gradient(90deg,#F0EEE8 0%,#FBFAF7 50%,#F0EEE8 100%)', backgroundSize: '400px 100%', animation: 'gc-shimmer 1.4s linear infinite' } });
+    const skeleton = h('div', { style: { flex: 'none', display: 'flex', flexDirection: 'column', gap: 1, background: '#E3DFD6', borderRadius: 8, overflow: 'hidden' } },
+      [0, 1, 2, 3, 4].map(i => h('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, minHeight: i === 0 ? 60 : 64, padding: '0 14px', background: i === 0 ? '#F0EEE8' : '#FFFFFF' } }, [
+        h('div', { key: 'a', style: { flex: 1, display: 'flex', flexDirection: 'column', gap: 8 } }, [bar('x', ['45%', '70%', '55%', '62%', '50%'][i], 14), bar('y', '36%', 10)]), bar('z', 36, 14)])));
+
+    const tabStyle = k => { const on = (k === 'profile' ? (tab === 'profile' || tab === 'equipment') : tab === k); return { cur: on ? 'page' : undefined, fg: on ? '#14171A' : '#5E6166', fw: on ? 700 : 600, msh: on ? 'inset 0 3px 0 #2CD36A' : 'none', dsh: on ? 'inset 0 -3px 0 #2CD36A' : 'none' }; };
+    const goTab = t => () => this.setState({ tab: t, openId: null });
+
+    // planner
+    const plansLeft = sim === 'PLAN_LIMIT' ? 0 : Math.max(0, 10 - s.plansUsed);
+    const plannerBanners = [];
+    if (sim === 'EXPIRED' && !s.expiredDismissed) plannerBanners.push(this.banner({ code: 'EXPIRED' }, () => set({ expiredDismissed: true })));
+    if (spend) plannerBanners.push(this.banner({ code: 'SPEND_CAP' }));
+    if (plansLeft === 0) plannerBanners.push(this.banner({ code: 'PLAN_LIMIT' }));
+    s.plannerCodes.forEach(c => plannerBanners.push(this.banner(c)));
+    const redBlocked = s.redFlagNote !== null && s.note === s.redFlagNote;
+    const suggestDis = spend || plansLeft === 0 || redBlocked;
+    const last = this.lastTrained(s.history);
+    const rec = Object.entries(last).filter(([, n]) => n <= 14).sort((a, b) => a[1] - b[1]);
+    const recency = !s.history.length ? 'No workouts logged yet' : !rec.length ? 'Last trained: nothing in the last 14 days' : 'Last trained: ' + rec.map(([g, n]) => `${g} ${n === 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'}`).join(' · ');
+    const toggleGroup = g => this.setState(st => ({ focus: st.focus.includes(g) ? st.focus.filter(x => x !== g) : [...st.focus, g] }));
+    const focusChips = [this.chip('Let coach choose', !s.focus.length, () => set({ focus: [] })), ...GROUPS.map(g => this.chip(g, s.focus.includes(g), () => toggleGroup(g)))];
+    const genLabels = ['Checking your inputs', 'Choosing exercises', 'Checking the plan'];
+
+    // plan
+    let rows = [], totalSec = 0;
+    if (plan) {
+      let n = 0;
+      totalSec = plan.items.reduce((a, i) => a + secOf(i), 0);
+      rows = plan.items.map((it, idx) => {
+        const howto = () => set({ sheet: 'howto', howtoId: it.id });
+        if (it.kind === 'act') return { act: true, flat: false, hot: false, label: it.label, name: it.name, time: '5 min', padR: isDraft ? '58px' : '14px', onHowto: howto };
+        n++;
+        const timed = it.kind === 'timed'; const bf = timed ? 'sec' : 'reps'; const step = timed ? 5 : 1;
+        const hot = isDraft && s.openId === it.id;
+        const prevAct = !plan.items[idx - 1] || plan.items[idx - 1].kind === 'act';
+        const nextAct = !plan.items[idx + 1] || plan.items[idx + 1].kind === 'act';
+        const lim = timed ? [10, 120] : [1, 30];
+        return {
+          act: false, hot, flat: !hot, upd: !!it.upd, editable: isDraft, num: String(n), name: it.name, meta: metaWords(it), time: Math.round(secOf(it) / 60) + ' min',
+          bg: it.upd ? '#E9FBEF' : '#FFFFFF', bar: it.upd ? 'inset 4px 0 0 #2CD36A' : 'none', padRx: isDraft ? '4px' : '8px',
+          sets: it.sets, b: timed ? it.sec + ' s' : String(it.reps), bLabel: timed ? 'Time per set' : 'Reps',
+          onHowto: howto, onOpen: () => set({ openId: s.openId === it.id ? null : it.id }),
+          onSm: () => this.bump(it.id, 'sets', -1), onSp: () => this.bump(it.id, 'sets', 1), onBm: () => this.bump(it.id, bf, -step), onBp: () => this.bump(it.id, bf, step),
+          onUp: () => this.move(it.id, -1), onDown: () => this.move(it.id, 1), onDel: () => this.del(it.id),
+          smDis: it.sets <= 1, smOp: it.sets <= 1 ? 0.45 : 1, spDis: it.sets >= 10, spOp: it.sets >= 10 ? 0.45 : 1,
+          bmDis: it[bf] <= lim[0], bmOp: it[bf] <= lim[0] ? 0.45 : 1, bpDis: it[bf] >= lim[1], bpOp: it[bf] >= lim[1] ? 0.45 : 1,
+          upDis: prevAct, upOp: prevAct ? 0.45 : 1, downDis: nextAct, downOp: nextAct ? 0.45 : 1,
+          aOpen: `Change ${it.name}`, aSm: `Decrease sets for ${it.name}`, aSp: `Increase sets for ${it.name}`, aBm: `Decrease ${timed ? 'time per set' : 'reps'} for ${it.name}`, aBp: `Increase ${timed ? 'time per set' : 'reps'} for ${it.name}`, aUp: `Move ${it.name} up`, aDown: `Move ${it.name} down`, aDel: `Delete ${it.name}`,
+        };
+      });
+    }
+    const totalMin = Math.round(totalSec / 60);
+    const overTime = !!plan && totalSec > plan.length * 60;
+    const planBanners = s.planCodes.map(c => this.banner(c));
+    if (spend && plan) planBanners.push(this.banner({ code: 'SPEND_CAP' }));
+
+    // sheets
+    const sheet = s.sheet;
+    const isDialog = sheet === 'delEntry' || sheet === 'delAccount' || sheet === 'discard';
+    const centered = desktop || isDialog;
+    const overlayStyle = { position: 'absolute', inset: 0, zIndex: 30, display: 'flex', flexDirection: 'column', justifyContent: centered ? 'center' : 'flex-end', alignItems: 'center', background: 'rgba(20,23,26,.5)', padding: centered ? 16 : 0 };
+    const panelStyle = { position: 'relative', width: '100%', maxWidth: 480, maxHeight: '88%', overflowY: 'auto', background: '#FFFFFF', borderRadius: centered ? 12 : '12px 12px 0 0', boxShadow: centered ? '0 12px 32px rgba(20,23,26,.18)' : '0 -8px 24px rgba(20,23,26,.12)', padding: centered ? '16px' : `8px 16px ${phone ? 30 : 16}px`, display: 'flex', flexDirection: 'column', gap: 14 };
+    let sheetTitle = '', sheetSub = '', howto = { isEx: false, meta: '', listLabel: '', steps: [] };
+    const hItem = plan && s.howtoId ? plan.items.find(i => i.id === s.howtoId) : null;
+    if (sheet === 'howto' && hItem) {
+      if (hItem.kind === 'act') { sheetTitle = `${hItem.label}: ${hItem.name}`; howto = { isEx: false, meta: '5 min', listLabel: 'Moves', steps: ROUTINES[hItem.name] || [] }; }
+      else { sheetTitle = hItem.name; howto = { isEx: true, meta: `${metaWords(hItem)} · ${Math.round(secOf(hItem) / 60)} min`, listLabel: 'How to do it', steps: STEPS[hItem.name] || ['Step-by-step instructions from the exercise database appear here.'] }; }
+    }
+    const editsLeft = plan ? plan.editsLeft : 0;
+    if (sheet === 'edit') { sheetTitle = 'Edit with AI'; sheetSub = `${editsLeft} of 5 changes left`; }
+    if (sheet === 'reset') sheetTitle = 'Reset this plan';
+    if (sheet === 'discard') sheetTitle = 'Discard your current workout?';
+    if (sheet === 'complete') sheetTitle = 'Workout completed';
+    if (sheet === 'photo') sheetTitle = 'Detect from photos';
+    if (sheet === 'delEntry') sheetTitle = 'Delete this workout?';
+    if (sheet === 'delAccount') sheetTitle = 'Delete your account?';
+    const editLocked = editsLeft <= 0 || spend || s.editBusy;
+    const editBanners = []; if (editsLeft <= 0) editBanners.push({ text: MSG.EDIT_LIMIT() }); if (spend) editBanners.push({ text: MSG.SPEND_CAP() });
+    const applyDis = editLocked || !s.editText.trim();
+    const reasonChips = REASONS.map(r => this.chip(r, s.reason === r, () => set({ reason: s.reason === r ? null : r })));
+    const doReset = () => this.setState(st => ({ plan: null, planCodes: [], note: '', redFlagNote: null, afterReset: true, lastPool: st.plan ? st.plan.pool : 'A', sheet: null, plannerCodes: [], openId: null, reason: null }));
+    const ratingOpts = RATINGS.map(r => { const sel = s.rating === r; return { label: r, sel, onClick: () => set({ rating: r }), bg: sel ? '#14171A' : '#FFFFFF', fg: sel ? '#FFFFFF' : '#14171A', sh: sel ? 'none' : 'inset 0 0 0 1px #8F8A7E' }; });
+    const saveRating = () => {
+      const st = this.state; if (!st.rating || !st.plan) return; const p = st.plan;
+      const entry = { id: 'h' + Date.now(), date: TODAY, groups: p.groups, length: p.length, rating: st.rating, items: p.items.map(i => [i.kind === 'act' ? `${i.label}: ${i.name}` : i.name, metaShort(i)]) };
+      this.setState({ history: [entry, ...st.history], plan: null, planCodes: [], sheet: null, rating: null, focus: [], note: '', afterReset: false, redFlagNote: null, plannerCodes: [] });
+      this.toast('Workout saved');
+    };
+    const photoBusy = s.photoStage === 'scanning';
+    const scan = () => {
+      this.setState({ photoStage: 'scanning' });
+      this.later(() => this.setState(st => ({ photoStage: 'pick', sheet: null, scansLeft: st.scansLeft - 1, found: FOUND, equip: st.photoCtx === 'onboarding' ? FOUND.slice() : Array.from(new Set([...st.equip, ...FOUND])), equipCodes: [{ code: 'PHOTO_PARTIAL', params: { n: FOUND.length } }] })), 2400);
+    };
+    const confirm = () => {
+      const st = this.state;
+      if (st.sheet === 'delEntry') { this.setState({ history: st.history.filter(x => x.id !== st.delEntryId), sheet: null, delEntryId: null }); this.toast('Workout deleted'); }
+      if (st.sheet === 'delAccount') { if (st.deleteText !== 'DELETE') return; this.setState({ ...this.init('Sign up'), toast: null }); this.toast('Your account and data were deleted'); }
+      if (st.sheet === 'discard') doReset();
+    };
+    const confirmBody = sheet === 'delEntry' ? "It's removed from your history and won't be used for planning." : sheet === 'delAccount' ? 'This deletes your profile, equipment, plans and history right away.' : '';
+
+    // auth footers
+    const validEmail = /.+@.+\..+/.test(s.email);
+    const pwOk = s.pw.length >= 8 && s.pw === s.pw2;
+    const fp = (label, onClick, dis = false) => ({ label, onClick, dis, op: dis ? 0.45 : 1 });
+    const fs = (label, onClick) => ({ show: true, label, onClick });
+    let footPrimary = fp('', null), footSecondary = { show: false };
+    const sc = s.screen;
+    if (sc === 'signup') { footPrimary = fp('Create account', () => set({ screen: 'verify' }), !validEmail || !pwOk); footSecondary = fs('Already have an account? Log in', () => set({ screen: 'login' })); }
+    if (sc === 'verify') { footPrimary = fp('Resend email', () => this.toast('Email sent')); footSecondary = fs('Back to log in', () => set({ screen: 'login' })); }
+    if (sc === 'login') { footPrimary = fp('Log in', () => set(s.onboarded ? { screen: 'app', tab: 'plan' } : { screen: 'onbProfile' }), !validEmail || !s.pw); footSecondary = fs('Create an account', () => set({ screen: 'signup', verified: false })); }
+    if (sc === 'forgot') { footPrimary = fp('Send reset link', () => set({ screen: 'forgotSent' }), !validEmail); footSecondary = fs('Back to log in', () => set({ screen: 'login' })); }
+    if (sc === 'forgotSent') { footPrimary = fp('Back to log in', () => set({ screen: 'login' })); }
+    if (sc === 'updatePw') { footPrimary = fp('Save password', () => set({ screen: s.onboarded ? 'app' : 'onbProfile', tab: 'plan' }), !pwOk); }
+    if (sc === 'onbProfile') { const o = s.onb; footPrimary = fp('Next', () => set({ screen: 'onbEquip', photoCtx: 'onboarding' }), !o.name.trim() || !o.goal || !o.exp); }
+
+    const sEquipScreen = sc === 'onbEquip' || (inApp && tab === 'equipment');
+    const profDirty = inApp && tab === 'profile' && JSON.stringify(s.prof) !== JSON.stringify(s.profile);
+    const toastShow = !!s.toast && !s.sheet;
+
+    const appStyle = phone
+      ? { position: 'relative', width: 390, height: 844, flex: 'none', display: 'flex', flexDirection: 'column', background: '#F7F5F0', color: '#14171A', borderRadius: 32, overflow: 'hidden', boxShadow: '0 24px 64px rgba(20,23,26,.22), 0 0 0 1px rgba(20,23,26,.08)' }
+      : { position: 'relative', width: '100%', height: '100dvh', display: 'flex', flexDirection: 'column', background: '#F7F5F0', color: '#14171A', overflow: 'hidden' };
+    const outerStyle = phone ? { minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 24 } : {};
+
+    return {
+      rootRef: this.rootRef, outerStyle, appStyle, phone, showNums, spinner, skeleton,
+      mobileHeader: !desktop, desktopHeader: desktop, inApp, mobileTabs: !desktop && inApp && sc === 'app',
+      tabs: { plan: tabStyle('plan'), history: tabStyle('history'), profile: tabStyle('profile') },
+      goPlan: goTab('plan'), goHistory: goTab('history'), goProfile: goTab('profile'), goEquip: () => set({ tab: 'equipment', photoCtx: 'profile_edit', equipCodes: [], found: [] }),
+      sSignup: sc === 'signup', sVerify: sc === 'verify', sLogin: sc === 'login', sForgot: sc === 'forgot', sForgotSent: sc === 'forgotSent', sUpdatePw: sc === 'updatePw', sOnbProfile: sc === 'onbProfile', sOnbEquip: sc === 'onbEquip',
+      footAuth: authScreens.includes(sc) || sc === 'onbProfile', footPrimary, footSecondary,
+      email: s.email, pw: s.pw, pw2: s.pw2, verified: s.verified, pwMismatch: !!s.pw2 && s.pw !== s.pw2,
+      onEmail: e => set({ email: e.target.value }), onPw: e => set({ pw: e.target.value }), onPw2: e => set({ pw2: e.target.value }),
+      openVerifyLink: () => set({ screen: 'login', verified: true, pw: '' }), goForgot: () => set({ screen: 'forgot' }), openResetLink: () => set({ screen: 'updatePw', pw: '', pw2: '' }),
+      onb: s.onb, onOnbName: e => set({ onb: { ...s.onb, name: e.target.value } }),
+      onbGoal: this.radio(GOALS, s.onb.goal, v => set({ onb: { ...s.onb, goal: v } })),
+      onbExp: this.radio(EXPS, s.onb.exp, v => set({ onb: { ...s.onb, exp: v } })),
+      onbDays: this.seg([1, 2, 3, 4, 5, 6, 7], s.onb.days, v => set({ onb: { ...s.onb, days: v } }), false),
+      equipScreen: sEquipScreen, tEquip: inApp && tab === 'equipment',
+      equipIntro: sc === 'onbEquip' ? "Everything starts selected. Untick anything you can't use, or detect it from photos." : 'Untick anything you no longer have. Items found in photos are added to your list.',
+      equipBanners: s.equipCodes.map(c => this.banner(c)),
+      equipRows: EQUIP.map(n => { const sel = s.equip.includes(n); return { name: n, sel, found: s.found.includes(n), boxBg: sel ? '#14171A' : '#FFFFFF', boxSh: sel ? 'none' : 'inset 0 0 0 1.5px #8F8A7E', onToggle: () => this.setState(st => ({ equip: st.equip.includes(n) ? st.equip.filter(x => x !== n) : [...st.equip, n] })) }; }),
+      equipCount: `${s.equip.length} selected`, bodyweightOnly: s.equip.length === 0,
+      openPhoto: () => set({ sheet: 'photo', photoStage: 'pick' }),
+      onEquipSave: () => { if (sc === 'onbEquip') { this.setState(st => ({ screen: 'app', tab: 'plan', onboarded: true, profile: { ...st.onb }, prof: { ...st.onb }, equipCodes: [], found: [] })); } else { this.setState({ tab: 'profile', equipCodes: [], found: [] }); this.toast('Equipment saved'); } },
+      showPlanner, showGen, showPlan, isDraft, isAccepted,
+      plannerBanners, lenOpts: this.seg([30, 45, 60], s.length, v => set({ length: v }), true), focusChips, recency,
+      note: s.note, onNote: e => { const v = e.target.value.slice(0, 300); this.setState(st => ({ note: v, plannerCodes: st.redFlagNote !== null && v !== st.redFlagNote ? st.plannerCodes.filter(c => c.code !== 'RED_FLAG') : st.plannerCodes })); },
+      noteCount: `${s.note.length} / 300`, plansLeftText: plansLeft === 1 ? '1 plan left today' : `${plansLeft} plans left today`,
+      suggestDis, suggestOp: suggestDis ? 0.45 : 1, onSuggest: () => this.suggest(),
+      genLabel: s.gen ? genLabels[s.gen.step] : '', genSub: `${s.length} min · ${s.focus.length ? fmtGroups(s.focus) : 'Let coach choose'}`, genStill: !!(s.gen && s.gen.still),
+      planHeader: plan ? plan.header : '', planBanners, rows,
+      onReset: () => set({ sheet: plan && plan.status === 'accepted' ? 'discard' : 'reset', reason: null }),
+      totalText: `About ${totalMin} min`, overTime, overText: plan ? `This workout now runs about ${totalMin} min — longer than your ${plan.length} min.` : '',
+      openEdit: () => set({ sheet: 'edit' }), editDis: spend, editOp: spend ? 0.45 : 1,
+      onAccept: () => { this.setState(st => ({ plan: { ...st.plan, status: 'accepted' }, openId: null, planCodes: [] })); this.toast('Workout accepted. It stays here for 12 hours.'); },
+      openComplete: () => set({ sheet: 'complete', rating: null }),
+      historyEmpty: !s.history.length,
+      historyRows: s.history.map(x => ({ date: fmtDate(x.date), focus: fmtGroups(x.groups), length: `${x.length} min`, rating: x.rating, items: x.items.map(([name, meta]) => ({ name, meta })), aDel: `Delete ${fmtGroups(x.groups)} workout`, onDelete: () => set({ sheet: 'delEntry', delEntryId: x.id }) })),
+      tHistory: inApp && tab === 'history', tProfile: inApp && tab === 'profile',
+      prof: s.prof, onProfName: e => set({ prof: { ...s.prof, name: e.target.value } }),
+      profGoal: this.radio(GOALS, s.prof.goal, v => set({ prof: { ...s.prof, goal: v } })),
+      profExp: this.radio(EXPS, s.prof.exp, v => set({ prof: { ...s.prof, exp: v } })),
+      profDays: this.seg([1, 2, 3, 4, 5, 6, 7], s.prof.days, v => set({ prof: { ...s.prof, days: v } }), false),
+      profSaveDis: !profDirty, profSaveOp: profDirty ? 1 : 0.45,
+      onProfSave: () => { if (!profDirty) return; this.setState(st => ({ profile: { ...st.prof } })); this.toast('Profile saved'); },
+      onLogout: () => set({ screen: 'login', verified: false, pw: '', sheet: null }),
+      openDelAccount: () => set({ sheet: 'delAccount', deleteText: '' }),
+      toastShow, toastText: s.toast ? s.toast.text : '', toastHasAction: !!(s.toast && s.toast.action), toastAction: s.toast ? s.toast.action : '',
+      onToastAction: () => { const f = this.toastFn; this.toastFn = null; if (f) f(); else set({ toast: null }); },
+      sheetOpen: !!sheet, overlayStyle, panelStyle, grabber: !centered, closeSheet: () => { if (!s.editBusy && !photoBusy) set({ sheet: null }); },
+      sheetTitle, sheetSub, sheetSubShow: !!sheetSub,
+      shHowto: sheet === 'howto' && !!hItem, howto,
+      shEdit: sheet === 'edit', editText: s.editText, onEditText: e => set({ editText: e.target.value.slice(0, 300) }), editLocked, editBanners,
+      editCount: `${s.editText.length} / 300`, applyDis, applyOp: applyDis && !s.editBusy ? 0.45 : 1, onApply: () => this.apply(), editBusy: s.editBusy,
+      shReset: sheet === 'reset' || sheet === 'discard', reasonChips, onResetConfirm: () => (sheet === 'discard' ? confirm() : doReset()),
+      resetBody: sheet === 'discard' ? "You'll lose this accepted workout and go back to the planner. Your session length and focus stay; your note is cleared." : "You'll go back to the planner and get a clearly different plan next. Your session length and focus stay; your note is cleared.",
+      resetBtnLabel: sheet === 'discard' ? 'Discard' : 'Reset',
+      resetBtnStyle: { flex: 1, height: 48, border: 0, borderRadius: 6, cursor: 'pointer', fontFamily: SC, fontWeight: 700, fontSize: 17, background: sheet === 'discard' ? '#B42318' : '#14171A', color: '#FFFFFF' },
+      shComplete: sheet === 'complete', ratingOpts, onSaveRating: saveRating, saveRatingDis: !s.rating, saveRatingOp: s.rating ? 1 : 0.45,
+      shPhoto: sheet === 'photo', photoPick: s.photoStage === 'pick', photoPicked: s.photoStage !== 'pick', photoBusy,
+      photoHint: `Up to 5 photos per scan · ${s.scansLeft} scans left today`, onPickPhotos: () => set({ photoStage: 'picked' }), onScan: scan,
+      scanLabel: photoBusy ? 'Checking your photos…' : 'Scan 3 photos',
+      shConfirm: sheet === 'delEntry' || sheet === 'delAccount', shDelAccount: sheet === 'delAccount', confirmBody,
+      deleteText: s.deleteText, onDeleteText: e => set({ deleteText: e.target.value }),
+      onConfirm: confirm, confirmLabel: sheet === 'delAccount' ? 'Delete account' : 'Delete',
+      confirmDis: sheet === 'delAccount' && s.deleteText !== 'DELETE', confirmOp: sheet === 'delAccount' && s.deleteText !== 'DELETE' ? 0.45 : 1,
+    };
+  }
+}
+</script>
+</body>
+</html>
