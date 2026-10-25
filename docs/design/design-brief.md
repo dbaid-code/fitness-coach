@@ -1,4 +1,6 @@
-# Gym Coach: Design Brief (v0.2, draft for owner approval)
+# Gym Coach: Design Brief (v0.2)
+
+> **Status (2026-10-25): fulfilled and superseded.** Claude Design delivered the handoff in `docs/design/handoff/`. Where this brief and the handoff differ (for example "Edit workout" is now "Edit with AI"), the handoff wins. This brief is kept for history.
 
 **Purpose.** Input for Claude Design. Behaviour is fixed by the PRD (`docs/gym-coach-prd.md`) and the engineering doc (`docs/engineering/engineering-doc.md`). If this brief and the PRD disagree, the PRD wins. Design decides layout, look and feel, not features.
 

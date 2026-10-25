@@ -3,7 +3,8 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.0 — approved by the owner (2026-10-24) |
+| **Version** | 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
 | **Readers** | The owner (review and decisions); a coding agent (technical design and build) |
@@ -144,12 +145,12 @@ Treat these as directional: with 20 users or fewer, the numbers will be noisy. T
 2. The user taps **Suggest Workout** and gets plan cards with a header showing the focus and a fixed-format reason (e.g., "Coach picked Back & Biceps — rested at least 6 days").
 
 ### 6.3 Reviewing and changing the plan
-- **Direct edits on the cards:** change sets, reps or time per set, delete an exercise, or reorder. The total time updates as they edit. If it goes over the session length, a soft warning appears.
-- **Text edit:** tap **Edit workout** and type a request of up to 300 characters, e.g., "swap squats for lunges", "fewer exercises", "my wrist hurts". The coach updates the cards, changed cards are highlighted, and a fixed status message appears. There are at most 5 text edits per workout.
-- **Reset:** discard the plan and all changes. The user can pick an optional reason: *Too long / Too hard / Too easy / Don't like the exercises*. The "Anything for today?" box is cleared, while the session length and focus stay selected. The next plan will be clearly different.
+- **Direct edits on the cards:** each exercise card has a controls button that opens that card's controls, one card at a time. With them the user can change sets, reps or time per set, delete the exercise, or reorder it. Tapping the card itself opens how-to (FR-43). The total time updates as they edit. If it goes over the session length, a soft warning appears.
+- **Text edit:** tap **Edit with AI** and type a request of up to 300 characters, e.g., "swap squats for lunges", "fewer exercises", "my wrist hurts". The coach updates the cards, changed cards are highlighted, and a fixed status message appears. There are at most 5 text edits per workout.
+- **Reset:** the Reset button sits next to the plan's Draft or Accepted tag. It discards the plan and all changes. The user can pick an optional reason: *Too long / Too hard / Too easy / Don't like the exercises*. The "Anything for today?" box is cleared, while the session length and focus stay selected. The next plan will be clearly different.
 
 ### 6.4 Accept, train, complete
-1. **Accept workout** turns the plan into the active workout. It is saved on the server, so the user can plan at home and open it at the gym. It expires 12 hours after it was accepted.
+1. **Accept** turns the plan into the active workout. It is saved on the server, so the user can plan at home and open it at the gym. It expires 12 hours after it was accepted.
 2. After training, the user taps **Workout completed** and picks one difficulty rating for the whole workout: *Easy / Just right / Hard*. That's all: the MVP has no per-exercise logging, so no skipping exercises or editing what was done (parked, section 15).
 3. The workout is saved to history. The user can plan another workout the same day.
 
@@ -165,7 +166,7 @@ stateDiagram-v2
     Draft --> Draft: direct edit / text edit
     Draft --> Discarded: Reset, or red flag in an edit
     Draft --> Expired: 12 h with no activity
-    Draft --> Accepted: Accept workout
+    Draft --> Accepted: Accept
     Accepted --> Discarded: Reset (after confirming)
     Accepted --> Expired: 12 h after accepting
     Accepted --> Completed: Workout completed (+ rating)
@@ -238,7 +239,7 @@ Everything in this section is in MVP scope.
 
 ### 7.6 Changing a plan
 - **FR-50 Direct edits** on a draft plan: change sets, reps or time per set, delete an exercise, reorder. These don't call the LLM. The total time updates immediately, and `OVER_TIME_WARNING` appears if the total goes over the session length, but the edit is still allowed.
-- **FR-51 Text edits** go through **Edit workout**: up to 300 characters, at most **5 per workout**. When the limit is reached, show `EDIT_LIMIT`.
+- **FR-51 Text edits** go through **Edit with AI**: up to 300 characters, at most **5 per workout**. When the limit is reached, show `EDIT_LIMIT`.
 - **FR-52** After a text edit, show one fixed status message (Appendix A) and highlight cards that were added or changed. Code compares the old and new plans to find them.
 - **FR-53** A text edit must keep the user's earlier direct edits, unless the request is specifically about those items.
 - **FR-54** Text that is out of scope or can't be understood leaves the plan exactly as it was (section 8.11).
@@ -247,7 +248,7 @@ Everything in this section is in MVP scope.
 - **FR-55 Reset** discards the current plan, all edits and the "Anything for today?" note. The session length and focus selections stay.
 - **FR-56** Reset offers optional one-tap reasons: *Too long / Too hard / Too easy / Don't like the exercises*. The chosen reason and the discarded plan inform the next generation in the same planning session only.
 - **FR-57** The first plan generated after a Reset must change at least half of the main exercises compared with the discarded plan.
-- **FR-58** Reset is available until the workout is completed. Resetting an accepted workout asks for confirmation first (`DISCARD_CONFIRM`).
+- **FR-58** Reset is available until the workout is completed. Resetting an accepted workout asks for confirmation first (`DISCARD_CONFIRM`). The confirmation and the optional reasons appear together in one dialog.
 
 ### 7.8 Accept, expiry, completion
 - **FR-61 Accept** locks the plan: no more direct or text edits, and only Reset or Complete are available. Plans are saved on the server and survive closing the app.
@@ -291,7 +292,7 @@ All limits reset at midnight in the user's local time zone.
 | ID | Agent | Model | Job | Output |
 |-|-|-|-|-|
 | **AG-1** | Equipment Vision | Claude Sonnet 5.5 | Identify gym equipment across the photos in one scan (up to 5) | One combined list of `{equipment_id, confidence}` from the master list |
-| **AG-2** | Input Guard | Claude Haiku 5.5 | Sort the "Anything for today?" note or an Edit workout request into categories, detect red flags, and turn it into structured requests | `{category, red_flag, intents[]}` (section 8.11) |
+| **AG-2** | Input Guard | Claude Haiku 5.5 | Sort the "Anything for today?" note or an Edit with AI request into categories, detect red flags, and turn it into structured requests | `{category, red_flag, intents[]}` (section 8.11) |
 | **AG-3** | Workout Planner | Claude Sonnet 5.5 | Pick the focus (when the coach chooses) and the exercises, sets, reps and times; apply requests to an existing plan | Plan JSON (section 8.5) |
 
 **Code components (no LLM):**
@@ -321,7 +322,7 @@ All limits reset at midnight in the user's local time zone.
 
 ```mermaid
 flowchart TD
-    A[Suggest Workout / Edit workout] --> B{Limits or spend cap reached?}
+    A[Suggest Workout / Edit with AI] --> B{Limits or spend cap reached?}
     B -- yes --> M1[Fixed limit message]
     B -- no --> C{Any text?}
     C -- yes --> G[AG-2 Input Guard]
@@ -348,7 +349,7 @@ flowchart TD
 3. Code computes recency, the candidate list and progression targets.
 4. AG-3 generates a plan, the validator checks it, and code calculates the times.
 
-**Edit workout:**
+**Edit with AI:**
 1. Check the edit limit and the spend cap.
 2. Run AG-2 on the text:
    - Red flag → discard the draft and show `RED_FLAG`.
@@ -486,7 +487,7 @@ AG-2 sorts every note or edit request into categories and turns it into structur
 | Kept across sessions | Kept only for the current planning session | Never kept |
 |-|-|-|
 | Profile, confirmed equipment, last session length | "Anything for today?" note and the structured requests from it | Health details (except in logs, which expire after 30 days) |
-| Completed workouts: the final accepted version and the rating | Edit workout requests | Photos (deleted after analysis) |
+| Completed workouts: the final accepted version and the rating | Edit with AI requests | Photos (deleted after analysis) |
 | Discarded plans and reset reasons, **for metrics only** (never used for planning) | Today's equipment override | Preferences learned from text feedback (parked) |
 | | The discarded plan and reset reason (only for the next generation) | Drafts, discarded, expired or uncompleted plans as history |
 
@@ -684,7 +685,7 @@ No entity has a field for health information.
 The coding agent makes the detailed technical decisions within these constraints.
 
 ### 12.1 Platform and hosting
-- **Responsive web app, designed for phones first.** Targets the latest iOS Safari and Android Chrome, and also works on desktop.
+- **Responsive web app, designed for phones first.** Targets the latest iOS Safari and Android Chrome, and also works on desktop. Phones use a bottom tab bar (Plan · History · Profile); from 640 px wide, a top bar replaces it. Visual design follows `docs/design/handoff/`.
 - **Vercel** for the web app and server code. The Hobby plan is fine during development. The server time limit must allow a generation, including one retry, to finish.
 - **Supabase** for Postgres, authentication (email + password, verification, password reset) and temporary photo upload. Start on the free tier and **move to Pro (~$25/month) before Phase 1**, which prevents projects being paused and adds backups.
 - **Resend** (free tier) as the email sender for authentication emails. Supabase's built-in sender is only meant for testing.
@@ -788,7 +789,7 @@ The coding agent makes the detailed technical decisions within these constraints
 
 ### 14.2 Assumptions made while drafting (confirmed by the owner)
 These weren't decided explicitly in the interview. The owner confirmed them when approving the PRD on 2026-10-24.
-1. A red flag in an **Edit workout** request discards the current draft, the same as a Reset.
+1. A red flag in an **Edit with AI** request discards the current draft, the same as a Reset.
 2. A message that mixes actionable and out-of-scope parts applies the actionable part and returns `PARTIAL`.
 3. When AG-2 is unsure whether something is a health adjustment or a red flag, it chooses red flag.
 4. **Drafts** also expire, 12 hours after their last change.

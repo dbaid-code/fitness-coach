@@ -3,12 +3,13 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | 0.3, draft for owner approval (0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applies OD-05, OD-07 and OD-08 and defers OD-06 to Phase 1) |
+| **Version** | 0.3, draft for owner approval (0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applies OD-05, OD-07 and OD-08 and defers OD-06 to Phase 1; 0.4 applies the Claude Design handoff and its approvals, D-30 – D-37) |
 | **Status** | **Draft. No implementation begins until the owner approves this document.** |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
-| **Date** | 2026-10-24 |
-| **Requirements source** | `docs/gym-coach-prd.md` v1.0 (approved) |
+| **Date** | 2026-10-25 |
+| **Requirements source** | `docs/gym-coach-prd.md` v1.1 (v1.0 approved; v1.1 adds the design labels only) |
+| **Design source** | `docs/design/handoff/` (Claude Design handoff, owner-approved 2026-10-25): layout, look and feel, tokens, UI labels |
 | **Readers** | Owner (approval and the open decisions in §20.2); coding agent (build) |
 
 ---
@@ -42,10 +43,12 @@
 | 15 | **D-09** The verification link confirms the email, then sends the user to the login page; it doesn't sign them in (OD-07). |
 | 16 | The PRD-required owner reviews happen at the milestones listed in §19.2 (OD-08). |
 | 17 | Phase 1 email delivery (OD-06) is deferred until Phase 1 is reached. |
+| 18 | **D-30 – D-35** The Claude Design handoff (`docs/design/handoff/`) is adopted for layout, look, tokens and UI labels. Its doc changes: the **Edit with AI** and **Accept** labels; Reset as an icon in the plan status row; one discard dialog for accepted plans; a top bar from 640 px; per-row edit controls; and the profile layout (2026-10-25). |
+| 19 | **D-36, D-37** The app icon and wordmark export (OD-10) and the handoff's new UI copy (OD-11) are approved (2026-10-25). |
 
 ### 0.3 What still needs the owner
 See §20.2.
-- **Decided:** OD-01 to OD-05 and OD-07 to OD-09 (Appendix A).
+- **Decided:** OD-01 to OD-05 and OD-07 to OD-11 (Appendix A). OD-10 and OD-11 came from the design handoff.
 - **Deferred:** OD-06 (how friends receive auth emails), until Phase 1 is reached. It doesn't block implementation or Phase 0. It **must be settled before Phase 1 starts**, because Supabase's built-in sender only delivers to members of the Supabase organisation (§19.2, Phase 1 entry).
 
 ---
@@ -378,15 +381,15 @@ sequenceDiagram
 
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
-| 1 | Changes sets, reps or time per set with the steppers; deletes a card; reorders (drag handle or ↑/↓ buttons) | `plan-editor-reducer` updates local state. The total is recomputed instantly by `src/shared/time-model` (no network, PRD §12.3). If the total exceeds the session length, `OVER_TIME_WARNING {m, t}` shows; the edit is still allowed. Deleting a card shows an "Undo" toast for 5 s. | — | — | Instant update |
+| 1 | Opens a card's controls with its sliders button (one card open at a time; tapping the row body opens How-to instead, D-34), then changes sets, reps or time per set with the steppers, deletes the card, or reorders it (drag handle or ↑/↓ buttons) | `plan-editor-reducer` updates local state. The total is recomputed instantly by `src/shared/time-model` (no network, PRD §12.3). If the total exceeds the session length, `OVER_TIME_WARNING {m, t}` shows; the edit is still allowed. Deleting a card shows an "Undo" toast for 5 s. | — | — | Instant update |
 | 2 | Pauses editing | Debounced 600 ms: `PATCH /api/v1/plans/{planId}` (API-10) with `{version, items[]}` (the full ordered list of main exercises) | `plan-direct-edit.service.apply()`: plan is `draft`, not expired, `version` matches; item IDs belong to the plan; numbers within bounds (Appendix B); card fields match the type; recompute totals on the server with the same time model; mark changed items `origin = 'user_edit'` | `update app.plan_items` (positions, numbers; deleted items removed); `update app.plans` (`total_time_s`, `last_changed_at = now()`, `expires_at = now() + 12 h`, `version + 1`) | 200 with the plan. The client replaces its state with the server copy. |
 | 3 | (Conflict) another tab changed the plan | — | `version` mismatch | — | 409 `VERSION_CONFLICT`. The client refetches API-09 and shows "Your plan was updated on another screen" (UI copy). |
 
-### UF-9 Text edit: Edit workout, the "AI chat" equivalent (FR-51 – FR-54, FR-82)
+### UF-9 Text edit: Edit with AI, the "AI chat" equivalent (FR-51 – FR-54, FR-82)
 
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
-| 1 | Taps **Edit workout** | Bottom sheet: textarea (≤ 300 characters), "N of 5 changes left". Disabled with `EDIT_LIMIT` when 0 remain. | — | — | Sheet open |
+| 1 | Taps **Edit with AI** (D-31) | Bottom sheet titled "Edit with AI": textarea (≤ 300 characters), "N of 5 changes left". Disabled with `EDIT_LIMIT` when 0 remain. | — | — | Sheet open |
 | 2 | Types a request and taps **Apply** | Flushes any pending direct-edit PATCH first (await). Then `POST /api/v1/plans/{planId}/edits` (API-11) with `{text, version}` and an `Idempotency-Key`. Progress UI; "Still working…" after 8 s. | `plan-edit.service.apply()`: draft, not expired, version; `text_edit_count < 5` (FR-82); spend guard; **AG-2** on the text with the plan items | `select` plan, items, `planning_context`; `insert agent_logs` | — |
 | 3 | — | — | **Red flag** → discard the draft (`status = 'discarded'`, no reset reason) and delete the context. **Out of scope** → unchanged (`OUT_OF_SCOPE_EDIT`). **Not understood** → unchanged (`NOT_UNDERSTOOD`). | `update app.plans`; `delete app.planning_context`; `text_edit_count + 1` (D-13) | 200, `outcome: 'discarded'` with `RED_FLAG`, or `outcome: 'unchanged'` with its code |
 | 4 | — | — | Otherwise: merge the intents into the planning context → rebuild candidates → **AG-3 edit mode** with the current plan (including direct edits) and the intents → V-1 – V-11 (edit-mode V-8 and V-11 protect direct edits, §8.7) → one retry → otherwise `GENERATION_FAILED` with the plan unchanged | `insert agent_logs` | — |
@@ -396,7 +399,7 @@ sequenceDiagram
 
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
-| 1 | Taps **Reset** | Sheet with optional one-tap reasons: *Too long / Too hard / Too easy / Don't like the exercises*. If the plan is accepted, shows `DISCARD_CONFIRM` first (FR-58). | — | — | — |
+| 1 | Taps the **Reset** icon button in the plan status row (D-32) | Draft: Reset sheet with optional one-tap reasons (*Too long / Too hard / Too easy / Don't like the exercises*) and Cancel / Reset. Accepted: one dialog titled `DISCARD_CONFIRM` with the same optional reasons and Cancel / **Discard** (FR-58). | — | — | — |
 | 2 | Confirms | `POST /api/v1/plans/{planId}/reset` (API-12) with `{reason?, confirm}` | `plan-lifecycle.service.reset()`: status is `draft` or `accepted`; an accepted plan requires `confirm: true` | `update app.plans` (`status = 'discarded'`, `reset_reason`, `discarded_at`); the trigger deletes `planning_context`; `insert app_events (plan_reset)` | 200 `{discarded_plan_id}` |
 | 3 | — | Returns to the planner with the **same session length and focus**, the **note cleared** (FR-55), and `after_reset_of = discarded_plan_id` held in planner state for the next Suggest | — | — | Planner shown. The next Suggest (UF-7) sends `after_reset_of`; the server adds the discarded exercises and the reason to AG-3's context and applies V-9. |
 
@@ -404,7 +407,7 @@ sequenceDiagram
 
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
-| 1 | Taps **Accept workout** | Flushes pending direct edits; `POST /api/v1/plans/{planId}/accept` (API-13) with `{version}` | `plan-lifecycle.service.accept()`: draft, not expired, version | `update app.plans` (`status = 'accepted'`, `accepted_at = now()`, `expires_at = accepted_at + 12 h`, `version + 1`); `insert app_events (plan_accepted)` | 200 with the plan. Cards are locked (no steppers, no Edit). Actions left: **Workout completed** and **Reset**. |
+| 1 | Taps **Accept** (D-31) | Flushes pending direct edits; `POST /api/v1/plans/{planId}/accept` (API-13) with `{version}` | `plan-lifecycle.service.accept()`: draft, not expired, version | `update app.plans` (`status = 'accepted'`, `accepted_at = now()`, `expires_at = accepted_at + 12 h`, `version + 1`); `insert app_events (plan_accepted)` | 200 with the plan. Cards are locked (no row controls, no Edit with AI). Actions left: **Workout completed** (action bar) and **Reset** (status-row icon). Toast "Workout accepted. It stays here for 12 hours." (UI copy). |
 | 2 | Opens the app later on another device | `/plan` bootstrap (UF-6) | Same as UF-6 | — | Accepted plan shown (stored on the server, FR-61) |
 
 ### UF-12 Complete and rate (FR-64 – FR-66)
@@ -433,7 +436,7 @@ sequenceDiagram
 | # | User Action | Frontend Behavior | Backend Processing | Database Interaction | System Response |
 |-|-|-|-|-|-|
 | 1 | Opens `/profile` | `GET /api/v1/profile` (API-02) | `profile.service.get()` | `select profiles, user_equipment` | Form pre-filled |
-| 2 | Changes fields and saves | `PUT /api/v1/profile` (API-03) | Validates and updates | `update app.profiles` | Saved. The next generation uses the new values (FR-11). |
+| 2 | Changes fields and taps **Save changes** (under the Equipment row; disabled until a field changes, D-35) | `PUT /api/v1/profile` (API-03) | Validates and updates | `update app.profiles` | Saved; toast "Profile saved". The next generation uses the new values (FR-11). |
 | 3 | Opens **Equipment**, toggles items or runs a photo scan (UF-5 with `context = 'profile_edit'`: detections are **added**), and saves | `PUT /api/v1/profile/equipment` (API-04) | Validates IDs | `delete` + `insert app.user_equipment` | Saved |
 
 ### UF-16 Account deletion (FR-4)
@@ -479,9 +482,11 @@ stateDiagram-v2
 | Concern | Choice | Notes |
 |-|-|-|
 | Framework | **Next.js 16** (App Router), **React 19**, TypeScript `strict` | Exact versions are pinned in `pnpm-lock.yaml` at scaffold. |
-| Styling | **Tailwind CSS v4** | Design tokens in `src/app/globals.css` (`@theme`). Mobile-first. |
-| Components | **shadcn/ui** (Radix primitives), copied into `src/components/ui/` | Accessible dialogs, sheets, toggles and toasts. No runtime component library. |
-| Icons | `lucide-react` | |
+| Styling | **Tailwind CSS v4** | Design tokens in `src/app/globals.css` (`@theme`), copied from `docs/design/handoff/globals.css`, which is the source of truth for the values (D-30). Light theme only. Mobile-first. |
+| Components | **shadcn/ui** (Radix primitives), copied into `src/components/ui/` | Accessible dialogs, sheets, toggles and toasts (`Sonner`). Icon-only buttons get a `Tooltip` on desktop. No runtime component library. The handoff README names the shadcn component for each design component. |
+| Icons | `lucide-react` | Stroke 2. The icon set is listed in the handoff README. |
+| Fonts | **Barlow** (400–700, `font-sans`) and **Barlow Semi Condensed** (500–800 plus 800 italic, `font-display`) through `next/font/google` | Self-hosted at build time, so the browser never calls Google and the CSP needs no extra domain (§16.3). The token file's font families point at the `next/font` CSS variables. |
+| Brand assets | Wordmark "GYM COACH" (Barlow Semi Condensed 800 italic, text only) as SVG; "GC" app icon at 512, 180, 32 and 16 px in `public/icons/` | Approved by the owner (OD-10, D-36) |
 | Server state | **TanStack Query v5** | Query keys in §5.3. `initialData` comes from the Server Components. |
 | Local edit state | `useReducer` (`plan-editor-reducer.ts`) | The draft being edited. No global store. |
 | Forms | **React Hook Form** + `@hookform/resolvers/zod` | Same Zod schemas as the API (`src/shared/schemas`). |
@@ -510,7 +515,7 @@ stateDiagram-v2
 | `/profile` | `(app)` | Server prefetch + client | Profile fields, log out, delete account | FR-4, FR-11 |
 | `/profile/equipment` | `(app)` | Server prefetch + client | Equipment checklist and photo scan | FR-20 – FR-24 |
 
-Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages except `/onboarding`.
+Navigation on `(app)` pages except `/onboarding` (D-33): below 640 px, a bottom tab bar (**Plan · History · Profile**); from 640 px up, a full-width top bar with the wordmark and the same three items, and no bottom tabs. `/profile/equipment` keeps Profile active.
 
 ### 5.3 State management
 
@@ -525,6 +530,8 @@ Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages e
 | How-to (exercise or routine) | TanStack Query | `['exercise', id]`, `['routine', id]`, `staleTime: Infinity` | Never in a session |
 | Planner form (length, focus, note, `after_reset_of`, red-flag block) | `useState` in `PlannerForm` | Component state | Reset clears the note and keeps length and focus (FR-55) |
 | "Expired banner dismissed" | `localStorage` key `gc.expired-dismissed.<planId>` (wrapped in try/catch) | — | — |
+
+**Red-flag block (PRD §8.11):** after `RED_FLAG`, Suggest stays disabled until the note text changes; clearing it counts as a change. Any new text goes through AG-2 again.
 
 **Direct-edit persistence (FR-50, FR-53):**
 - The reducer applies each edit locally and recomputes totals with the shared time model.
@@ -576,8 +583,9 @@ Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages e
 
 **Responsive layout:**
 - Mobile-first, single column, designed for 360–430 px widths.
-- From 640 px up, content is centred at a maximum width of 480 px. Desktop works but isn't optimised.
-- Primary actions sit in a sticky bottom bar above the tab bar, padded with `env(safe-area-inset-bottom)`.
+- From 640 px up, content is centred at a maximum width of 480 px on an `accent` surround, under the top bar (D-33). Desktop works but isn't optimised beyond that.
+- Primary actions sit in a sticky action bar: above the tab bar on phones, at the bottom of the column on desktop. The tab bar is padded with `env(safe-area-inset-bottom)`.
+- Exact sizes, spacing, colours, states and motion are in `docs/design/handoff/README.md`.
 - Use `100dvh`, not `100vh` (avoids the iOS Safari toolbar jump).
 - Input font size is at least 16 px, which prevents iOS zoom on focus.
 - Tested on WebKit (iPhone 15 profile) and Chromium (Pixel 7 profile) in Playwright (§13.4).
@@ -597,6 +605,7 @@ Navigation: a bottom tab bar (**Plan · History · Profile**) on `(app)` pages e
 - **UI copy** (labels, empty states, network errors, `STILL_WORKING`) lives in `src/shared/messages/ui-copy.ts`. It isn't agent text, so FR-46 doesn't restrict it. It's kept in one file so the owner can review the wording. The owner approved the proposed copy (D-29).
 - `STILL_WORKING` (UI copy, approved D-29): "Still working on your workout…"
 - `EMAIL_VERIFIED` (UI copy, on `/log-in?verified=1`, D-09): "Email verified. Log in to continue."
+- **Design handoff copy (OD-11, approved as D-37):** the handoff adds more UI copy, written out in `docs/design/handoff/README.md`: screen titles, helper lines, the Reset and Discard bodies, toasts (e.g., "Workout accepted. It stays here for 12 hours.") and "{n} plans left today". It goes into `ui-copy.ts` word for word. The README's "Prototype only" boxes are not product copy.
 - **`RECENCY_STRIP` variant (D-29):** when completed workouts exist but none in the last 14 days, the strip reads "Last trained: nothing in the last 14 days". The catalog keeps both variants under `RECENCY_STRIP`.
 - **Amended Appendix A text (D-27):** `SIGNUP_NOTICE` reads "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic."
 
@@ -618,7 +627,7 @@ src/app/layout.tsx                      RootLayout: fonts, QueryProvider, Toaste
 │   └── update-password/page.tsx        └── UpdatePasswordForm
 ├── auth/confirm/route.ts               (Route Handler, no UI)
 └── (app)/layout.tsx                    AppShell: auth guard, onboarding guard
-    ├── BottomNav                       Plan · History · Profile
+    ├── BottomNav (< 640 px) / TopBar (≥ 640 px)   Plan · History · Profile (D-33)
     ├── onboarding/page.tsx
     │   └── OnboardingWizard
     │       ├── ProfileStep             name, GoalSelect, ExperienceSelect, DaysPerWeekStepper
@@ -636,26 +645,29 @@ src/app/layout.tsx                      RootLayout: fonts, QueryProvider, Toaste
     │       │   ├── StatusBanner          RED_FLAG / SPEND_CAP / EXPIRED / PLAN_LIMIT
     │       │   └── SuggestButton ── GenerationProgress (skeleton, step labels, STILL_WORKING)
     │       └── PlanView
+    │           ├── PlanStatusRow         Draft / Accepted tag · ResetIconButton (RefreshCw, aria-label "Reset") (D-32)
     │           ├── PlanHeader            HEADER_USER / HEADER_COACH / HEADER_FIRST
     │           ├── StatusBanner          status code of the last generation or edit
     │           ├── PlanCardList (sortable when draft)
     │           │   ├── ActivityCard (warm-up)      → HowToSheet (routine moves)
-    │           │   ├── ExerciseCard (reps | timed)  → HowToSheet (instructions + images)
-    │           │   │   ├── CardStepper (sets, reps | time per set)   draft only
-    │           │   │   ├── DragHandle + MoveUp/MoveDown              draft only
-    │           │   │   ├── DeleteCardButton (+ undo toast)           draft only
+    │           │   ├── ExerciseCard (reps | timed)  row body → HowToSheet (instructions + images)
+    │           │   │   ├── RowControlsToggle (sliders; one row open at a time)   draft only (D-34)
+    │           │   │   ├── CardStepper (sets, reps | time per set)              draft, row open
+    │           │   │   ├── DragHandle + MoveUp/MoveDown                         draft, row open
+    │           │   │   ├── DeleteCardButton (+ undo toast)                      draft, row open
     │           │   │   └── UpdatedTag (after a text edit)
     │           │   └── ActivityCard (cool-down)    → HowToSheet
-    │           ├── TotalTimeBar          total minutes + OVER_TIME_WARNING
-    │           ├── EditWorkoutSheet      textarea, "N of 5 changes left", EDIT_LIMIT
-    │           ├── ResetSheet            optional reasons, DISCARD_CONFIRM for accepted
-    │           ├── ActionBar             draft: Edit workout · Reset · Accept
-    │           │                         accepted: Reset · Workout completed
+    │           ├── TotalTimeBar          "About N min" + OVER_TIME_WARNING
+    │           ├── EditWithAiSheet       textarea, "N of 5 changes left", EDIT_LIMIT (D-31)
+    │           ├── ResetSheet            draft: optional reasons · Cancel / Reset
+    │           ├── DiscardDialog         accepted: DISCARD_CONFIRM title, optional reasons · Cancel / Discard (D-32)
+    │           ├── ActionBar             draft: Edit with AI · Accept
+    │           │                         accepted: Workout completed
     │           └── CompleteSheet         Easy / Just right / Hard (required)
     ├── history/page.tsx
     │   └── HistoryList (infinite) ── HistoryEntry ── DeleteEntryDialog
     └── profile/
-        ├── page.tsx  └── ProfileForm · EquipmentSummaryLink · LogOutButton · DeleteAccountDialog
+        ├── page.tsx  └── ProfileForm · EquipmentSummaryLink · SaveChangesButton (disabled until a change) · LogOutLink · DeleteAccountDialog (D-35)
         └── equipment/page.tsx └── EquipmentChecklist · PhotoScanSheet (context = profile_edit)
 ```
 
@@ -2117,7 +2129,7 @@ type HistoryEntryDto = {
 - **Response:** `200 { data: { plan: PlanDto } }`. `over_time` is true when the total exceeds the session length; the client shows `OVER_TIME_WARNING`.
 - **Errors:** 400, 404, 409 `PLAN_NOT_EDITABLE`, 409 `VERSION_CONFLICT`, 410 `PLAN_EXPIRED`.
 
-#### API-11 `POST /api/v1/plans/{planId}/edits`: Edit workout
+#### API-11 `POST /api/v1/plans/{planId}/edits`: Edit with AI
 - **Purpose:** text edit through AG-2 and AG-3 (FR-51 – FR-54, FR-82).
 - **Auth:** profile. **Idempotency:** required. **`maxDuration`:** 60 s; app deadline 20 s.
 - **Request:** `{ version: number; text: string }`, with `text` trimmed to 1–300 characters.
@@ -2212,7 +2224,7 @@ type HistoryEntryDto = {
 
 ## 10. Feature Breakdown — Phase 1 (MVP)
 
-"Phase 1 (MVP)" here means the whole Build scope that has to pass before PRD Phase 0 (owner only) and Phase 1 (≤ 20 users) start. Every feature is required. The order is the build order (§19).
+"Phase 1 (MVP)" here means the whole Build scope that has to pass before PRD Phase 0 (owner only) and Phase 1 (≤ 20 users) start. Every feature is required. The order is the build order (§19). Every screen follows the design handoff (`docs/design/handoff/README.md`, D-30).
 
 ```mermaid
 flowchart LR
@@ -2251,6 +2263,7 @@ flowchart LR
 ### F-01 Project foundation
 - **Description:**
   - Next.js 16 app scaffold, TypeScript strict, Tailwind v4, shadcn/ui, ESLint and Prettier.
+  - Design tokens from `docs/design/handoff/globals.css` and the Barlow fonts through `next/font` (§5.1).
   - Vitest and Playwright set up.
   - Supabase CLI local stack.
   - GitHub Actions CI (§13.6).
@@ -2373,7 +2386,7 @@ flowchart LR
 - **Dependencies:** F-09.
 
 ### F-11 Direct edits (FR-50)
-- **Description:** steppers, delete with undo, reorder (drag plus buttons), reducer, debounced API-10, version handling.
+- **Description:** per-row controls opened by a sliders button, one row at a time (D-34); steppers, delete with undo, reorder (drag plus buttons), reducer, debounced API-10, version handling.
 - **Acceptance criteria:**
   - The total updates within one frame of an edit, with no network call (E2E with the network throttled to offline for the edit step, then restored).
   - `OVER_TIME_WARNING {m, t}` appears when the total exceeds the length, and the edit persists.
@@ -2382,7 +2395,7 @@ flowchart LR
 - **Dependencies:** F-10.
 
 ### F-12 Text edits (FR-51 – FR-54, FR-82)
-- **Description:** Edit workout sheet, API-11, AG-2 edit mode, AG-3 edit mode, diff and highlights, V-11.
+- **Description:** Edit with AI sheet, API-11, AG-2 edit mode, AG-3 edit mode, diff and highlights, V-11.
 - **Acceptance criteria:**
   - The 6th edit returns `EDIT_LIMIT`.
   - Every §8.8 edit row produces its status.
@@ -2394,7 +2407,7 @@ flowchart LR
 - **Dependencies:** F-11, F-08.
 
 ### F-13 Reset (FR-55 – FR-58)
-- **Description:** Reset sheet with reasons, `DISCARD_CONFIRM` for accepted plans, API-12, `after_reset_of` in API-08, V-9.
+- **Description:** Reset icon button in the plan status row, Reset sheet with reasons (draft), `DISCARD_CONFIRM` dialog with reasons (accepted, D-32), API-12, `after_reset_of` in API-08, V-9.
 - **Acceptance criteria:**
   - Reset keeps length and focus and clears the note.
   - The next plan differs in at least half of its main exercises (or as many as the candidates allow, D-05).
@@ -2489,8 +2502,12 @@ fitness-coach/
 │       └── review-sample.v1.csv      # owner 10% spot-check sample
 ├── docs/
 │   ├── gym-coach-prd.md
+│   ├── design/
+│   │   ├── design-brief.md           # brief given to Claude Design (superseded by the handoff)
+│   │   └── handoff/                  # Claude Design handoff (D-30): README spec, globals.css tokens, HTML references
 │   ├── engineering/
-│   │   └── engineering-doc.md        # this document
+│   │   ├── engineering-doc.md        # this document
+│   │   └── implementation-plan.md    # build and deployment plan with status tracking
 │   └── runbooks/
 │       ├── weekly-review.sql         # saved owner queries (§18.4)
 │       ├── spend-cap.md
@@ -2573,7 +2590,7 @@ fitness-coach/
 │   │       └── health/route.ts
 │   ├── components/
 │   │   ├── ui/                       # shadcn/ui primitives (button, sheet, dialog, toast, …)
-│   │   └── layout/                   # app-shell.tsx, bottom-nav.tsx, sticky-action-bar.tsx
+│   │   └── layout/                   # app-shell.tsx, bottom-nav.tsx, top-bar.tsx, sticky-action-bar.tsx
 │   ├── features/                     # client feature modules: components + hooks per journey
 │   │   ├── auth/                     # sign-up-form.tsx, log-in-form.tsx, signup-notice.tsx, …
 │   │   ├── onboarding/               # onboarding-wizard.tsx, profile-step.tsx, equipment-step.tsx
@@ -2935,14 +2952,14 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | Spec | Flow | Key files | Tests |
 |-|-|-|-|
 | FR-50 Direct edits | `CardStepper` / drag → `plan-editor-reducer` → debounced API-10 → `plan-direct-edit.service` | `features/plan/plan-editor-reducer.ts`, `use-direct-edits.ts`, `server/services/plan-direct-edit.service.ts` | `plan-editor-reducer.test.ts`; `direct-edits.int.test.ts`; E2E |
-| FR-51 Text edits ≤ 300, ≤ 5 | `EditWorkoutSheet` → API-11 → `plan-edit.service` | `features/plan/edit-workout-sheet.tsx`, `server/services/plan-edit.service.ts` | `plan-edit.int.test.ts` |
+| FR-51 Text edits ≤ 300, ≤ 5 | `EditWithAiSheet` → API-11 → `plan-edit.service` | `features/plan/edit-with-ai-sheet.tsx`, `server/services/plan-edit.service.ts` | `plan-edit.int.test.ts` |
 | FR-52 Highlights | `plan-diff` → `changed_item_ids` → `UpdatedTag` | `server/domain/plan-diff/plan-diff.ts` | `plan-diff.test.ts` |
 | FR-53 Keep direct edits | V-11 + AG-3 edit-mode rules | `validator/checks/v11-user-edits.ts`, `workout-planner/prompt.v1.md` | `plan-validator.test.ts`; `plan-edit.int.test.ts` |
 | FR-54 Out of scope → unchanged | `status-resolver` edit rows; no AG-3 call | `plan-edit.service.ts` | `plan-edit.int.test.ts`; EV-3 |
-| FR-55 Reset clears the note | `ResetSheet` → API-12 → planner state | `features/plan/reset-sheet.tsx`, `features/planner/planner-form.tsx` | `reset.spec.ts` |
+| FR-55 Reset clears the note | `ResetSheet` / `DiscardDialog` → API-12 → planner state | `features/plan/reset-sheet.tsx`, `features/plan/discard-dialog.tsx`, `features/planner/planner-form.tsx` | `reset.spec.ts` |
 | FR-56 Reset reasons inform the next plan | API-12 stores `reset_reason` → API-08 `after_reset_of` → `<reset>` context | `plan-lifecycle.service.ts`, `workout-planner/render-context.ts` | `reset.int.test.ts` |
 | FR-57 ≥ half different | V-9 (D-05) | `validator/checks/v09-reset-diversity.ts` | `plan-validator.test.ts`; EV-1 |
-| FR-58 Confirm on accepted | `DISCARD_CONFIRM` → API-12 `confirm` | `reset-sheet.tsx`, `plan-lifecycle.service.ts` | `reset.int.test.ts` |
+| FR-58 Confirm on accepted | `DiscardDialog` (`DISCARD_CONFIRM`) → API-12 `confirm` | `discard-dialog.tsx`, `plan-lifecycle.service.ts` | `reset.int.test.ts` |
 | FR-61 Accept locks | API-13 → state machine | `plan-lifecycle.service.ts`, `plan-state-machine.ts` | `plan-state-machine.test.ts` |
 | FR-62 One active plan | Service check + `uq_plans__one_active_per_user` | `plan-generation.service.ts`, migration | `one-active-plan.int.test.ts` |
 | FR-63 Expiry | `gc_expire_plans` + `expireIfDue` | migration (cron), `plan-lifecycle.service.ts` | `expiry.int.test.ts` |
@@ -3083,7 +3100,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 ### 16.3 Web security controls
 - **HTTPS** everywhere (Vercel). `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`.
 - **Headers** (set in `proxy.ts` and `next.config.ts`):
-  - `Content-Security-Policy`: `default-src 'self'`; `script-src 'self' 'nonce-<per-request>' 'strict-dynamic'`; `style-src 'self' 'unsafe-inline'`; `img-src 'self' blob: data: https://<project-ref>.supabase.co`; `connect-src 'self' https://<project-ref>.supabase.co`; `frame-ancestors 'none'`; `base-uri 'self'`; `form-action 'self'`.
+  - `Content-Security-Policy`: `default-src 'self'`; `script-src 'self' 'nonce-<per-request>' 'strict-dynamic'`; `style-src 'self' 'unsafe-inline'`; `img-src 'self' blob: data: https://<project-ref>.supabase.co`; `connect-src 'self' https://<project-ref>.supabase.co`; `frame-ancestors 'none'`; `base-uri 'self'`; `form-action 'self'`. Fonts are self-hosted by `next/font` (§5.1), so `font-src` falls back to `'self'`.
   - `X-Content-Type-Options: nosniff`.
   - `Referrer-Policy: strict-origin-when-cross-origin`.
   - `Permissions-Policy: camera=(self), microphone=(), geolocation=()`. The file input may open the camera.
@@ -3305,7 +3322,7 @@ There is no paging for the pilot. Passive signals:
 |-|-|-|-|
 | **M0 Foundation** | F-01 | CI green; preview deploys; health check | P-1, P-2, P-3 (dev), P-6 |
 | **M1 Data and engines** | F-02, F-07, F-16 | Migrations and seed apply; RLS tests pass; domain engines at 100% branch coverage; EV-7 and EV-8 pass | Spot-check the 10% exercise sample; approve the equipment list, muscle-group map and rulebook v1 (OD-08) |
-| **M2 Accounts and profile** | F-03, F-04, F-17 | Sign-up → onboarding E2E; deletion cascade test | — |
+| **M2 Accounts and profile** | F-03, F-04, F-17 | Sign-up → onboarding E2E; deletion cascade test | — (handoff UI copy approved, D-37) |
 | **M3 Agents and generation** | F-08, F-06, F-09, F-10 | Suggest Workout E2E with fake agents; EV-3 passes with real AG-2; first EV-1 and EV-2 runs | Review the EV-3 labels |
 | **M4 Plan changes and lifecycle** | F-11, F-12, F-13, F-14, F-15 | Every UF-8 – UF-14 E2E passes; EV-6 passes | — |
 | **M5 Photos** | F-05 | EV-5 passes; threshold tuned and recorded | Review the photo-case truth lists |
@@ -3340,6 +3357,7 @@ There is no paging for the pilot. Passive signals:
 | R-10 | The built-in sender delivers only to Supabase organisation members, at about 2 emails an hour, so friends can't verify their email or reset passwords in Phase 1 | **Certain without action** / High | Settle OD-06 before Phase 1. Phase 0 (owner only) is unaffected. |
 | R-11 | The free dev Supabase project pauses and breaks previews | Medium / Low | Resume on demand; production is on Pro |
 | R-12 | A provider spend-limit error isn't recognised and shows as `GENERATION_FAILED` instead of `SPEND_CAP` | Low / Low | The app-side guard triggers first at $58; the error shape is captured during F-16 |
+| R-13 | Users don't find the icon-only Reset in the plan status row (D-32) | Medium / Low | Watch it in Phase 0 and Phase 1 (weekly review, reset rate). Fallback from the handoff: a "Reset" text label next to the icon in the same row. |
 
 ### 20.2 Open decisions for the owner
 
@@ -3354,6 +3372,8 @@ There is no paging for the pilot. Passive signals:
 | **OD-07** | Whether the verification link signs the user in or sends them to the login page. PRD §6.1 says "verify … then log in". | (a) Sign in automatically. (b) Send them to the login page. | (a): one step fewer, same security | **Decided: (b)**, send them to the login page (D-09) |
 | **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook v1 (PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | **Agreed:** reviews at M1, M3, M5 and M6 (§19.2) |
 | **OD-09** | Confirm the interpretations D-11 – D-19 (Appendix A) in one go when approving this document | Approve or amend | Approve | **Decided: approved** (D-11 – D-19) |
+| **OD-10** | App icon and wordmark export from the design handoff: "GC" in the wordmark face, `primary-foreground` on `primary`, square, at 512, 180, 32 and 16 px; the wordmark as SVG outlines | Approve, or ask for changes | Approve | **Decided 2026-10-25: approved** (D-36). The files still need exporting into `public/icons/` and `manifest.webmanifest` before M7. |
+| **OD-11** | New UI copy from the design handoff, outside PRD Appendix A: screen titles, helper lines, Reset and Discard bodies, toasts, "{n} plans left today" | Approve, or amend the wording | Approve | **Decided 2026-10-25: approved** (D-37) |
 
 ---
 
@@ -3390,6 +3410,14 @@ There is no paging for the pilot. Passive signals:
 | D-27 | `SIGNUP_NOTICE` reads: "Gym Coach is a workout planner, not medical advice. The app owner can see your data and the coach's activity logs (kept for 30 days) to fix problems and improve the app. Your notes and photos are processed by our AI provider, Anthropic." | **Approved** (OD-03) | 2026-10-24 | FR-3, PRD Appendix A |
 | D-28 | Resend is parked for a later build. Auth emails use Supabase's built-in sender for the MVP, although PRD §12.1 reserved it for testing. How friends receive emails in Phase 1 is OD-06, deferred by the owner until Phase 1 is reached (2026-10-25). | **Approved** (OD-06) | 2026-10-24 | PRD §12.1, FR-1, FR-2 |
 | D-29 | The proposed UI copy in `src/shared/messages/ui-copy.ts` (§5.5, §5.6) is approved, together with the `RECENCY_STRIP` variant "Last trained: nothing in the last 14 days" for history older than 14 days | **Approved** (OD-05) | 2026-10-25 | FR-32, FR-46 |
+| D-30 | The Claude Design handoff (`docs/design/handoff/`, direction 1b) defines layout, look and feel, tokens (`globals.css`), components and UI copy. On behaviour, the PRD wins. | **Approved** (owner, during design) | 2026-10-25 | All UI |
+| D-31 | The text-edit button and sheet are labelled **Edit with AI** (lucide `Sparkles`); the accept button is labelled **Accept** | **Approved** (owner, during design) | 2026-10-25 | FR-51, FR-61 |
+| D-32 | Reset is an icon-only button (`RefreshCw`, `aria-label="Reset"`) in the plan status row, next to the Draft or Accepted tag. The action bar is **Edit with AI · Accept** (draft) or **Workout completed** (accepted). Resetting an accepted plan opens one dialog titled `DISCARD_CONFIRM` with the optional reasons and Cancel / Discard. | **Approved** (owner, during design) | 2026-10-25 | FR-55 – FR-58 |
+| D-33 | A bottom tab bar below 640 px; from 640 px up, a full-width top bar (wordmark + Plan · History · Profile) and no bottom tabs | **Approved** (owner, during design) | 2026-10-25 | PRD §12.1 |
+| D-34 | Each exercise row has a sliders button that opens that row's controls (steppers, reorder, delete), one row at a time; tapping the row body opens How-to | **Approved** (owner, during design) | 2026-10-25 | FR-43, FR-50 |
+| D-35 | Profile: **Save changes** sits under the Equipment row, always visible, disabled until a field changes; Log out and Delete account are text links at the bottom | **Approved** (owner, during design) | 2026-10-25 | FR-4, FR-11 |
+| D-36 | The app icon ("GC" in the wordmark face, `primary-foreground` on `primary`, square; 512, 180, 32 and 16 px) and the wordmark exported as SVG outlines | **Approved** (OD-10) | 2026-10-25 | Branding, `public/icons/` |
+| D-37 | The UI copy added by the design handoff (screen titles, helper lines, Reset and Discard bodies, toasts, "{n} plans left today") goes into `ui-copy.ts` as written in the handoff README | **Approved** (OD-11) | 2026-10-25 | FR-46 (UI copy, not agent text) |
 
 ## Appendix B. Configuration constants
 
@@ -3414,6 +3442,7 @@ There is no paging for the pilot. Passive signals:
 | `STARTING_HOLD_S` | newbie 20, moderately regular 30, experienced 45 | PRD §8.8 | `rulebook.v1.ts` |
 | `CONTINUOUS_CARDIO_S` | 300–1800 | D-15 | `rulebook.v1.ts` |
 | Hard bounds (direct edits and V-6) | sets 1–10, reps 1–50, time per set 5–3600 s | DB checks | `shared/constants.ts` |
+| Direct-edit stepper steps | sets ±1, reps ±1, time per set ±5 s; steppers stop at the hard bounds above | Design handoff (D-34) | `shared/constants.ts` |
 | `HISTORY_SUMMARY_MAX_WORKOUTS`, `HISTORY_SUMMARY_DAYS` | 5, 28 | §8.5.2 | `server/config/app-config.ts` |
 | `PHOTO_MAX_LONG_EDGE_PX`, `PHOTO_JPEG_QUALITY` | 1568, 0.85 | D-01 | `shared/constants.ts` |
 | `PHOTO_MAX_FILE_BYTES`, `PHOTO_MAX_TOTAL_BYTES` | 1.5 MB, 4 MB | D-01 (Vercel 4.5 MB body limit) | `shared/constants.ts` |
