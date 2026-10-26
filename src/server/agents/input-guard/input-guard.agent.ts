@@ -45,5 +45,6 @@ export function inputGuardAgent(
     buildUserContent: (i) => [{ type: 'text', text: userContentText(i) }],
     // The raw text is allowed in agent_logs only (30 days).
     redactForLog: (i) => ({ mode: i.mode, plan_items: i.planItems, user_text: i.text }),
+    freeTextLogFields: ['user_text'],
   };
 }

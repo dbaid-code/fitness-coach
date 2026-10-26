@@ -36,7 +36,7 @@ describe('F-13 reset, F-14 accept / expiry / complete', () => {
   afterEach(resetClock);
   afterAll(truncateUserData);
 
-  it('FR-55/56: draft reset with a reason; context deleted; event; next Suggest with after_reset_of differs (V-9)', async () => {
+  it('FR-55, FR-56: draft reset with a reason; context deleted; event; next Suggest with after_reset_of differs (V-9)', async () => {
     const r = await doReset({ reason: 'too_hard', confirm: false });
     expect(r.json.data).toEqual({ discarded_plan_id: plan.id });
     const [p] = await adminSql`select status, reset_reason, expires_at from app.plans where id = ${plan.id}`;
@@ -120,7 +120,7 @@ describe('F-13 reset, F-14 accept / expiry / complete', () => {
     expect((await doComplete({ difficulty: 'hard' })).status).toBe(410);
   });
 
-  it('FR-64/65/66: completion needs a rating, stores the accepted version with direct edits, replays, and a second Suggest works', async () => {
+  it('FR-64, FR-65, FR-66: completion needs a rating, stores the accepted version with direct edits, replays, and a second Suggest works', async () => {
     const body = {
       version: plan.version,
       items: mainsOf(plan).map((i: any) => ({

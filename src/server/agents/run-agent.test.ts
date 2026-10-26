@@ -110,6 +110,15 @@ describe('AG-runtime runAgent outcomes (agent-runtime.md §4)', () => {
     await expect(runAgent(def, { text: 'x', image: 'A'.repeat(5000) }, ctx(sink()))).rejects.toThrow(/base64/);
   });
 
+  it('D-01: declared free-text fields are not mistaken for image data', async () => {
+    setTransport(async () => raw());
+    const textAgent = { ...def, freeTextLogFields: ['user_text'] as const };
+    const r = await runAgent(textAgent, { text: 'x'.repeat(290) }, ctx(sink()));
+    expect(r.outcome).toBe('ok');
+    // …but the probe still covers every other field.
+    await expect(runAgent(textAgent, { text: 'ok', image: 'A'.repeat(5000) }, ctx(sink()))).rejects.toThrow(/base64/);
+  });
+
   it('a failing log sink never throws to the caller', async () => {
     setTransport(async () => raw());
     const r = await runAgent(def, { text: 'x' }, ctx({ write: async () => Promise.reject(new Error('db down')) }));

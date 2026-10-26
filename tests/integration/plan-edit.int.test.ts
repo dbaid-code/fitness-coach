@@ -126,6 +126,14 @@ describe('F-12 Edit with AI (API-11)', () => {
     expect(p).toEqual({ text_edit_count: 0, version: plan.version });
   });
 
+  it('FR-51: up to 300 characters; longer or empty text → 400 and not counted', async () => {
+    expect((await send('x'.repeat(301))).status).toBe(400);
+    expect((await send('   ')).status).toBe(400);
+    expect((await send('make it better ' + 'x'.repeat(285))).status).toBe(200);
+    const [p] = await adminSql`select text_edit_count from app.plans where id = ${plan.id}`;
+    expect(p!.text_edit_count).toBe(1);
+  });
+
   it('FR-82: the 6th edit → 429 EDIT_LIMIT; stale version → 409', async () => {
     expect((await send('make it better', plan.version + 3)).json.error.code).toBe('VERSION_CONFLICT');
     for (let i = 0; i < 5; i++) expect((await send('make it better', plan.version + i)).status).toBe(200);

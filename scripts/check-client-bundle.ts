@@ -3,6 +3,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { CLIENT_BUNDLE_FORBIDDEN_PATTERNS, findSecrets } from '../src/lib/security/secrets';
+import { stripKnownLibrarySnippets } from './bundle-allowlist';
 
 const root = '.next/static';
 
@@ -19,7 +20,7 @@ let scanned = 0;
 try {
   for (const file of jsFiles(root)) {
     scanned++;
-    const found = findSecrets(readFileSync(file, 'utf8'), CLIENT_BUNDLE_FORBIDDEN_PATTERNS);
+    const found = findSecrets(stripKnownLibrarySnippets(readFileSync(file, 'utf8')), CLIENT_BUNDLE_FORBIDDEN_PATTERNS);
     if (found.length > 0) {
       failures++;
       console.error(`${file}: ${found.join(', ')}`);

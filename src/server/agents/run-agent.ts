@@ -31,6 +31,11 @@ export type AgentDefinition<I, O> = {
   system: () => SystemPrompt;
   buildUserContent: (input: I) => Anthropic.Beta.BetaContentBlockParam[];
   redactForLog: (input: I) => unknown;
+  /**
+   * Top-level log fields holding the user's own typed text (AG-2 only). They are skipped by the base64
+   * probe: a long unbroken run in a note is the user's text, not image data, and must not fail the call.
+   */
+  freeTextLogFields?: readonly string[];
 };
 
 /** What a call returned, independent of the transport (real SDK or fake). */
@@ -187,7 +192,12 @@ export async function runAgent<I, O>(def: AgentDefinition<I, O>, input: I, ctx: 
   const cost = billed ? costUsd(modelServed ?? cfg.model, usage) : 0;
 
   const request = def.redactForLog(input);
-  if (hasBase64Blob(JSON.stringify(request))) throw new Error(`agent log request for ${def.id} contains base64 data`);
+  // D-01: no image bytes may reach agent_logs.
+  const probe =
+    def.freeTextLogFields && request && typeof request === 'object'
+      ? Object.fromEntries(Object.entries(request).filter(([k]) => !def.freeTextLogFields!.includes(k)))
+      : request;
+  if (hasBase64Blob(JSON.stringify(probe))) throw new Error(`agent log request for ${def.id} contains base64 data`);
 
   const row: agentLogRepo.NewAgentLog = {
     requestId: ctx.requestId,

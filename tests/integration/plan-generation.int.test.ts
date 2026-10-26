@@ -197,7 +197,7 @@ describe('F-06 planner (API-07), plan view (API-09), how-to (API-17/18), events 
     u = await createUser({ onboard: true });
   });
 
-  it('defaults 45, then the last length; active plan; limits and spend flag', async () => {
+  it('FR-12: defaults 45, then the last length; active plan; limits and spend flag', async () => {
     const first = (await callRoute(planner, { user: u })).json.data;
     expect(first).toMatchObject({
       defaults: { session_length_min: 45 },
@@ -235,7 +235,7 @@ describe('F-06 planner (API-07), plan view (API-09), how-to (API-17/18), events 
     expect((await callRoute(getPlan, { user: other, params: { planId: id } })).status).toBe(404);
   });
 
-  it('API-17/18: DB instructions and public image URLs; ordered moves; 404', async () => {
+  it('FR-43 / API-17/18: DB instructions and public image URLs; ordered moves; 404', async () => {
     const ex = (await callRoute(getExercise, { user: u, params: { exerciseId: 'Pushups' } })).json.data;
     expect(ex.instructions.length).toBeGreaterThan(0);
     expect(ex.image_urls[0]).toBe('http://127.0.0.1:54321/storage/v1/object/public/exercise-images/Pushups/0.jpg');
