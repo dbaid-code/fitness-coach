@@ -42,9 +42,12 @@ export type AgentOutcome = 'ok' | 'schema_invalid' | 'refusal' | 'max_tokens' | 
 export type AgentDefinition<I, O> = {
   id: AgentId;                                   // 'ag1_equipment_vision' | 'ag2_input_guard' | 'ag3_workout_planner'
   schema: z.ZodType<O>;                          // canonical <agent>.schema.ts
-  buildUserContent: (input: I) => Anthropic.ContentBlockParam[];
+  system: () => SystemPrompt;                    // prompt-loader: static text, sha256, version (cached)
+  buildUserContent: (input: I) => Anthropic.Beta.BetaContentBlockParam[];
   redactForLog: (input: I) => unknown;           // AG-1 replaces images with {type:'image', bytes, width, height}
+  freeTextLogFields?: readonly string[];         // AG-2: ['user_text'], skipped by the D-01 base64 probe (build notes §5.22)
 };
+// runAgent throws when JSON.stringify(redactForLog(input)) minus freeTextLogFields contains a base64 run (D-01).
 
 export type RunContext = {
   requestId: string; userId: string | null; planId: string | null;

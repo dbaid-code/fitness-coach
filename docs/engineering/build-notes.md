@@ -53,6 +53,25 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 10. The CI key export reads `ANON_KEY`/`SERVICE_ROLE_KEY`; newer CLIs also print publishable/secret keys. I'll check when the CI job is set up in M1.
 11. Approved deviations, recorded and not reopened: D-01 (photos never stored), D-28 (no Resend), D-39 ($25 dev), D-26 (AG-2 failure on a note).
 
+Found during the build (2026-10-26); each is resolved in code unless marked **open**:
+
+12. **Idempotency release** is done by setting `expires_at` to the epoch (the key row stays until the purge job), so a retry after a 5xx, `RATE_LIMITED` or `REQUEST_IN_PROGRESS` re-runs. Same behaviour as the spec's delete.
+13. **Timezone check:** `Intl.supportedValuesOf('timeZone')` lacks `Asia/Kolkata` on some ICU builds, so `Timezone` validates by resolving the zone with `Intl.DateTimeFormat` instead.
+14. **Seed curation** ran with `--heuristic` (no P-3 key). `curation.method = "heuristic"` is recorded in `exercises.v1.json`; the LLM pass and the owner's 10% review are still due. No bodyweight biceps exercise exists in free-exercise-db, so a custom `gc_towel_biceps_curl_hold` was added.
+15. **`HEADER_COACH` with 0 rest days** renders `n = max(1, restDays)`; the catalog template has no "0 days" form.
+16. **gitleaks** runs as the pinned release binary with a SHA-256 check, not a third-party action (S-8).
+17. **Extra UI copy keys** not in `messages-and-ui-copy.md`: `toast.rateLimited` (same words as `auth.rateLimited`), `common.close`, `plan.drag` (aria-label for the drag handle). Owner copy review requested.
+18. **Coverage thresholds** are enforced at 100% for `src/server/domain`, `src/shared/time-model` and `src/shared/messages` only, as specified; the rest of `src/server` is covered by integration tests without a threshold.
+19. **AG-1/AG-3 provider spend-limit error:** matched by `billing_error` and a message pattern until the F-16 capture on the dev workspace (needs P-3).
+20. **Fake AG-3** (tests only) raises new exercises inside the rulebook range when short of the time window and applies "lighter" through reps/hold time, so fixtures behave like a sensible planner.
+21. **Client-bundle scan:** `@supabase/supabase-js` ships `k.startsWith("sb_publishable_")||k.startsWith("sb_secret_")` in browser code. Only that exact paired expression is exempt (`scripts/bundle-allowlist.ts`, tested); bare prefixes anywhere else still fail.
+22. **D-01 base64 probe** in `runAgent` threw on a note or edit containing a long unbroken run (500). AG-2 declares `user_text` as free text, which the probe skips; every other log field is still probed.
+23. **FR-62 under true concurrency:** the claim-then-check in-flight guard (api-conventions §6) can make all concurrent Suggests back off with `REQUEST_IN_PROGRESS`. Never more than one active plan; the integration test asserts exactly that.
+24. **Open — Newbie 60-minute sessions are infeasible for Stay fit and Lose weight.** The rulebook pins newbies to the minimum sets (2), so 12 strength cards (`MAX_MAIN_ITEMS`) give at most ~36 min of main work against the ~41 min the 85% window needs at 60 min. Continuous cardio is the only filler and is allowed only for Lose weight with coach focus or a Cardio focus. Result: `GENERATION_FAILED` every time. Owner decision needed (options in `validation-report.md`).
+25. **EV-1** holds by construction: the generation core only returns plans the production validator accepted. The runner reports generation failures alongside it.
+26. **`deploy.yml`** uses the repository's Supabase CLI (devDependency, lockfile-pinned) instead of `supabase/setup-cli`, and Vercel CLI `63.1.2`; it re-runs `evals:check` before migrating.
+27. **EV-5 photos** could not be fetched: the container's network policy refuses `commons.wikimedia.org` and `upload.wikimedia.org`. EV-5 reports `cases: 0` and fails until photos exist.
+
 ## 6. Owner decisions (2026-10-26, defaults accepted)
 1. Security plan S-1 to S-8 approved, recorded as D-41 to D-48. The S-1 per-user LLM ceiling is **$3 per rolling 24 h**.
 2. Docker Desktop isn't needed; the build runs in the cloud container (§4).
@@ -70,3 +89,18 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 - **The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews. Each milestone PR carries the preview's `/api/v1/health` link, and the owner confirms `"db":"ok"`. Vercel Authentication stays on for previews.
 - **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are created at M7, not M0.
+
+
+## 7. Build status (2026-10-26)
+| M | State | Evidence | Still open |
+|-|-|-|-|
+| M0 | Done in code | lint, typecheck, unit, build, bundle scan, audit, gitleaks config | Preview `/api/v1/health` (owner, no PR yet) |
+| M1 | Done in code | 9 migrations, schema parity, RLS/cron/rate-limit tests, domain 100% | LLM curation + 10% review (P-3) |
+| M2 | Done | Mailpit sign-up E2E, deletion cascade test | Hosted Auth settings (owner) |
+| M3 | Done with fakes | 23 generation integration tests, planner/plan view E2E | Smoke evals on real models (P-3) |
+| M4 | Done | edits, text edits, reset, accept, complete, history: integration + E2E; EV-6 health scan | — |
+| M5 | Done with fakes | photo scan integration + privacy test + E2E | EV-5 photo set (network policy) |
+| M6 | Harness done | metrics views tested; eval runner plumbing verified with fakes; `eval-gate` blocking | First real run, owner label/judge reviews |
+| M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
+
+Details: `docs/engineering/validation-report.md`.

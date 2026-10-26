@@ -23,67 +23,67 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 1: Approvals and owner setup**
   - [x] 🟩 Owner approved the engineering doc; bumped to v1.0 with the other 2026-10-25 decisions recorded (D-38 full evals at the end of development, D-39 $25 dev cap with Phase 1 limits up to $110, D-40 Supabase Pro just before Phase 1)
-  - [ ] 🟥 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment
+  - [ ] 🟥 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment — *open: no Anthropic key reached the build container (2026-10-26)*
 
-- [ ] 🟨 **Step 2: Design in Claude Design (runs alongside Steps 3–4)**
+- [x] 🟩 **Step 2: Design in Claude Design (runs alongside Steps 3–4)**
   - [x] 🟩 Design brief v0.2 used as the input to Claude Design (now superseded by the handoff)
   - [x] 🟩 Three visual directions for the plan screen → owner picked direction 1b
   - [x] 🟩 Foundations (colour, type, spacing, radius, motion) as Tailwind tokens, a shadcn component sheet, the wordmark and the "GC" icon design
   - [x] 🟩 All screens and states, plus a clickable prototype of the core flow
   - [x] 🟩 Handoff stored in `docs/design/handoff/`; PRD v1.1, engineering doc v0.4 and this plan updated to match
   - [x] 🟩 Owner approved the handoff's open items: app icon and wordmark export (OD-10) and new UI copy (OD-11)
-  - [ ] 🟥 Export the wordmark SVG and the icon PNGs (512, 180, 32 and 16 px) into `public/icons/`
+  - [x] 🟩 Export the wordmark SVG and the icon PNGs (512, 180, 32 and 16 px) into `public/icons/`
 
-- [ ] 🟥 **Step 3: M0 Foundation (F-01)**
-  - [ ] 🟥 Local toolchain on the Windows machine: Node 24, pnpm, Docker Desktop (WSL2), Supabase CLI local stack with Mailpit
-  - [ ] 🟥 Scaffold: Next.js 16, TypeScript strict, Tailwind v4, shadcn/ui, ESLint, Prettier, Vitest, Playwright, `env.ts` validated with Zod; `src/app/globals.css` from `docs/design/handoff/globals.css`, with the Barlow fonts through `next/font`
-  - [ ] 🟥 `ci.yml` with lint, typecheck, unit, build, audit and gitleaks (integration, E2E and eval-gate jobs join in later milestones)
-  - [ ] 🟥 Vercel preview per PR; `GET /api/v1/health` returns `ok` on the preview
+- [ ] 🟨 **Step 3: M0 Foundation (F-01)**
+  - [x] 🟩 Local toolchain on the Windows machine: Node 24, pnpm, Docker Desktop (WSL2), Supabase CLI local stack with Mailpit — *built in the Claude cloud container instead (build notes §4)*
+  - [x] 🟩 Scaffold: Next.js 16, TypeScript strict, Tailwind v4, shadcn/ui, ESLint, Prettier, Vitest, Playwright, `env.ts` validated with Zod; `src/app/globals.css` from `docs/design/handoff/globals.css`, with the Barlow fonts through `next/font`
+  - [x] 🟩 `ci.yml` with lint, typecheck, unit, build, audit and gitleaks (integration, E2E and eval-gate jobs join in later milestones)
+  - [ ] 🟥 Vercel preview per PR; `GET /api/v1/health` returns `ok` on the preview — *owner check (no PR opened yet)*
 
-- [ ] 🟥 **Step 4: M1 Data and engines (F-02, F-07, F-16)**
-  - [ ] 🟥 Migrations for all §7 tables, enums, constraints, RLS, grants, the `gc_app` role, triggers, `pg_cron` jobs and `SECURITY DEFINER` functions
-  - [ ] 🟥 Seed pipeline: free-exercise-db import (pinned commit), LLM-assisted curation, `validate-seed.ts` in CI, images to Storage, idempotent seed script
+- [ ] 🟨 **Step 4: M1 Data and engines (F-02, F-07, F-16)**
+  - [x] 🟩 Migrations for all §7 tables, enums, constraints, RLS, grants, the `gc_app` role, triggers, `pg_cron` jobs and `SECURITY DEFINER` functions
+  - [ ] 🟨 Seed pipeline: free-exercise-db import (pinned commit), LLM-assisted curation, `validate-seed.ts` in CI, images to Storage, idempotent seed script — *heuristic curation; LLM curation pending the P-3 key*
   - [ ] 🟥 Owner reviews: 10% exercise sample, equipment list, muscle-group map, rulebook v1 (OD-08)
-  - [ ] 🟥 Domain engines at 100% branch coverage: recency, candidate filter, progression, time model, validator V-1 to V-11, plan diff, status resolver, header, state machine, limits policy
-  - [ ] 🟥 Limits and spend guard: usage counters in the user's local day, spend ledger, app guard; capture the provider spend-cap error once on the dev workspace
-  - [ ] 🟥 Integration job in CI (Supabase local): cross-user RLS tests, cron SQL, one-active-plan index; EV-7 and EV-8 pass
+  - [x] 🟩 Domain engines at 100% branch coverage: recency, candidate filter, progression, time model, validator V-1 to V-11, plan diff, status resolver, header, state machine, limits policy
+  - [ ] 🟨 Limits and spend guard: usage counters in the user's local day, spend ledger, app guard; capture the provider spend-cap error once on the dev workspace — *provider spend-cap error capture pending P-3*
+  - [x] 🟩 Integration job in CI (Supabase local): cross-user RLS tests, cron SQL, one-active-plan index; EV-7 and EV-8 pass
 
-- [ ] 🟥 **Step 5: M2 Accounts and profile (F-03, F-04, F-17)**
-  - [ ] 🟥 Supabase Auth settings and email templates: confirm email on, minimum 8 characters, redirect allowlist, `/auth/confirm` with D-09 behaviour
-  - [ ] 🟥 API-01 to API-05 (onboarding, profile, equipment) and API-20 (account deletion with cascade test)
-  - [ ] 🟥 *(UI)* Sign-up, verify-email, log-in, forgot and update password, onboarding wizard, profile and equipment pages
-  - [ ] 🟥 E2E: sign-up → Mailpit → log in → onboarding; deleted account can't log in; E2E smoke job added to CI
+- [x] 🟩 **Step 5: M2 Accounts and profile (F-03, F-04, F-17)**
+  - [x] 🟩 Supabase Auth settings and email templates: confirm email on, minimum 8 characters, redirect allowlist, `/auth/confirm` with D-09 behaviour — *local config; hosted settings are owner steps*
+  - [x] 🟩 API-01 to API-05 (onboarding, profile, equipment) and API-20 (account deletion with cascade test)
+  - [x] 🟩 *(UI)* Sign-up, verify-email, log-in, forgot and update password, onboarding wizard, profile and equipment pages
+  - [x] 🟩 E2E: sign-up → Mailpit → log in → onboarding; deleted account can't log in; E2E smoke job added to CI
 
-- [ ] 🟥 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
-  - [ ] 🟥 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
-  - [ ] 🟥 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9)
-  - [ ] 🟥 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
-  - [ ] 🟥 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
-  - [ ] 🟥 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet
+- [ ] 🟨 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
+  - [x] 🟩 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
+  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 label review and smoke run pending owner/key*
+  - [x] 🟩 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
+  - [x] 🟩 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
+  - [x] 🟩 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet — *plumbing verified with fakes only*
 
-- [ ] 🟥 **Step 7: M4 Plan changes and lifecycle (F-11 to F-15)**
-  - [ ] 🟥 *(UI)* Direct edits: steppers, delete with undo, reorder, debounced API-10, version conflicts
-  - [ ] 🟥 Text edits: API-11, AG-2 and AG-3 edit modes, change highlights, V-11, 5-edit limit
-  - [ ] 🟥 Reset: API-12, reasons, `DISCARD_CONFIRM`, `after_reset_of`, V-9
-  - [ ] 🟥 Accept, expiry (cron and lazy), complete with rating, history list and delete (API-13 to API-16)
-  - [ ] 🟥 E2E for UF-8 to UF-14 pass; EV-6 passes
+- [x] 🟩 **Step 7: M4 Plan changes and lifecycle (F-11 to F-15)**
+  - [x] 🟩 *(UI)* Direct edits: steppers, delete with undo, reorder, debounced API-10, version conflicts
+  - [x] 🟩 Text edits: API-11, AG-2 and AG-3 edit modes, change highlights, V-11, 5-edit limit
+  - [x] 🟩 Reset: API-12, reasons, `DISCARD_CONFIRM`, `after_reset_of`, V-9
+  - [x] 🟩 Accept, expiry (cron and lazy), complete with rating, history list and delete (API-13 to API-16)
+  - [x] 🟩 E2E for UF-8 to UF-14 pass; EV-6 passes
 
-- [ ] 🟥 **Step 8: M5 Photos (F-05)**
-  - [ ] 🟥 *(UI)* Photo sheet with on-phone resize and EXIF stripping; API-06; AG-1 prompt and schema; replace-vs-add; scan limit
-  - [ ] 🟥 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9)
+- [ ] 🟨 **Step 8: M5 Photos (F-05)**
+  - [x] 🟩 *(UI)* Photo sheet with on-phone resize and EXIF stripping; API-06; AG-1 prompt and schema; replace-vs-add; scan limit
+  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; truth-list review waits on the EV-5 photos*
 
-- [ ] 🟥 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
-  - [ ] 🟥 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
-  - [ ] 🟥 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health)
-  - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement
-  - [ ] 🟥 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check
-  - [ ] 🟥 Full E2E (Chromium and WebKit) with axe running on `main`
+- [ ] 🟨 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
+  - [x] 🟩 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
+  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built; EV-5 photos blocked (network policy)*
+  - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *blocked: no dev key in the container*
+  - [ ] 🟨 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job added and blocking; no real latest.json yet*
+  - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job added; verified locally on Chromium only*
 
-- [ ] 🟥 **Step 10: M7 Release readiness (F-20)**
+- [ ] 🟨 **Step 10: M7 Release readiness (F-20)**
   - [ ] 🟥 Owner: P-5 Supabase prod project (`ap-south-1`, free tier until Phase 1), P-3 Anthropic prod workspace ($60 cap), P-4 sign up with the Supabase organisation email
-  - [ ] 🟥 `deploy.yml`: migrate prod → seed if the dataset changed → `vercel deploy --prod` behind owner approval → smoke check; Vercel's automatic production deploys turned off
-  - [ ] 🟥 Production config: env vars (`LLM_MONTHLY_BUDGET_USD = 58`), Auth settings and templates, exercise images in Storage, security headers and CSP
-  - [ ] 🟥 Runbooks: spend cap, Anthropic outage, safety miss, key rotation, delete user
+  - [x] 🟩 `deploy.yml`: migrate prod → seed if the dataset changed → `vercel deploy --prod` behind owner approval → smoke check; Vercel's automatic production deploys turned off — *prepared, not run*
+  - [ ] 🟨 Production config: env vars (`LLM_MONTHLY_BUDGET_USD = 58`), Auth settings and templates, exercise images in Storage, security headers and CSP — *documented in `docs/runbooks/owner-setup-prod.md`; owner applies*
+  - [x] 🟩 Runbooks: spend cap, Anthropic outage, safety miss, key rotation, delete user
   - [ ] 🟥 Production smoke E2E with a test account (then deleted); owner receives verification and reset emails; first `release-YYYYMMDD-N` tag
 
 - [ ] 🟥 **Step 11: Phase 0, owner pilot (2 weeks)**
