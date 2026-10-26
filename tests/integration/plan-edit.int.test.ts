@@ -15,7 +15,13 @@ describe('F-12 Edit with AI (API-11)', () => {
   let u: TestUser;
   let plan: any;
   const send = (text: string, version = plan.version, key = crypto.randomUUID()) =>
-    callRoute(edit, { method: 'POST', user: u, params: { planId: plan.id }, body: { version, text }, idempotencyKey: key });
+    callRoute(edit, {
+      method: 'POST',
+      user: u,
+      params: { planId: plan.id },
+      body: { version, text },
+      idempotencyKey: key,
+    });
 
   beforeEach(async () => {
     await truncateUserData();
@@ -32,11 +38,17 @@ describe('F-12 Edit with AI (API-11)', () => {
     const before = await itemRows(plan.id);
     const r = await send(text);
     expect(r.status).toBe(200);
-    expect(r.json.data).toMatchObject({ outcome: 'unchanged', status: { code }, changed_item_ids: [], text_edits_remaining: 4 });
+    expect(r.json.data).toMatchObject({
+      outcome: 'unchanged',
+      status: { code },
+      changed_item_ids: [],
+      text_edits_remaining: 4,
+    });
     expect(await itemRows(plan.id)).toEqual(before);
     const [p] = await adminSql`select text_edit_count, version from app.plans where id = ${plan.id}`;
     expect(p).toEqual({ text_edit_count: 1, version: plan.version + 1 });
-    const [ev] = await adminSql`select properties from app.app_events where plan_id = ${plan.id} and event_type = 'text_edit_submitted'`;
+    const [ev] =
+      await adminSql`select properties from app.app_events where plan_id = ${plan.id} and event_type = 'text_edit_submitted'`;
     expect(ev!.properties).toMatchObject({ edit_index: 1, plan_changed: false });
   });
 
@@ -86,18 +98,29 @@ describe('F-12 Edit with AI (API-11)', () => {
     await send('swap the first exercise');
     const r = await send('I feel chest pain', plan.version + 1);
     expect(r.json.data).toMatchObject({ outcome: 'discarded', plan: null, status: { code: 'RED_FLAG' } });
-    const [p] = await adminSql`select status, reset_reason, expires_at, text_edit_count from app.plans where id = ${plan.id}`;
+    const [p] =
+      await adminSql`select status, reset_reason, expires_at, text_edit_count from app.plans where id = ${plan.id}`;
     expect(p).toEqual({ status: 'discarded', reset_reason: null, expires_at: null, text_edit_count: 2 });
     expect(await adminSql`select 1 from app.planning_context where plan_id = ${plan.id}`).toHaveLength(0);
-    expect(await adminSql`select 1 from app.app_events where plan_id = ${plan.id} and event_type = 'plan_reset'`).toHaveLength(0);
+    expect(
+      await adminSql`select 1 from app.app_events where plan_id = ${plan.id} and event_type = 'plan_reset'`,
+    ).toHaveLength(0);
   });
 
   it('D-13: AG-2 api_error → NOT_UNDERSTOOD, not counted; AG-3 invalid_always → generation_failed, not counted', async () => {
     fakeAgents.set({ ag2: 'api_error' });
-    expect((await send('swap the first exercise')).json.data).toMatchObject({ outcome: 'unchanged', status: { code: 'NOT_UNDERSTOOD' }, text_edits_remaining: 5 });
+    expect((await send('swap the first exercise')).json.data).toMatchObject({
+      outcome: 'unchanged',
+      status: { code: 'NOT_UNDERSTOOD' },
+      text_edits_remaining: 5,
+    });
     fakeAgents.set({ ag2: 'keywords', ag3: 'invalid_always' });
     const r = await send('swap the first exercise');
-    expect(r.json.data).toMatchObject({ outcome: 'generation_failed', status: { code: 'GENERATION_FAILED' }, text_edits_remaining: 5 });
+    expect(r.json.data).toMatchObject({
+      outcome: 'generation_failed',
+      status: { code: 'GENERATION_FAILED' },
+      text_edits_remaining: 5,
+    });
     expect(r.json.data.plan.id).toBe(plan.id);
     const [p] = await adminSql`select text_edit_count, version from app.plans where id = ${plan.id}`;
     expect(p).toEqual({ text_edit_count: 0, version: plan.version });

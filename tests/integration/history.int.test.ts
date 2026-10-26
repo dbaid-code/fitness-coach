@@ -47,7 +47,12 @@ describe('F-15 history (API-15 / API-16)', () => {
     const { entries, next_cursor } = r.json.data;
     expect(entries.map((e: any) => e.plan_id)).toEqual([b.id, a.id]);
     expect(next_cursor).toBeNull();
-    expect(entries[0]).toMatchObject({ difficulty: 'hard', focus_groups: ['legs'], session_length_min: 45, local_date: '2026-10-25' });
+    expect(entries[0]).toMatchObject({
+      difficulty: 'hard',
+      focus_groups: ['legs'],
+      session_length_min: 45,
+      local_date: '2026-10-25',
+    });
     expect(entries[0].items[0].kind).toBe('warmup');
     expect(entries[0].items.at(-1).kind).toBe('cooldown');
     const [row] = await adminSql`select name from app.exercises where id = ${b.items[1].exercise_id}`;

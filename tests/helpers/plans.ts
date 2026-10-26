@@ -44,10 +44,7 @@ export async function insertItem(
 }
 
 /** A real draft through API-08 with the fake agents (focus chest, 45 min unless overridden). */
-export async function suggestPlan(
-  user: import('./users').TestUser,
-  over: Record<string, unknown> = {},
-): Promise<any> {
+export async function suggestPlan(user: import('./users').TestUser, over: Record<string, unknown> = {}): Promise<any> {
   const { POST } = await import('@/app/api/v1/plans/route');
   const { callRoute } = await import('./call-route');
   const r = await callRoute(POST, {

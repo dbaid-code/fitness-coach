@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { api } from '@/lib/api-client';
 import { readStorage, writeStorage } from '@/lib/storage';
@@ -7,7 +8,8 @@ import type { StatusMessage } from '@/shared/schemas/api/common';
 import type { PlannerBootstrap } from '@/shared/schemas/api/plans';
 import { PlannerForm, type PlannerBannerCode, type PlannerFormState } from '@/features/planner/planner-form';
 import { useSuggestWorkout, type SuggestResult } from '@/features/planner/use-suggest-workout';
-import { PlanView } from './plan-view';
+import { setActivePlan } from './plan-cache';
+import { PlanView, type LeaveReason } from './plan-view';
 import { usePlanner } from './use-planner';
 
 const expiredKey = (id: string) => `gc.expired-dismissed.${id}`;
@@ -15,6 +17,7 @@ const subscribeNoop = () => () => {};
 
 /** /plan: the active plan when there is one (FR-62), otherwise the planner (planner.md §2). */
 export function PlanScreen({ initialData }: { initialData: PlannerBootstrap }) {
+  const qc = useQueryClient();
   const planner = usePlanner(initialData);
   const data = planner.data;
   const [form, setForm] = useState<PlannerFormState>({
@@ -70,13 +73,42 @@ export function PlanScreen({ initialData }: { initialData: PlannerBootstrap }) {
     });
   };
 
+  const onLeave = useCallback(
+    (r: LeaveReason) => {
+      setPlanStatus(null);
+      if (r.kind === 'reset') {
+        // FR-55: length and focus stay, the note is cleared; the next Suggest carries after_reset_of.
+        setForm({
+          sessionLength: r.plan.session_length_min,
+          groups: r.plan.focus.mode === 'user' ? r.plan.focus.groups : [],
+          note: '',
+          redFlagNote: null,
+          afterResetOf: r.discardedPlanId,
+        });
+        setBanner(null);
+      } else if (r.kind === 'completed') {
+        // FR-66: plan again — focus back to the coach, note cleared, length kept.
+        setForm((f) => ({ ...f, groups: [], note: '', redFlagNote: null, afterResetOf: null }));
+        setBanner(null);
+      } else if (r.kind === 'red_flag') setBanner('RED_FLAG');
+      else setBanner(null);
+      setActivePlan(qc, null);
+      void qc.invalidateQueries({ queryKey: ['planner'] });
+    },
+    [qc],
+  );
+
   if (data.active_plan)
     return (
       <PlanView
+        key={data.active_plan.id}
         plan={data.active_plan}
         status={planStatus}
+        setStatus={setPlanStatus}
         focusToken={focusToken}
+        bumpFocus={() => setFocusToken((t) => t + 1)}
         spendCapReached={data.spend_cap_reached}
+        onLeave={onLeave}
       />
     );
 

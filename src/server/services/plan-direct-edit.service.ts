@@ -27,7 +27,11 @@ export async function apply(claims: Claims, planId: string, body: DirectEditRequ
     body.items.forEach((it, idx) => {
       const stored = mains.get(it.id);
       if (!stored || seen.has(it.id)) details.push({ path: `items.${idx}.id`, issue: 'unknown or duplicate item' });
-      else if (stored.cardType === 'reps' ? it.reps === null || it.time_per_set_s !== null : it.time_per_set_s === null || it.reps !== null)
+      else if (
+        stored.cardType === 'reps'
+          ? it.reps === null || it.time_per_set_s !== null
+          : it.time_per_set_s === null || it.reps !== null
+      )
         details.push({ path: `items.${idx}`, issue: `numbers do not match a ${stored.cardType} card` });
       seen.add(it.id);
     });

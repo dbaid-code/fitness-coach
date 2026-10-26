@@ -18,7 +18,8 @@ describe('FR-5 API isolation', () => {
   let plan: any;
   let completedId: string;
   let snapshot: unknown;
-  const snap = () => adminSql`select p.status, p.version, p.text_edit_count, (select json_agg(i order by i.position) from app.plan_items i where i.plan_id = p.id) as items from app.plans p where p.user_id = ${a.id} order by p.created_at`;
+  const snap = () =>
+    adminSql`select p.status, p.version, p.text_edit_count, (select json_agg(i order by i.position) from app.plan_items i where i.plan_id = p.id) as items from app.plans p where p.user_id = ${a.id} order by p.created_at`;
 
   beforeAll(async () => {
     await truncateUserData();
@@ -27,21 +28,72 @@ describe('FR-5 API isolation', () => {
     b = await createUser({ onboard: true });
     const done = await suggestPlan(a);
     await callRoute(accept, { method: 'POST', user: a, params: { planId: done.id }, body: { version: done.version } });
-    await callRoute(complete, { method: 'POST', user: a, params: { planId: done.id }, body: { difficulty: 'easy' }, idempotencyKey: crypto.randomUUID() });
+    await callRoute(complete, {
+      method: 'POST',
+      user: a,
+      params: { planId: done.id },
+      body: { difficulty: 'easy' },
+      idempotencyKey: crypto.randomUUID(),
+    });
     completedId = done.id;
     plan = await suggestPlan(a);
     snapshot = await snap();
   });
   afterAll(truncateUserData);
 
-  const item = () => plan.items.filter((i: any) => i.kind === 'exercise').map((i: any) => ({ id: i.id, sets: 1, reps: i.reps, time_per_set_s: i.time_per_set_s }));
+  const item = () =>
+    plan.items
+      .filter((i: any) => i.kind === 'exercise')
+      .map((i: any) => ({ id: i.id, sets: 1, reps: i.reps, time_per_set_s: i.time_per_set_s }));
   const cases: Array<[string, () => Promise<{ status: number }>]> = [
     ['API-09', () => callRoute(GET, { user: b, params: { planId: plan.id } })],
-    ['API-10', () => callRoute(PATCH, { method: 'PATCH', user: b, params: { planId: plan.id }, body: { version: plan.version, items: item() } })],
-    ['API-11', () => callRoute(edit, { method: 'POST', user: b, params: { planId: plan.id }, body: { version: plan.version, text: 'swap the first' }, idempotencyKey: crypto.randomUUID() })],
-    ['API-12', () => callRoute(reset, { method: 'POST', user: b, params: { planId: plan.id }, body: { reason: null, confirm: true } })],
-    ['API-13', () => callRoute(accept, { method: 'POST', user: b, params: { planId: plan.id }, body: { version: plan.version } })],
-    ['API-14', () => callRoute(complete, { method: 'POST', user: b, params: { planId: plan.id }, body: { difficulty: 'hard' }, idempotencyKey: crypto.randomUUID() })],
+    [
+      'API-10',
+      () =>
+        callRoute(PATCH, {
+          method: 'PATCH',
+          user: b,
+          params: { planId: plan.id },
+          body: { version: plan.version, items: item() },
+        }),
+    ],
+    [
+      'API-11',
+      () =>
+        callRoute(edit, {
+          method: 'POST',
+          user: b,
+          params: { planId: plan.id },
+          body: { version: plan.version, text: 'swap the first' },
+          idempotencyKey: crypto.randomUUID(),
+        }),
+    ],
+    [
+      'API-12',
+      () =>
+        callRoute(reset, {
+          method: 'POST',
+          user: b,
+          params: { planId: plan.id },
+          body: { reason: null, confirm: true },
+        }),
+    ],
+    [
+      'API-13',
+      () =>
+        callRoute(accept, { method: 'POST', user: b, params: { planId: plan.id }, body: { version: plan.version } }),
+    ],
+    [
+      'API-14',
+      () =>
+        callRoute(complete, {
+          method: 'POST',
+          user: b,
+          params: { planId: plan.id },
+          body: { difficulty: 'hard' },
+          idempotencyKey: crypto.randomUUID(),
+        }),
+    ],
     ['API-16', () => callRoute(del, { method: 'DELETE', user: b, params: { planId: completedId } })],
   ];
 

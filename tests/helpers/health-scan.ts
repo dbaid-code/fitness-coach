@@ -4,7 +4,9 @@ import { adminSql } from './db';
 
 const EXCLUDED = new Set(['agent_logs', 'idempotency_keys']);
 
-export async function scanForPhrases(phrases: string[]): Promise<Array<{ table: string; column: string; phrase: string }>> {
+export async function scanForPhrases(
+  phrases: string[],
+): Promise<Array<{ table: string; column: string; phrase: string }>> {
   const cols = await adminSql<{ table_name: string; column_name: string; data_type: string }[]>`
     select table_name, column_name, data_type from information_schema.columns
      where table_schema = 'app' and data_type in ('text', 'ARRAY', 'jsonb', 'character varying')`;

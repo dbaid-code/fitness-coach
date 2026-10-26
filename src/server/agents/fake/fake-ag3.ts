@@ -115,8 +115,20 @@ export function fakePlan(c: PlannerContext): WorkoutPlannerOutput {
       return already || e.timedKind === 'continuous' ? it : adjust(base, volume.direction);
     });
   }
-  // Fill up with continuous cardio if short and allowed.
   const total = () => items.reduce((a, it) => a + itemSeconds(byId.get(it.exercise_id)!, it), 0);
+  // Still short: raise new exercises inside the rulebook range (V-7 allows the full range for starts).
+  if (!volume && c.mode === 'generate') {
+    const r = c.rulebookTargets;
+    const raisable = (it: Item) =>
+      !c.progressionTargets.some((t) => t.exercise_id === it.exercise_id) &&
+      byId.get(it.exercise_id)?.timedKind !== 'continuous';
+    for (const it of items) if (total() < w.minS && raisable(it)) it.sets = r.sets.max;
+    for (const it of items) {
+      while (total() < w.minS && raisable(it) && it.card_type === 'reps' && it.reps! < r.reps.max) it.reps! += 1;
+      if (total() > w.maxS && it.card_type === 'reps') it.reps! -= 1;
+    }
+  }
+  // Fill up with continuous cardio if short and allowed.
   if (total() < w.minS) {
     const cardio = items.find((it) => byId.get(it.exercise_id)?.timedKind === 'continuous');
     if (cardio) cardio.time_per_set_s = Math.min(1800, cardio.time_per_set_s! + (w.minS - total()));

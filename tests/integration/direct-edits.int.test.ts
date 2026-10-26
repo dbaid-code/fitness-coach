@@ -9,7 +9,8 @@ import { suggestPlan } from '../helpers/plans';
 import { createUser, type TestUser } from '../helpers/users';
 
 const mainsOf = (plan: any) => plan.items.filter((i: any) => i.kind === 'exercise');
-const payload = (plan: any, items = mainsOf(plan)) => ({
+type Item = { id: string; sets: number; reps: number | null; time_per_set_s: number | null };
+const payload = (plan: any, items = mainsOf(plan)): { version: number; items: Item[] } => ({
   version: plan.version,
   items: items.map((i: any) => ({ id: i.id, sets: i.sets, reps: i.reps, time_per_set_s: i.time_per_set_s })),
 });
@@ -40,7 +41,11 @@ describe('F-11 direct edits (API-10)', () => {
     const first = mainsOf(p)[0];
     expect(first.origin).toBe('user_edit');
     expect(first.total_time_s).toBeGreaterThan(mainsOf(plan)[0].total_time_s);
-    expect(mainsOf(p).slice(1).every((i: any) => i.origin === 'agent')).toBe(true);
+    expect(
+      mainsOf(p)
+        .slice(1)
+        .every((i: any) => i.origin === 'agent'),
+    ).toBe(true);
     expect(p.version).toBe(plan.version + 1);
     expect(p.total_time_s).toBe(p.items.reduce((a: number, i: any) => a + i.total_time_s, 0));
     expect(new Date(p.expires_at).getTime() - new Date(p.last_changed_at).getTime()).toBe(12 * 3_600_000);
@@ -57,8 +62,8 @@ describe('F-11 direct edits (API-10)', () => {
     expect(mainsOf(p).every((i: any) => i.origin === 'agent')).toBe(true);
     expect(p.items.map((i: any) => i.position)).toEqual(p.items.map((_: any, k: number) => k + 1));
     expect(p.items.at(-1).kind).toBe('cooldown');
-    const [{ n }] = await adminSql`select count(*)::int as n from app.plan_items where plan_id = ${plan.id}`;
-    expect(n).toBe(mains.length + 1);
+    const [nRow] = await adminSql`select count(*)::int as n from app.plan_items where plan_id = ${plan.id}`;
+    expect(nRow!.n).toBe(mains.length + 1);
   });
 
   it('over the session length is allowed and flagged over_time', async () => {
