@@ -74,4 +74,5 @@ export default defineConfig([
     },
   },
   { files: ['src/server/logging/logger.ts'], rules: { 'no-console': 'off' } },
+  { files: ['tests/**', 'scripts/**', 'evals/**'], rules: { '@typescript-eslint/no-explicit-any': 'off' } },
 ]);

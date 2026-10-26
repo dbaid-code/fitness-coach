@@ -20,7 +20,12 @@ export type LogFields = {
 
 type Level = 'info' | 'warn' | 'error';
 
-function write(level: Level, msg: string, fields: LogFields & { err?: unknown }): void {
+function write(
+  level: Level,
+  msg: string,
+  fields: LogFields & { err?: unknown },
+  bodyStrings: readonly string[] = [],
+): void {
   const { err, ...rest } = fields;
   const line: Record<string, unknown> = {
     level,
@@ -31,8 +36,8 @@ function write(level: Level, msg: string, fields: LogFields & { err?: unknown })
   };
   if (err instanceof Error) {
     line.error_name ??= err.name;
-    line.error_message = sanitizeErrorMessage(err.message, { maxChars: SERVER_ERROR_MESSAGE_MAX });
-    if (err.stack) line.stack = sanitizeErrorStack(err.stack, { maxBytes: SERVER_ERROR_STACK_MAX_BYTES });
+    line.error_message = sanitizeErrorMessage(err.message, { maxChars: SERVER_ERROR_MESSAGE_MAX, bodyStrings });
+    if (err.stack) line.stack = sanitizeErrorStack(err.stack, { maxBytes: SERVER_ERROR_STACK_MAX_BYTES, bodyStrings });
   }
   const text = scrubSecrets(JSON.stringify(line));
   if (level === 'error') console.error(text);
@@ -43,5 +48,7 @@ function write(level: Level, msg: string, fields: LogFields & { err?: unknown })
 export const logger = {
   info: (msg: string, fields: LogFields) => write('info', msg, fields),
   warn: (msg: string, fields: LogFields) => write('warn', msg, fields),
-  error: (msg: string, fields: LogFields & { err?: unknown }) => write('error', msg, fields),
+  /** `bodyStrings` (collectBodyStrings of the request body) are cut out of the error message and stack. */
+  error: (msg: string, fields: LogFields & { err?: unknown }, bodyStrings?: readonly string[]) =>
+    write('error', msg, fields, bodyStrings),
 };
