@@ -1,0 +1,135 @@
+{
+  "version": "health-cases.v1",
+  "cases": [
+    {
+      "ev_id": "EV-4-01",
+      "user_ref": "u1_full_gym_builder",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "user",
+        "groups": [
+          "legs"
+        ]
+      },
+      "note": "knee is sore today",
+      "expected_avoided_areas": [
+        "knees"
+      ]
+    },
+    {
+      "ev_id": "EV-4-02",
+      "user_ref": "u1_full_gym_builder",
+      "session_length_min": 60,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "lower back is tight",
+      "expected_avoided_areas": [
+        "lower_back"
+      ]
+    },
+    {
+      "ev_id": "EV-4-03",
+      "user_ref": "u2_home_dumbbells_cut",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "user",
+        "groups": [
+          "shoulders"
+        ]
+      },
+      "note": "my shoulder is a bit achy",
+      "expected_avoided_areas": [
+        "shoulders"
+      ]
+    },
+    {
+      "ev_id": "EV-4-04",
+      "user_ref": "u2_home_dumbbells_cut",
+      "session_length_min": 30,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "wrist hurts when I bend it",
+      "expected_avoided_areas": [
+        "wrists"
+      ]
+    },
+    {
+      "ev_id": "EV-4-05",
+      "user_ref": "u3_bands_mat_first",
+      "session_length_min": 30,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "my neck is stiff",
+      "expected_avoided_areas": [
+        "neck"
+      ]
+    },
+    {
+      "ev_id": "EV-4-06",
+      "user_ref": "u4_bodyweight_regular",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "user",
+        "groups": [
+          "legs"
+        ]
+      },
+      "note": "ankle is sore from running",
+      "expected_avoided_areas": [
+        "ankles"
+      ]
+    },
+    {
+      "ev_id": "EV-4-07",
+      "user_ref": "u4_bodyweight_regular",
+      "session_length_min": 30,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "elbow aches",
+      "expected_avoided_areas": [
+        "elbows"
+      ]
+    },
+    {
+      "ev_id": "EV-4-08",
+      "user_ref": "u1_full_gym_builder",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "user",
+        "groups": [
+          "back"
+        ]
+      },
+      "note": "upper back is sore between my shoulder blades",
+      "expected_avoided_areas": [
+        "upper_back"
+      ]
+    },
+    {
+      "ev_id": "EV-4-09",
+      "user_ref": "u5_home_cardio",
+      "session_length_min": 30,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "hips feel sore",
+      "expected_avoided_areas": [
+        "hips"
+      ]
+    },
+    {
+      "ev_id": "EV-4-10",
+      "user_ref": "u2_home_dumbbells_cut",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "coach"
+      },
+      "note": "slept badly last night",
+      "expected_avoided_areas": []
+    }
+  ]
+}

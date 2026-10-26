@@ -30,8 +30,8 @@
     "seed:curate": "tsx scripts/curate-exercises.ts",
     "seed:validate": "tsx scripts/validate-seed.ts",
     "seed:images": "tsx scripts/upload-exercise-images.ts",
-    "evals:smoke": "tsx evals/run-evals.ts --smoke",
-    "evals:full": "tsx evals/run-evals.ts --full",
+    "evals:smoke": "tsx --conditions react-server evals/run-evals.ts --smoke",
+    "evals:full": "tsx --conditions react-server evals/run-evals.ts --full",
     "evals:check": "tsx evals/manifest.ts --check",
     "trace:specs": "tsx scripts/trace-specs.ts",
     "check:bundle": "tsx scripts/check-client-bundle.ts"
