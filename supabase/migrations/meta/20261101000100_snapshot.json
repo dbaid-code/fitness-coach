@@ -1,0 +1,2543 @@
+{
+  "id": "d475937d-bd2e-4b6a-9d45-46f25d3b1ee9",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "app.agent_logs": {
+      "name": "agent_logs",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agent": {
+          "name": "agent",
+          "type": "agent_id",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mode": {
+          "name": "mode",
+          "type": "agent_mode",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempt": {
+          "name": "attempt",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "model_requested": {
+          "name": "model_requested",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model_served": {
+          "name": "model_served",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt_version": {
+          "name": "prompt_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "system_prompt_sha256": {
+          "name": "system_prompt_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "effort": {
+          "name": "effort",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request": {
+          "name": "request",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "response": {
+          "name": "response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stop_reason": {
+          "name": "stop_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cache_creation_input_tokens": {
+          "name": "cache_creation_input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cache_read_input_tokens": {
+          "name": "cache_read_input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "latency_ms": {
+          "name": "latency_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status_code": {
+          "name": "status_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validator_result": {
+          "name": "validator_result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_agent_logs__created": {
+          "name": "idx_agent_logs__created",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_agent_logs__user_created": {
+          "name": "idx_agent_logs__user_created",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_agent_logs__agent_created": {
+          "name": "idx_agent_logs__agent_created",
+          "columns": [
+            {
+              "expression": "agent",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "agent_logs_pkey": {
+          "name": "agent_logs_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_agent_logs__attempt": {
+          "name": "ck_agent_logs__attempt",
+          "value": "\"app\".\"agent_logs\".\"attempt\" between 1 and 2"
+        },
+        "ck_agent_logs__outcome": {
+          "name": "ck_agent_logs__outcome",
+          "value": "\"app\".\"agent_logs\".\"outcome\" in ('ok', 'schema_invalid', 'refusal', 'max_tokens', 'api_error', 'timeout', 'aborted')"
+        },
+        "ck_agent_logs__prompt_sha": {
+          "name": "ck_agent_logs__prompt_sha",
+          "value": "\"app\".\"agent_logs\".\"system_prompt_sha256\" ~ '^[0-9a-f]{64}$'"
+        },
+        "ck_agent_logs__tokens": {
+          "name": "ck_agent_logs__tokens",
+          "value": "\"app\".\"agent_logs\".\"input_tokens\" >= 0 and \"app\".\"agent_logs\".\"output_tokens\" >= 0 and \"app\".\"agent_logs\".\"cache_creation_input_tokens\" >= 0 and \"app\".\"agent_logs\".\"cache_read_input_tokens\" >= 0"
+        },
+        "ck_agent_logs__cost": {
+          "name": "ck_agent_logs__cost",
+          "value": "\"app\".\"agent_logs\".\"cost_usd\" >= 0"
+        },
+        "ck_agent_logs__latency": {
+          "name": "ck_agent_logs__latency",
+          "value": "\"app\".\"agent_logs\".\"latency_ms\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.app_events": {
+      "name": "app_events",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "app_events_id_seq",
+            "schema": "app",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "app_event_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "properties": {
+          "name": "properties",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "client_occurred_at": {
+          "name": "client_occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_app_events__type_time": {
+          "name": "idx_app_events__type_time",
+          "columns": [
+            {
+              "expression": "event_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_app_events__user_time": {
+          "name": "idx_app_events__user_time",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_app_events__user": {
+          "name": "fk_app_events__user",
+          "tableFrom": "app_events",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "app_events_pkey": {
+          "name": "app_events_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_app_events__client_time": {
+          "name": "ck_app_events__client_time",
+          "value": "\"app\".\"app_events\".\"client_occurred_at\" is null or \"app\".\"app_events\".\"event_type\" in ('planner_opened', 'client_error')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "auth.users": {
+      "name": "users",
+      "schema": "auth",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.completions": {
+      "name": "completions",
+      "schema": "app",
+      "columns": {
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "difficulty",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_completions__user_completed": {
+          "name": "idx_completions__user_completed",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "completed_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_completions__plan": {
+          "name": "fk_completions__plan",
+          "tableFrom": "completions",
+          "tableTo": "plans",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "plan_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "completions_pkey": {
+          "name": "completions_pkey",
+          "columns": [
+            "plan_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.equipment": {
+      "name": "equipment",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visual_hint": {
+          "name": "visual_hint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "equipment_pkey": {
+          "name": "equipment_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "uq_equipment__name": {
+          "name": "uq_equipment__name",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_equipment__id_format": {
+          "name": "ck_equipment__id_format",
+          "value": "\"app\".\"equipment\".\"id\" ~ '^[a-z0-9_]{2,40}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.user_equipment": {
+      "name": "user_equipment",
+      "schema": "app",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "equipment_id": {
+          "name": "equipment_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_user_equipment__profile": {
+          "name": "fk_user_equipment__profile",
+          "tableFrom": "user_equipment",
+          "tableTo": "profiles",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_user_equipment__equipment": {
+          "name": "fk_user_equipment__equipment",
+          "tableFrom": "user_equipment",
+          "tableTo": "equipment",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "equipment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_equipment_pkey": {
+          "name": "user_equipment_pkey",
+          "columns": [
+            "user_id",
+            "equipment_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.exercises": {
+      "name": "exercises",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "force": {
+          "name": "force",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "level": {
+          "name": "level",
+          "type": "exercise_level",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mechanic": {
+          "name": "mechanic",
+          "type": "mechanic",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "primary_muscles": {
+          "name": "primary_muscles",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "secondary_muscles": {
+          "name": "secondary_muscles",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "instructions": {
+          "name": "instructions",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_paths": {
+          "name": "image_paths",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "muscle_group": {
+          "name": "muscle_group",
+          "type": "muscle_group",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "required_equipment": {
+          "name": "required_equipment",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "body_areas_stressed": {
+          "name": "body_areas_stressed",
+          "type": "body_area[]",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "easier_version_id": {
+          "name": "easier_version_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "harder_version_id": {
+          "name": "harder_version_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "card_type": {
+          "name": "card_type",
+          "type": "card_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timed_kind": {
+          "name": "timed_kind",
+          "type": "timed_kind",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seconds_per_rep": {
+          "name": "seconds_per_rep",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rest_s": {
+          "name": "rest_s",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "setup_s": {
+          "name": "setup_s",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "dataset_version": {
+          "name": "dataset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_exercises__group_active": {
+          "name": "idx_exercises__group_active",
+          "columns": [
+            {
+              "expression": "muscle_group",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"app\".\"exercises\".\"is_active\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "exercises_pkey": {
+          "name": "exercises_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_exercises__source": {
+          "name": "ck_exercises__source",
+          "value": "\"app\".\"exercises\".\"source\" in ('free_exercise_db', 'custom')"
+        },
+        "ck_exercises__custom_prefix": {
+          "name": "ck_exercises__custom_prefix",
+          "value": "(\"app\".\"exercises\".\"source\" = 'custom') = (\"app\".\"exercises\".\"id\" like 'gc\\_%')"
+        },
+        "ck_exercises__category": {
+          "name": "ck_exercises__category",
+          "value": "\"app\".\"exercises\".\"category\" not in ('strongman', 'olympic weightlifting')"
+        },
+        "ck_exercises__card_type": {
+          "name": "ck_exercises__card_type",
+          "value": "\"app\".\"exercises\".\"card_type\" in ('reps', 'timed')"
+        },
+        "ck_exercises__timed_kind": {
+          "name": "ck_exercises__timed_kind",
+          "value": "(\"app\".\"exercises\".\"card_type\" = 'timed') = (\"app\".\"exercises\".\"timed_kind\" is not null)"
+        },
+        "ck_exercises__seconds_per_rep": {
+          "name": "ck_exercises__seconds_per_rep",
+          "value": "\"app\".\"exercises\".\"seconds_per_rep\" between 1 and 10"
+        },
+        "ck_exercises__rest_s": {
+          "name": "ck_exercises__rest_s",
+          "value": "\"app\".\"exercises\".\"rest_s\" between 0 and 300"
+        },
+        "ck_exercises__setup_s": {
+          "name": "ck_exercises__setup_s",
+          "value": "\"app\".\"exercises\".\"setup_s\" between 0 and 300"
+        },
+        "ck_exercises__no_self_chain": {
+          "name": "ck_exercises__no_self_chain",
+          "value": "\"app\".\"exercises\".\"easier_version_id\" <> \"app\".\"exercises\".\"id\" and \"app\".\"exercises\".\"harder_version_id\" <> \"app\".\"exercises\".\"id\""
+        },
+        "ck_exercises__active_instructions": {
+          "name": "ck_exercises__active_instructions",
+          "value": "not \"app\".\"exercises\".\"is_active\" or cardinality(\"app\".\"exercises\".\"instructions\") >= 1"
+        },
+        "ck_exercises__active_primary_muscles": {
+          "name": "ck_exercises__active_primary_muscles",
+          "value": "not \"app\".\"exercises\".\"is_active\" or cardinality(\"app\".\"exercises\".\"primary_muscles\") >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.idempotency_keys": {
+      "name": "idempotency_keys",
+      "schema": "app",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "endpoint": {
+          "name": "endpoint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "idempotency_state",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'in_progress'"
+        },
+        "response_status": {
+          "name": "response_status",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "response_body": {
+          "name": "response_body",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(now() + interval '1 hour')"
+        }
+      },
+      "indexes": {
+        "idx_idem__inflight": {
+          "name": "idx_idem__inflight",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "endpoint",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"app\".\"idempotency_keys\".\"state\" = 'in_progress'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_idem__expires": {
+          "name": "idx_idem__expires",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_idempotency_keys__user": {
+          "name": "fk_idempotency_keys__user",
+          "tableFrom": "idempotency_keys",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "idempotency_keys_pkey": {
+          "name": "idempotency_keys_pkey",
+          "columns": [
+            "user_id",
+            "key"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_idempotency_keys__endpoint": {
+          "name": "ck_idempotency_keys__endpoint",
+          "value": "\"app\".\"idempotency_keys\".\"endpoint\" in ('create_plan', 'edit_plan', 'complete_plan', 'equipment_scan')"
+        },
+        "ck_idempotency_keys__hash": {
+          "name": "ck_idempotency_keys__hash",
+          "value": "\"app\".\"idempotency_keys\".\"request_hash\" ~ '^[0-9a-f]{64}$'"
+        },
+        "ck_idempotency_keys__status": {
+          "name": "ck_idempotency_keys__status",
+          "value": "\"app\".\"idempotency_keys\".\"response_status\" between 100 and 599"
+        },
+        "ck_idempotency_keys__completed": {
+          "name": "ck_idempotency_keys__completed",
+          "value": "(\"app\".\"idempotency_keys\".\"state\" = 'completed') = (\"app\".\"idempotency_keys\".\"response_status\" is not null and \"app\".\"idempotency_keys\".\"response_body\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.profiles": {
+      "name": "profiles",
+      "schema": "app",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal": {
+          "name": "goal",
+          "type": "goal",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "experience": {
+          "name": "experience",
+          "type": "experience",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "days_per_week": {
+          "name": "days_per_week",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_session_length_min": {
+          "name": "last_session_length_min",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Asia/Kolkata'"
+        },
+        "onboarding_completed_at": {
+          "name": "onboarding_completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_profiles__user": {
+          "name": "fk_profiles__user",
+          "tableFrom": "profiles",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "profiles_pkey": {
+          "name": "profiles_pkey",
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_profiles__name_len": {
+          "name": "ck_profiles__name_len",
+          "value": "char_length(btrim(\"app\".\"profiles\".\"name\")) between 1 and 60"
+        },
+        "ck_profiles__days": {
+          "name": "ck_profiles__days",
+          "value": "\"app\".\"profiles\".\"days_per_week\" between 1 and 7"
+        },
+        "ck_profiles__last_len": {
+          "name": "ck_profiles__last_len",
+          "value": "\"app\".\"profiles\".\"last_session_length_min\" in (30, 45, 60)"
+        },
+        "ck_profiles__timezone_len": {
+          "name": "ck_profiles__timezone_len",
+          "value": "char_length(\"app\".\"profiles\".\"timezone\") between 1 and 64"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.routine_moves": {
+      "name": "routine_moves",
+      "schema": "app",
+      "columns": {
+        "routine_id": {
+          "name": "routine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exercise_id": {
+          "name": "exercise_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration_s": {
+          "name": "duration_s",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_routine_moves__routine": {
+          "name": "fk_routine_moves__routine",
+          "tableFrom": "routine_moves",
+          "tableTo": "routines",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "routine_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_routine_moves__exercise": {
+          "name": "fk_routine_moves__exercise",
+          "tableFrom": "routine_moves",
+          "tableTo": "exercises",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "exercise_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "routine_moves_pkey": {
+          "name": "routine_moves_pkey",
+          "columns": [
+            "routine_id",
+            "position"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_routine_moves__position": {
+          "name": "ck_routine_moves__position",
+          "value": "\"app\".\"routine_moves\".\"position\" >= 1"
+        },
+        "ck_routine_moves__duration": {
+          "name": "ck_routine_moves__duration",
+          "value": "\"app\".\"routine_moves\".\"duration_s\" between 10 and 300"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.routines": {
+      "name": "routines",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "routine_type": {
+          "name": "routine_type",
+          "type": "routine_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "focus_groups": {
+          "name": "focus_groups",
+          "type": "muscle_group[]",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration_s": {
+          "name": "duration_s",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 300
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "dataset_version": {
+          "name": "dataset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "routines_pkey": {
+          "name": "routines_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_routines__id_format": {
+          "name": "ck_routines__id_format",
+          "value": "\"app\".\"routines\".\"id\" ~ '^(warmup|cooldown)_[a-z0-9_]{2,40}$'"
+        },
+        "ck_routines__groups": {
+          "name": "ck_routines__groups",
+          "value": "cardinality(\"app\".\"routines\".\"focus_groups\") >= 1"
+        },
+        "ck_routines__duration": {
+          "name": "ck_routines__duration",
+          "value": "\"app\".\"routines\".\"duration_s\" = 300"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.plans": {
+      "name": "plans",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "plan_status",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "session_length_min": {
+          "name": "session_length_min",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "focus_mode": {
+          "name": "focus_mode",
+          "type": "focus_mode",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "focus_groups": {
+          "name": "focus_groups",
+          "type": "muscle_group[]",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "focus_reason": {
+          "name": "focus_reason",
+          "type": "focus_reason",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "focus_rest_days": {
+          "name": "focus_rest_days",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rule_48h_relaxed": {
+          "name": "rule_48h_relaxed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "warmup_routine_id": {
+          "name": "warmup_routine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cooldown_routine_id": {
+          "name": "cooldown_routine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_time_s": {
+          "name": "total_time_s",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text_edit_count": {
+          "name": "text_edit_count",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "generation_attempts": {
+          "name": "generation_attempts",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "reset_reason": {
+          "name": "reset_reason",
+          "type": "reset_reason",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after_reset_of": {
+          "name": "after_reset_of",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt_version": {
+          "name": "prompt_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rulebook_version": {
+          "name": "rulebook_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dataset_version": {
+          "name": "dataset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_changed_at": {
+          "name": "last_changed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discarded_at": {
+          "name": "discarded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expired_at": {
+          "name": "expired_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "uq_plans__one_active_per_user": {
+          "name": "uq_plans__one_active_per_user",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"app\".\"plans\".\"status\" in ('draft', 'accepted')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_plans__user_status_created": {
+          "name": "idx_plans__user_status_created",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_plans__expiry": {
+          "name": "idx_plans__expiry",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"app\".\"plans\".\"status\" in ('draft', 'accepted')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_plans__after_reset_of": {
+          "name": "idx_plans__after_reset_of",
+          "columns": [
+            {
+              "expression": "after_reset_of",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"app\".\"plans\".\"after_reset_of\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_plans__profile": {
+          "name": "fk_plans__profile",
+          "tableFrom": "plans",
+          "tableTo": "profiles",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_plans__warmup": {
+          "name": "fk_plans__warmup",
+          "tableFrom": "plans",
+          "tableTo": "routines",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "warmup_routine_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_plans__cooldown": {
+          "name": "fk_plans__cooldown",
+          "tableFrom": "plans",
+          "tableTo": "routines",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "cooldown_routine_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_plans__after_reset_of": {
+          "name": "fk_plans__after_reset_of",
+          "tableFrom": "plans",
+          "tableTo": "plans",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "after_reset_of"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "plans_pkey": {
+          "name": "plans_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "uq_plans__id_user": {
+          "name": "uq_plans__id_user",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_plans__len": {
+          "name": "ck_plans__len",
+          "value": "\"app\".\"plans\".\"session_length_min\" in (30, 45, 60)"
+        },
+        "ck_plans__groups": {
+          "name": "ck_plans__groups",
+          "value": "cardinality(\"app\".\"plans\".\"focus_groups\") >= 1"
+        },
+        "ck_plans__rest_days": {
+          "name": "ck_plans__rest_days",
+          "value": "\"app\".\"plans\".\"focus_rest_days\" >= 0"
+        },
+        "ck_plans__version": {
+          "name": "ck_plans__version",
+          "value": "\"app\".\"plans\".\"version\" >= 1"
+        },
+        "ck_plans__total": {
+          "name": "ck_plans__total",
+          "value": "\"app\".\"plans\".\"total_time_s\" > 0"
+        },
+        "ck_plans__edits": {
+          "name": "ck_plans__edits",
+          "value": "\"app\".\"plans\".\"text_edit_count\" between 0 and 5"
+        },
+        "ck_plans__attempts": {
+          "name": "ck_plans__attempts",
+          "value": "\"app\".\"plans\".\"generation_attempts\" between 1 and 2"
+        },
+        "ck_plans__expires": {
+          "name": "ck_plans__expires",
+          "value": "(\"app\".\"plans\".\"status\" in ('draft', 'accepted')) = (\"app\".\"plans\".\"expires_at\" is not null)"
+        },
+        "ck_plans__accepted": {
+          "name": "ck_plans__accepted",
+          "value": "\"app\".\"plans\".\"status\" not in ('accepted', 'completed') or \"app\".\"plans\".\"accepted_at\" is not null"
+        },
+        "ck_plans__discarded": {
+          "name": "ck_plans__discarded",
+          "value": "(\"app\".\"plans\".\"status\" = 'discarded') = (\"app\".\"plans\".\"discarded_at\" is not null)"
+        },
+        "ck_plans__expired": {
+          "name": "ck_plans__expired",
+          "value": "(\"app\".\"plans\".\"status\" = 'expired') = (\"app\".\"plans\".\"expired_at\" is not null)"
+        },
+        "ck_plans__reset_reason": {
+          "name": "ck_plans__reset_reason",
+          "value": "\"app\".\"plans\".\"reset_reason\" is null or \"app\".\"plans\".\"status\" = 'discarded'"
+        },
+        "ck_plans__not_self_reset": {
+          "name": "ck_plans__not_self_reset",
+          "value": "\"app\".\"plans\".\"after_reset_of\" <> \"app\".\"plans\".\"id\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.plan_items": {
+      "name": "plan_items",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "plan_item_kind",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "card_type": {
+          "name": "card_type",
+          "type": "card_type",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exercise_id": {
+          "name": "exercise_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "routine_id": {
+          "name": "routine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sets": {
+          "name": "sets",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reps": {
+          "name": "reps",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time_per_set_s": {
+          "name": "time_per_set_s",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_time_s": {
+          "name": "total_time_s",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin": {
+          "name": "origin",
+          "type": "item_origin",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'agent'"
+        },
+        "progression_action": {
+          "name": "progression_action",
+          "type": "progression_action",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_plan_items__user_exercise": {
+          "name": "idx_plan_items__user_exercise",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "exercise_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_plan_items__plan": {
+          "name": "fk_plan_items__plan",
+          "tableFrom": "plan_items",
+          "tableTo": "plans",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "plan_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_plan_items__exercise": {
+          "name": "fk_plan_items__exercise",
+          "tableFrom": "plan_items",
+          "tableTo": "exercises",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "exercise_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_plan_items__routine": {
+          "name": "fk_plan_items__routine",
+          "tableFrom": "plan_items",
+          "tableTo": "routines",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "routine_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "plan_items_pkey": {
+          "name": "plan_items_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_plan_items__position": {
+          "name": "ck_plan_items__position",
+          "value": "\"app\".\"plan_items\".\"position\" >= 1"
+        },
+        "ck_plan_items__sets": {
+          "name": "ck_plan_items__sets",
+          "value": "\"app\".\"plan_items\".\"sets\" between 1 and 10"
+        },
+        "ck_plan_items__reps": {
+          "name": "ck_plan_items__reps",
+          "value": "\"app\".\"plan_items\".\"reps\" between 1 and 50"
+        },
+        "ck_plan_items__time": {
+          "name": "ck_plan_items__time",
+          "value": "\"app\".\"plan_items\".\"time_per_set_s\" between 5 and 3600"
+        },
+        "ck_plan_items__total": {
+          "name": "ck_plan_items__total",
+          "value": "\"app\".\"plan_items\".\"total_time_s\" > 0"
+        },
+        "ck_plan_items__activity": {
+          "name": "ck_plan_items__activity",
+          "value": "(\"app\".\"plan_items\".\"kind\" in ('warmup', 'cooldown')) = (\"app\".\"plan_items\".\"card_type\" = 'activity')"
+        },
+        "ck_plan_items__activity_fields": {
+          "name": "ck_plan_items__activity_fields",
+          "value": "\"app\".\"plan_items\".\"card_type\" <> 'activity' or (\"app\".\"plan_items\".\"routine_id\" is not null and \"app\".\"plan_items\".\"exercise_id\" is null and \"app\".\"plan_items\".\"sets\" is null and \"app\".\"plan_items\".\"reps\" is null and \"app\".\"plan_items\".\"time_per_set_s\" is null)"
+        },
+        "ck_plan_items__reps_fields": {
+          "name": "ck_plan_items__reps_fields",
+          "value": "\"app\".\"plan_items\".\"card_type\" <> 'reps' or (\"app\".\"plan_items\".\"exercise_id\" is not null and \"app\".\"plan_items\".\"routine_id\" is null and \"app\".\"plan_items\".\"sets\" is not null and \"app\".\"plan_items\".\"reps\" is not null and \"app\".\"plan_items\".\"time_per_set_s\" is null)"
+        },
+        "ck_plan_items__timed_fields": {
+          "name": "ck_plan_items__timed_fields",
+          "value": "\"app\".\"plan_items\".\"card_type\" <> 'timed' or (\"app\".\"plan_items\".\"exercise_id\" is not null and \"app\".\"plan_items\".\"routine_id\" is null and \"app\".\"plan_items\".\"sets\" is not null and \"app\".\"plan_items\".\"time_per_set_s\" is not null and \"app\".\"plan_items\".\"reps\" is null)"
+        },
+        "ck_plan_items__activity_origin": {
+          "name": "ck_plan_items__activity_origin",
+          "value": "\"app\".\"plan_items\".\"card_type\" <> 'activity' or \"app\".\"plan_items\".\"origin\" = 'agent'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.planning_context": {
+      "name": "planning_context",
+      "schema": "app",
+      "columns": {
+        "plan_id": {
+          "name": "plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "intents": {
+          "name": "intents",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_planning_context__plan": {
+          "name": "fk_planning_context__plan",
+          "tableFrom": "planning_context",
+          "tableTo": "plans",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "plan_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "planning_context_pkey": {
+          "name": "planning_context_pkey",
+          "columns": [
+            "plan_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_planning_context__intents_array": {
+          "name": "ck_planning_context__intents_array",
+          "value": "jsonb_typeof(\"app\".\"planning_context\".\"intents\") = 'array'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.usage_counters": {
+      "name": "usage_counters",
+      "schema": "app",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usage_date": {
+          "name": "usage_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plan_generations": {
+          "name": "plan_generations",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "photo_scans": {
+          "name": "photo_scans",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_usage_counters__user": {
+          "name": "fk_usage_counters__user",
+          "tableFrom": "usage_counters",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "usage_counters_pkey": {
+          "name": "usage_counters_pkey",
+          "columns": [
+            "user_id",
+            "usage_date"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_usage_counters__plans": {
+          "name": "ck_usage_counters__plans",
+          "value": "\"app\".\"usage_counters\".\"plan_generations\" between 0 and 10"
+        },
+        "ck_usage_counters__scans": {
+          "name": "ck_usage_counters__scans",
+          "value": "\"app\".\"usage_counters\".\"photo_scans\" between 0 and 5"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.llm_spend_daily": {
+      "name": "llm_spend_daily",
+      "schema": "app",
+      "columns": {
+        "spend_date": {
+          "name": "spend_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "agent": {
+          "name": "agent",
+          "type": "agent_id",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calls": {
+          "name": "calls",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cache_creation_input_tokens": {
+          "name": "cache_creation_input_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cache_read_input_tokens": {
+          "name": "cache_read_input_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "numeric(12, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "llm_spend_daily_pkey": {
+          "name": "llm_spend_daily_pkey",
+          "columns": [
+            "spend_date",
+            "agent",
+            "model"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_llm_spend_daily__non_negative": {
+          "name": "ck_llm_spend_daily__non_negative",
+          "value": "\"app\".\"llm_spend_daily\".\"calls\" >= 0 and \"app\".\"llm_spend_daily\".\"input_tokens\" >= 0 and \"app\".\"llm_spend_daily\".\"output_tokens\" >= 0 and \"app\".\"llm_spend_daily\".\"cache_creation_input_tokens\" >= 0 and \"app\".\"llm_spend_daily\".\"cache_read_input_tokens\" >= 0 and \"app\".\"llm_spend_daily\".\"cost_usd\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "app.server_errors": {
+      "name": "server_errors",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "server_errors_id_seq",
+            "schema": "app",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "route": {
+          "name": "route",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "error_name": {
+          "name": "error_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "error_code": {
+          "name": "error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stack": {
+          "name": "stack",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_server_errors__occurred": {
+          "name": "idx_server_errors__occurred",
+          "columns": [
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "server_errors_pkey": {
+          "name": "server_errors_pkey",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ck_server_errors__method": {
+          "name": "ck_server_errors__method",
+          "value": "\"app\".\"server_errors\".\"method\" in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')"
+        },
+        "ck_server_errors__message_len": {
+          "name": "ck_server_errors__message_len",
+          "value": "char_length(\"app\".\"server_errors\".\"message\") <= 500"
+        },
+        "ck_server_errors__stack_len": {
+          "name": "ck_server_errors__stack_len",
+          "value": "octet_length(\"app\".\"server_errors\".\"stack\") <= 4096"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "app.agent_id": {
+      "name": "agent_id",
+      "schema": "app",
+      "values": [
+        "ag1_equipment_vision",
+        "ag2_input_guard",
+        "ag3_workout_planner"
+      ]
+    },
+    "app.agent_mode": {
+      "name": "agent_mode",
+      "schema": "app",
+      "values": [
+        "photo_scan",
+        "classify_note",
+        "classify_edit",
+        "generate",
+        "edit"
+      ]
+    },
+    "app.app_event_type": {
+      "name": "app_event_type",
+      "schema": "app",
+      "values": [
+        "planner_opened",
+        "plan_generated",
+        "generation_failed",
+        "text_edit_submitted",
+        "plan_reset",
+        "plan_accepted",
+        "workout_completed",
+        "plan_expired",
+        "history_entry_deleted",
+        "photo_scan_completed",
+        "client_error"
+      ]
+    },
+    "app.body_area": {
+      "name": "body_area",
+      "schema": "app",
+      "values": [
+        "neck",
+        "shoulders",
+        "elbows",
+        "wrists",
+        "upper_back",
+        "lower_back",
+        "hips",
+        "knees",
+        "ankles"
+      ]
+    },
+    "app.card_type": {
+      "name": "card_type",
+      "schema": "app",
+      "values": [
+        "reps",
+        "timed",
+        "activity"
+      ]
+    },
+    "app.difficulty": {
+      "name": "difficulty",
+      "schema": "app",
+      "values": [
+        "easy",
+        "just_right",
+        "hard"
+      ]
+    },
+    "app.exercise_level": {
+      "name": "exercise_level",
+      "schema": "app",
+      "values": [
+        "beginner",
+        "intermediate",
+        "expert"
+      ]
+    },
+    "app.experience": {
+      "name": "experience",
+      "schema": "app",
+      "values": [
+        "newbie",
+        "moderately_regular",
+        "experienced"
+      ]
+    },
+    "app.focus_mode": {
+      "name": "focus_mode",
+      "schema": "app",
+      "values": [
+        "coach",
+        "user"
+      ]
+    },
+    "app.focus_reason": {
+      "name": "focus_reason",
+      "schema": "app",
+      "values": [
+        "user_selected",
+        "coach_recency",
+        "coach_first_workout"
+      ]
+    },
+    "app.goal": {
+      "name": "goal",
+      "schema": "app",
+      "values": [
+        "build_muscle",
+        "lose_weight",
+        "stay_fit"
+      ]
+    },
+    "app.idempotency_state": {
+      "name": "idempotency_state",
+      "schema": "app",
+      "values": [
+        "in_progress",
+        "completed"
+      ]
+    },
+    "app.item_origin": {
+      "name": "item_origin",
+      "schema": "app",
+      "values": [
+        "agent",
+        "user_edit"
+      ]
+    },
+    "app.mechanic": {
+      "name": "mechanic",
+      "schema": "app",
+      "values": [
+        "compound",
+        "isolation"
+      ]
+    },
+    "app.muscle_group": {
+      "name": "muscle_group",
+      "schema": "app",
+      "values": [
+        "chest",
+        "back",
+        "shoulders",
+        "biceps",
+        "triceps",
+        "legs",
+        "core",
+        "cardio"
+      ]
+    },
+    "app.plan_item_kind": {
+      "name": "plan_item_kind",
+      "schema": "app",
+      "values": [
+        "warmup",
+        "exercise",
+        "cooldown"
+      ]
+    },
+    "app.plan_status": {
+      "name": "plan_status",
+      "schema": "app",
+      "values": [
+        "draft",
+        "accepted",
+        "completed",
+        "discarded",
+        "expired"
+      ]
+    },
+    "app.progression_action": {
+      "name": "progression_action",
+      "schema": "app",
+      "values": [
+        "start",
+        "step_up",
+        "hold",
+        "step_back",
+        "harder_version",
+        "easier_version",
+        "request_override",
+        "not_progressed"
+      ]
+    },
+    "app.reset_reason": {
+      "name": "reset_reason",
+      "schema": "app",
+      "values": [
+        "too_long",
+        "too_hard",
+        "too_easy",
+        "dislike_exercises"
+      ]
+    },
+    "app.routine_type": {
+      "name": "routine_type",
+      "schema": "app",
+      "values": [
+        "warmup",
+        "cooldown"
+      ]
+    },
+    "app.timed_kind": {
+      "name": "timed_kind",
+      "schema": "app",
+      "values": [
+        "hold",
+        "continuous"
+      ]
+    }
+  },
+  "schemas": {
+    "app": "app"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

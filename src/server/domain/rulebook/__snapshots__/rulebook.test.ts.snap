@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EV-1 rulebook v1 > renders every number, deterministically 1`] = `
+"## Training rulebook (rulebook.v1)
+
+| Goal | Sets | Reps |
+|-|-|-|
+| Build muscle | 3–4 | 8–12 |
+| Lose weight | 2–3 | 12–15 |
+| Stay fit | 2–3 | 10–15 |
+
+| Experience | Exercise levels | Starting hold |
+|-|-|-|
+| Newbie | beginner | 20 s |
+| Moderately regular | beginner, intermediate | 30 s |
+| Experienced | beginner, intermediate, expert | 45 s |
+
+- Newbies use the minimum of the sets range.
+- Order: warmup → compound → isolation → cardio → cooldown.
+- Warm-up 300 s and cool-down 300 s are always included and count toward the session.
+- The plan fills 85–100% of the session length.
+- When the focus overlaps a recent workout, keep about half of its exercises for continuity.
+- After a Reset, at least half of the main exercises differ from the reset plan.
+- Lose weight: you may add a cardio block before the cool-down.
+- Continuous cardio: 1 set of 300–1800 s.
+- Progression: cap 15 reps / 60 s; step +2 reps / +10 s; minimum 6 reps / 15 s.
+- After a Reset, follow the reason:
+  - too_long: Aim near the 85% lower bound of the time window with fewer exercises.
+  - too_hard: Use lighter volume or easier versions.
+  - too_easy: Use more volume or harder versions.
+  - dislike_exercises: Use different exercises."
+`;
