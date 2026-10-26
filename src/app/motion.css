@@ -67,3 +67,20 @@
     animation: gc-fade-in 120ms ease-out !important;
   }
 }
+
+/* Skeleton bars (handoff "Generating"): shimmer 1.4 s, static under reduced motion. */
+.gc-shimmer {
+  background: linear-gradient(90deg, var(--secondary) 0%, var(--border) 50%, var(--secondary) 100%);
+  background-size: 800px 100%;
+  animation: var(--animate-shimmer);
+}
+/* Updated row: pulse once (900 ms). */
+.gc-pulse-updated {
+  animation: var(--animate-pulse-updated);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-shimmer,
+  .gc-pulse-updated {
+    animation: none;
+  }
+}
