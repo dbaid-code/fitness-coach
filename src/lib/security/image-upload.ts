@@ -44,7 +44,12 @@ export function validatePhotoBatch(files: readonly Uint8Array[], limits: PhotoLi
     total += file.byteLength;
   }
   if (total > limits.maxTotalBytes) {
-    return { ok: false, status: 413, path: 'photos', issue: `photos larger than ${limits.maxTotalBytes} bytes in total` };
+    return {
+      ok: false,
+      status: 413,
+      path: 'photos',
+      issue: `photos larger than ${limits.maxTotalBytes} bytes in total`,
+    };
   }
 
   const images: Array<ImageInfo & { bytes: number }> = [];

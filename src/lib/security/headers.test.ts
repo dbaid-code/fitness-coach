@@ -37,16 +37,19 @@ describe('buildContentSecurityPolicy', () => {
   });
 
   it('rejects a nonce that could inject directives', () => {
-    expect(() =>
-      buildContentSecurityPolicy({ nonce: `x'; script-src *`, supabaseUrl, isDev: false }),
-    ).toThrow();
+    expect(() => buildContentSecurityPolicy({ nonce: `x'; script-src *`, supabaseUrl, isDev: false })).toThrow();
   });
 });
 
 describe('STATIC_SECURITY_HEADERS', () => {
   it('includes HSTS, nosniff, framing and opener protection', () => {
     const keys = STATIC_SECURITY_HEADERS.map((h) => h.key);
-    for (const key of ['Strict-Transport-Security', 'X-Content-Type-Options', 'X-Frame-Options', 'Cross-Origin-Opener-Policy']) {
+    for (const key of [
+      'Strict-Transport-Security',
+      'X-Content-Type-Options',
+      'X-Frame-Options',
+      'Cross-Origin-Opener-Policy',
+    ]) {
       expect(keys).toContain(key);
     }
   });

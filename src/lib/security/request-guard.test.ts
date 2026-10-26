@@ -12,30 +12,56 @@ const post = (over: Partial<MutationRequest> = {}): MutationRequest => ({
 
 describe('checkMutationRequest', () => {
   it('lets reads through without an Origin', () => {
-    expect(checkMutationRequest(post({ method: 'GET', origin: null }), { allowedOrigins, body: 'json' })).toEqual({ ok: true });
+    expect(checkMutationRequest(post({ method: 'GET', origin: null }), { allowedOrigins, body: 'json' })).toEqual({
+      ok: true,
+    });
   });
 
   it('accepts a same-origin JSON post, with or without a charset', () => {
     expect(checkMutationRequest(post(), { allowedOrigins, body: 'json' })).toEqual({ ok: true });
-    expect(checkMutationRequest(post({ contentType: 'Application/JSON; charset=utf-8' }), { allowedOrigins, body: 'json' })).toEqual({ ok: true });
+    expect(
+      checkMutationRequest(post({ contentType: 'Application/JSON; charset=utf-8' }), { allowedOrigins, body: 'json' }),
+    ).toEqual({ ok: true });
   });
 
   it('rejects a missing, opaque, foreign or cross-site origin', () => {
-    for (const over of [{ origin: null }, { origin: 'null' }, { origin: 'https://evil.test' }, { origin: 'http://localhost:3001' }, { secFetchSite: 'cross-site' }]) {
-      expect(checkMutationRequest(post(over), { allowedOrigins, body: 'json' })).toEqual({ ok: false, reason: 'origin' });
+    for (const over of [
+      { origin: null },
+      { origin: 'null' },
+      { origin: 'https://evil.test' },
+      { origin: 'http://localhost:3001' },
+      { secFetchSite: 'cross-site' },
+    ]) {
+      expect(checkMutationRequest(post(over), { allowedOrigins, body: 'json' })).toEqual({
+        ok: false,
+        reason: 'origin',
+      });
     }
   });
 
   it('rejects form posts and look-alike media types', () => {
     for (const contentType of ['text/plain', 'application/x-www-form-urlencoded', 'application/jsonp', null]) {
-      expect(checkMutationRequest(post({ contentType }), { allowedOrigins, body: 'json' })).toEqual({ ok: false, reason: 'content_type' });
+      expect(checkMutationRequest(post({ contentType }), { allowedOrigins, body: 'json' })).toEqual({
+        ok: false,
+        reason: 'content_type',
+      });
     }
   });
 
   it('requires multipart for the scan route and skips the type check for a body-less DELETE', () => {
-    expect(checkMutationRequest(post(), { allowedOrigins, body: 'multipart' })).toEqual({ ok: false, reason: 'content_type' });
-    expect(checkMutationRequest(post({ contentType: 'multipart/form-data; boundary=x' }), { allowedOrigins, body: 'multipart' })).toEqual({ ok: true });
-    expect(checkMutationRequest(post({ method: 'DELETE', contentType: null }), { allowedOrigins, body: 'none' })).toEqual({ ok: true });
+    expect(checkMutationRequest(post(), { allowedOrigins, body: 'multipart' })).toEqual({
+      ok: false,
+      reason: 'content_type',
+    });
+    expect(
+      checkMutationRequest(post({ contentType: 'multipart/form-data; boundary=x' }), {
+        allowedOrigins,
+        body: 'multipart',
+      }),
+    ).toEqual({ ok: true });
+    expect(
+      checkMutationRequest(post({ method: 'DELETE', contentType: null }), { allowedOrigins, body: 'none' }),
+    ).toEqual({ ok: true });
   });
 
   it('reads the headers off a Request', () => {
@@ -52,7 +78,10 @@ describe('readJsonBody', () => {
   const url = 'http://localhost:3000/api/v1/plans';
 
   it('parses a JSON body within the limit', async () => {
-    expect(await readJsonBody(new Request(url, { method: 'POST', body: '{"a":1}' }), 64)).toEqual({ ok: true, value: { a: 1 } });
+    expect(await readJsonBody(new Request(url, { method: 'POST', body: '{"a":1}' }), 64)).toEqual({
+      ok: true,
+      value: { a: 1 },
+    });
   });
 
   it('rejects by Content-Length before reading', async () => {
@@ -77,7 +106,10 @@ describe('readJsonBody', () => {
 
   it('treats empty, non-UTF-8 and malformed bodies as invalid JSON', async () => {
     for (const body of ['', new Uint8Array([0x7b, 0xff, 0x7d]), '{"a":']) {
-      expect(await readJsonBody(new Request(url, { method: 'POST', body }), 64)).toEqual({ ok: false, reason: 'invalid_json' });
+      expect(await readJsonBody(new Request(url, { method: 'POST', body }), 64)).toEqual({
+        ok: false,
+        reason: 'invalid_json',
+      });
     }
   });
 });

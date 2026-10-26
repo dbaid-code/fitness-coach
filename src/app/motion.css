@@ -1,0 +1,69 @@
+/* App motion for sheets and dialogs (handoff "Motion"). Kept apart from globals.css, which mirrors the
+   handoff token file. */
+@keyframes gc-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes gc-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes gc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gc-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.gc-overlay[data-state='open'] {
+  animation: gc-fade-in 200ms ease-out;
+}
+.gc-overlay[data-state='closed'] {
+  animation: gc-fade-out 200ms ease-in;
+}
+.gc-sheet[data-state='open'] {
+  animation: gc-slide-up 280ms var(--ease-gc);
+}
+.gc-sheet[data-state='closed'] {
+  animation: gc-slide-down 200ms ease-in;
+}
+.gc-fade[data-state='open'] {
+  animation: gc-fade-in 200ms ease-out;
+}
+.gc-fade[data-state='closed'] {
+  animation: gc-fade-out 150ms ease-in;
+}
+
+@media (min-width: 640px) {
+  .gc-sheet[data-state='open'] {
+    animation: gc-fade-in 200ms ease-out;
+  }
+  .gc-sheet[data-state='closed'] {
+    animation: gc-fade-out 150ms ease-in;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-sheet[data-state='open'],
+  .gc-fade[data-state='open'] {
+    animation: gc-fade-in 120ms ease-out !important;
+  }
+}

@@ -2604,7 +2604,7 @@ fitness-coach/
 │   │   ├── plan/                     # plan-view.tsx, exercise-card.tsx, activity-card.tsx, plan-editor-reducer.ts, use-direct-edits.ts, use-text-edit.ts, …
 │   │   ├── history/                  # history-list.tsx, history-entry.tsx, use-history.ts
 │   │   └── profile/                  # profile-form.tsx, delete-account-dialog.tsx, use-profile.ts
-│   ├── lib/                          # client-only helpers
+│   ├── lib/                          # client-only helpers, except lib/security (isomorphic, D-41 – D-48)
 │   │   ├── api-client.ts             # fetch wrapper: envelope, timeouts, Idempotency-Key reuse
 │   │   ├── query-client.ts
 │   │   ├── supabase-browser.ts       # Auth only
@@ -3430,6 +3430,14 @@ There is no paging for the pilot. Passive signals:
 | D-38 | Full real-model eval runs (EV-1 to EV-5) start in M6, once every feature is built. Before that, only the smoke subset and the fixture suites EV-6 to EV-8 run. `eval-gate` joins CI in M6 as a blocking check; from then on, every change to a prompt, model, rulebook or dataset needs a passing full run. | **Approved** (owner) | 2026-10-25 | PRD §9.4, §13, §19.2 |
 | D-39 | The dev Anthropic workspace limit is $25 a month (app guard 24) through the build, Phase 0 and Phase 1. In Phase 1 the monthly limits total up to $110 ($60 prod + $25 dev + $25 Supabase Pro), over PRD §12.4's $100. | **Approved** (owner; deviation from PRD §12.4) | 2026-10-25 | PRD §9.4, PRD §12.4, FR-83 |
 | D-40 | Production moves to Supabase Pro just before Phase 1; Phase 0 runs on the free tier without guaranteed backups | **Approved** (owner) | 2026-10-25 | PRD §12.1, §17.7, §19.2 |
+| D-41 | S-1: per-user rate limits in SQL (`app_private.consume_rate_limit`, fixed UTC windows): `llm_call` 12/min, 200/UTC day and under **$3.00** spent in the last 24 h, consumed before every agent call (including AG-3 attempt 2); `api_mutation` 120/min; `event_ingest` 30/min and 500/day. 429 `RATE_LIMITED` with `Retry-After`; like a 5xx it releases the idempotency key. | **Approved** (owner, security plan) | 2026-10-26 | FR-80 – FR-83, §8.9, §9.2 |
+| D-42 | S-2: the one-at-a-time in-flight guard also covers `equipment_scan` | **Approved** (owner, security plan) | 2026-10-26 | API-06, API-08, API-11 |
+| D-43 | S-3: body caps `API_JSON_BODY_MAX_BYTES = 32 768` and `API_MULTIPART_BODY_MAX_BYTES = 4 259 840`, read with `readBodyWithLimit` before parsing; over → 413 `PAYLOAD_TOO_LARGE` | **Approved** (owner, security plan) | 2026-10-26 | §6.2.5, Appendix B |
+| D-44 | S-4: `safeNextPath` replaces `safeNext` on `/auth/confirm` and log-in (control characters, dot segments, optional allowlist) | **Approved** (owner, security plan) | 2026-10-26 | FR-1, FR-2 |
+| D-45 | S-5: policy `server_errors_insert_self` (`user_id is null or user_id = auth.uid()`) replaces `server_errors_insert_any` | **Approved** (owner, security plan) | 2026-10-26 | §7.4 |
+| D-46 | S-6: deny-by-default privileges for `app`, `app_private` and `public`; the Supabase Data API is off on hosted projects | **Approved** (owner, security plan) | 2026-10-26 | §7.4, §15.1 |
+| D-47 | S-7: `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin` join the static headers; the CSP adds `object-src 'none'` and `font-src 'self'` | **Approved** (owner, security plan) | 2026-10-26 | §16.3 |
+| D-48 | S-8: every GitHub Action pinned to a commit SHA, the Vercel CLI to an exact version, workflows default to `permissions: contents: read`, `evals.yml` never on `pull_request_target`, previews behind Vercel Deployment Protection. gitleaks runs as a checksum-pinned binary (no third-party action). | **Approved** (owner, security plan) | 2026-10-26 | §13.6, §17 |
 
 ## Appendix B. Configuration constants
 

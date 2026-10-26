@@ -2,7 +2,7 @@
 
 | | |
 |-|-|
-| **Status** | Draft for owner review, 2026-10-26. Controls S-1 – S-8 are proposals until the owner approves them and they are recorded as D-41 onward. |
+| **Status** | Approved by the owner 2026-10-26; S-1 – S-8 are recorded as D-41 – D-48 in engineering doc Appendix A. |
 | **Scope** | Every security surface in the engineering doc v1.0 and `docs/specs/`, settled before feature work starts at M0 |
 | **Built** | `src/lib/security/*` (8 modules, 59 unit tests passing) and `supabase/rls-policies.sql` (reviewed, not yet executed) |
 | **Precedence** | Engineering doc §16 and `docs/specs/security-and-privacy.md` stay authoritative. This plan closes gaps in them; approved items are folded back into both in the same PR (§0.1). |

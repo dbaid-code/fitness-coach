@@ -52,7 +52,12 @@ describe('truncateUtf8 / truncateChars', () => {
 
 describe('collectBodyStrings', () => {
   it('collects nested strings at or above the minimum length', () => {
-    const body = { note: ' sore knee ', items: [{ name: 'Push-up' }, { id: 'ab' }], n: 3, nested: { deeper: ['row machine'] } };
+    const body = {
+      note: ' sore knee ',
+      items: [{ name: 'Push-up' }, { id: 'ab' }],
+      n: 3,
+      nested: { deeper: ['row machine'] },
+    };
     expect(collectBodyStrings(body).sort()).toEqual(['Push-up', 'row machine', 'sore knee']);
   });
 

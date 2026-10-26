@@ -13,12 +13,28 @@ const u32le = (n: number) => [n & 0xff, (n >> 8) & 0xff, (n >> 16) & 0xff, (n >>
 
 const app0 = [0xff, 0xe0, ...u16be(16), ...Array.from('JFIF\0', (c) => c.charCodeAt(0)), 1, 1, 0, 0, 1, 0, 1, 0, 0];
 const jpeg = (w: number, h: number, sof = 0xc0) =>
-  bytes([0xff, 0xd8], app0, [0xff, 0xff, sof, ...u16be(17), 8, ...u16be(h), ...u16be(w), 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1], [0xff, 0xd9]);
+  bytes(
+    [0xff, 0xd8],
+    app0,
+    [0xff, 0xff, sof, ...u16be(17), 8, ...u16be(h), ...u16be(w), 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1],
+    [0xff, 0xd9],
+  );
 const png = (w: number, h: number) =>
-  bytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], u32be(13), 'IHDR', u32be(w), u32be(h), [8, 2, 0, 0, 0], u32be(0));
-const riff = (chunk: string, payload: number[]) => bytes('RIFF', u32le(4 + 8 + payload.length), 'WEBP', chunk, u32le(payload.length), payload);
-const webpLossy = (w: number, h: number) => riff('VP8 ', [0x30, 0x01, 0x00, 0x9d, 0x01, 0x2a, ...u16le(w), ...u16le(h), 0, 0]);
-const webpLossless = (w: number, h: number) => riff('VP8L', [0x2f, ...u32le(((w - 1) & 0x3fff) | (((h - 1) & 0x3fff) << 14)), 0]);
+  bytes(
+    [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    u32be(13),
+    'IHDR',
+    u32be(w),
+    u32be(h),
+    [8, 2, 0, 0, 0],
+    u32be(0),
+  );
+const riff = (chunk: string, payload: number[]) =>
+  bytes('RIFF', u32le(4 + 8 + payload.length), 'WEBP', chunk, u32le(payload.length), payload);
+const webpLossy = (w: number, h: number) =>
+  riff('VP8 ', [0x30, 0x01, 0x00, 0x9d, 0x01, 0x2a, ...u16le(w), ...u16le(h), 0, 0]);
+const webpLossless = (w: number, h: number) =>
+  riff('VP8L', [0x2f, ...u32le(((w - 1) & 0x3fff) | (((h - 1) & 0x3fff) << 14)), 0]);
 const webpExtended = (w: number, h: number) => riff('VP8X', [0, 0, 0, 0, ...u24le(w - 1), ...u24le(h - 1)]);
 const padTo = (file: Uint8Array, size: number) => {
   const out = new Uint8Array(size);
@@ -83,17 +99,29 @@ describe('validatePhotoBatch', () => {
 
   it('rejects zero or six photos', () => {
     expect(validatePhotoBatch([], limits)).toMatchObject({ ok: false, status: 400, path: 'photos' });
-    expect(validatePhotoBatch(Array.from({ length: 6 }, () => jpeg(10, 10)), limits)).toMatchObject({ ok: false, status: 400, path: 'photos' });
+    expect(
+      validatePhotoBatch(
+        Array.from({ length: 6 }, () => jpeg(10, 10)),
+        limits,
+      ),
+    ).toMatchObject({ ok: false, status: 400, path: 'photos' });
   });
 
   it('rejects a PDF named .jpg (the declared type is never consulted)', () => {
     expect(validatePhotoBatch([jpeg(10, 10), bytes('%PDF-1.7')], limits)).toEqual({
-      ok: false, status: 400, path: 'photos.1', issue: 'unsupported image type',
+      ok: false,
+      status: 400,
+      path: 'photos.1',
+      issue: 'unsupported image type',
     });
   });
 
   it('answers 413 for a 1.6 MB file and for a total over 4 MiB', () => {
-    expect(validatePhotoBatch([padTo(jpeg(10, 10), 1_600_000)], limits)).toMatchObject({ ok: false, status: 413, path: 'photos.0' });
+    expect(validatePhotoBatch([padTo(jpeg(10, 10), 1_600_000)], limits)).toMatchObject({
+      ok: false,
+      status: 413,
+      path: 'photos.0',
+    });
     const big = padTo(jpeg(10, 10), 1_500_000);
     expect(validatePhotoBatch([big, big, big], limits)).toMatchObject({ ok: false, status: 413, path: 'photos' });
   });
@@ -101,11 +129,17 @@ describe('validatePhotoBatch', () => {
   it('rejects a 9000 px header and an unreadable header', () => {
     expect(validatePhotoBatch([jpeg(9000, 100)], limits)).toMatchObject({ ok: false, status: 400, path: 'photos.0' });
     expect(validatePhotoBatch([jpeg(10, 10, 0xc3)], limits)).toEqual({
-      ok: false, status: 400, path: 'photos.0', issue: 'unreadable image header',
+      ok: false,
+      status: 400,
+      path: 'photos.0',
+      issue: 'unreadable image header',
     });
   });
 
   it('checks types before sizes, as the spec orders them', () => {
-    expect(validatePhotoBatch([padTo(jpeg(10, 10), 1_600_000), bytes('GIF89a')], limits)).toMatchObject({ status: 400, path: 'photos.1' });
+    expect(validatePhotoBatch([padTo(jpeg(10, 10), 1_600_000), bytes('GIF89a')], limits)).toMatchObject({
+      status: 400,
+      path: 'photos.1',
+    });
   });
 });

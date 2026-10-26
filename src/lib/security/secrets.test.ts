@@ -1,13 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { CLIENT_BUNDLE_FORBIDDEN_PATTERNS, findSecrets, findSecretsInPublicEnv, jwtRole, scrubSecrets } from './secrets';
+import {
+  CLIENT_BUNDLE_FORBIDDEN_PATTERNS,
+  findSecrets,
+  findSecretsInPublicEnv,
+  jwtRole,
+  scrubSecrets,
+} from './secrets';
 
 // Fixtures are assembled at runtime so this file holds no secret-shaped literal for gitleaks.
 const anthropicKey = ['sk', 'ant', 'api03', 'x'.repeat(40)].join('-');
 const supabaseSecret = ['sb', 'secret', 'y'.repeat(32)].join('_');
 const dbUrl = `${['postgres', 'ql'].join('')}://gc_app:pw@db.test:6543/postgres`;
 const b64url = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
-const jwt = (role: string) => `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ role, iss: 'supabase' })}.${'s'.repeat(43)}`;
+const jwt = (role: string) =>
+  `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ role, iss: 'supabase' })}.${'s'.repeat(43)}`;
 const adminRole = ['service', 'role'].join('_');
 
 describe('findSecretsInPublicEnv', () => {
@@ -33,7 +40,9 @@ describe('findSecretsInPublicEnv', () => {
         EMPTY: undefined,
       }),
     ).toEqual([]);
-    expect(findSecretsInPublicEnv({ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: `sb_publishable_${'z'.repeat(30)}` })).toEqual([]);
+    expect(
+      findSecretsInPublicEnv({ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: `sb_publishable_${'z'.repeat(30)}` }),
+    ).toEqual([]);
   });
 });
 
@@ -57,7 +66,15 @@ describe('jwtRole', () => {
 
 describe('CLIENT_BUNDLE_FORBIDDEN_PATTERNS', () => {
   it('matches each of the spec strings', () => {
-    const leaks = [anthropicKey, supabaseSecret, adminRole, dbUrl, ['SUPABASE', 'SECRET', 'KEY'].join('_'), ['ANTHROPIC', 'API', 'KEY'].join('_'), ['DATABASE', 'URL'].join('_')];
+    const leaks = [
+      anthropicKey,
+      supabaseSecret,
+      adminRole,
+      dbUrl,
+      ['SUPABASE', 'SECRET', 'KEY'].join('_'),
+      ['ANTHROPIC', 'API', 'KEY'].join('_'),
+      ['DATABASE', 'URL'].join('_'),
+    ];
     for (const leak of leaks) expect(findSecrets(`var x="${leak}"`, CLIENT_BUNDLE_FORBIDDEN_PATTERNS)).toHaveLength(1);
   });
 
