@@ -17,7 +17,7 @@ import { createDeadline } from '@/server/http/deadline';
 import { AppError } from '@/server/http/errors';
 import { assertNoOtherInflight } from '@/server/http/idempotency';
 import type { SuggestWorkoutResponse } from '@/shared/schemas/api/plans';
-import type { MuscleGroup } from '@/shared/constants';
+import { PLAN_EXPIRY_HOURS, type MuscleGroup } from '@/shared/constants';
 import type { ResetReason } from '@/shared/schemas/domain/enums';
 import { runGenerationCore } from './generation-core';
 import { loadCompletedWorkouts } from './history-loader';
@@ -162,7 +162,7 @@ export async function suggest(
         datasetVersion: ref.datasetVersion,
         createdAt: now,
         lastChangedAt: now,
-        expiresAt: new Date(now.getTime() + 12 * 3_600_000),
+        expiresAt: new Date(now.getTime() + PLAN_EXPIRY_HOURS * 3_600_000),
       });
       const items = await insertItems(tx, row.id, userId, plan.items);
       if (core.sessionIntents.length > 0) await planningContextRepo.upsert(tx, row.id, userId, core.sessionIntents);

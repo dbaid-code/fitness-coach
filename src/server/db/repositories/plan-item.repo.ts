@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { Tx } from '../client';
 import { planItems } from '../schema';
 
@@ -23,4 +23,24 @@ export async function insertMany(tx: Tx, items: NewPlanItem[]): Promise<PlanItem
 export async function replaceAll(tx: Tx, userId: string, planId: string, items: NewPlanItem[]): Promise<PlanItemRow[]> {
   await tx.delete(planItems).where(and(eq(planItems.userId, userId), eq(planItems.planId, planId)));
   return insertMany(tx, items);
+}
+
+/** Updates one item's numbers, position or origin (direct edits keep item IDs). */
+export async function update(
+  tx: Tx,
+  userId: string,
+  itemId: string,
+  patch: Partial<Pick<NewPlanItem, 'sets' | 'reps' | 'timePerSetS' | 'totalTimeS' | 'origin' | 'position'>>,
+): Promise<void> {
+  await tx
+    .update(planItems)
+    .set(patch)
+    .where(and(eq(planItems.userId, userId), eq(planItems.id, itemId)));
+}
+
+export async function deleteByIds(tx: Tx, userId: string, planId: string, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  await tx
+    .delete(planItems)
+    .where(and(eq(planItems.userId, userId), eq(planItems.planId, planId), inArray(planItems.id, ids)));
 }

@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { Tx } from '../client';
 import { completions, planItems, plans } from '../schema';
 
@@ -33,7 +33,7 @@ export type CompletedRow = {
 export async function listCompleted(
   tx: Tx,
   userId: string,
-  opts: { limit?: number; before?: Date } = {},
+  opts: { limit?: number; before?: { completedAt: Date; planId: string } } = {},
 ): Promise<CompletedRow[]> {
   const base = tx
     .select({
@@ -46,7 +46,16 @@ export async function listCompleted(
     })
     .from(completions)
     .innerJoin(plans, eq(plans.id, completions.planId))
-    .where(and(eq(completions.userId, userId), eq(plans.status, 'completed')))
+    .where(
+      and(
+        eq(completions.userId, userId),
+        eq(plans.status, 'completed'),
+        // API-15 keyset cursor: (completed_at, plan_id) strictly before the last entry of the previous page.
+        opts.before
+          ? sql`(${completions.completedAt}, ${plans.id}) < (${opts.before.completedAt.toISOString()}::timestamptz, ${opts.before.planId}::uuid)`
+          : undefined,
+      ),
+    )
     .orderBy(desc(completions.completedAt), desc(plans.id));
   const heads = opts.limit ? await base.limit(opts.limit) : await base;
   if (heads.length === 0) return [];

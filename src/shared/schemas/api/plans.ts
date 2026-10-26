@@ -1,6 +1,6 @@
 // Plan request/response schemas (api-conventions.md §8; plan-generation.md §1; plan-* specs).
 import { z } from 'zod';
-import { MUSCLE_GROUPS, NOTE_MAX_CHARS } from '@/shared/constants';
+import { HARD_BOUNDS, MAX_MAIN_ITEMS, MUSCLE_GROUPS, NOTE_MAX_CHARS } from '@/shared/constants';
 import { Difficulty, FocusReason, MuscleGroup, PlanStatus, ResetReason, SessionLength, StatusMessage } from './common';
 
 export const PlanItemDto = z.object({
@@ -105,3 +105,72 @@ export type RoutineHowToDto = {
 
 export const ResetReasonSchema = ResetReason;
 export const DifficultySchema = Difficulty;
+
+// API-10 direct edits (plan-direct-edits.md §5): the full ordered list of main items after edits.
+export const DirectEditRequest = z
+  .object({
+    version: z.number().int().min(1),
+    items: z
+      .array(
+        z
+          .object({
+            id: z.uuid(),
+            sets: z.number().int().min(HARD_BOUNDS.sets.min).max(HARD_BOUNDS.sets.max),
+            reps: z.number().int().min(HARD_BOUNDS.reps.min).max(HARD_BOUNDS.reps.max).nullable(),
+            time_per_set_s: z
+              .number()
+              .int()
+              .min(HARD_BOUNDS.timePerSetS.min)
+              .max(HARD_BOUNDS.timePerSetS.max)
+              .nullable(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(MAX_MAIN_ITEMS),
+  })
+  .strict();
+export type DirectEditRequest = z.infer<typeof DirectEditRequest>;
+
+// API-11 text edits (plan-text-edits.md §2).
+export const TextEditRequest = z
+  .object({ version: z.number().int().min(1), text: z.string().trim().min(1).max(NOTE_MAX_CHARS) })
+  .strict();
+export type TextEditResponse = {
+  outcome: 'updated' | 'unchanged' | 'discarded' | 'generation_failed';
+  plan: PlanDto | null;
+  status: StatusMessage;
+  changed_item_ids: string[];
+  text_edits_remaining: number;
+};
+
+// API-12 reset, API-13 accept, API-14 complete.
+export const ResetRequest = z.object({ reason: ResetReason.nullable(), confirm: z.boolean() }).strict();
+export const AcceptRequest = z.object({ version: z.number().int().min(1) }).strict();
+export const CompleteRequest = z.object({ difficulty: Difficulty }).strict();
+
+// API-15 / API-16 history (history.md).
+export const HistoryEntryDto = z.object({
+  plan_id: z.uuid(),
+  completed_at: z.iso.datetime(),
+  local_date: z.iso.date(),
+  focus_groups: z.array(MuscleGroup),
+  session_length_min: SessionLength,
+  difficulty: Difficulty,
+  total_time_min: z.number().int(),
+  items: z.array(
+    z.object({
+      kind: z.enum(['warmup', 'exercise', 'cooldown']),
+      card_type: z.enum(['reps', 'timed', 'activity']),
+      name: z.string(),
+      sets: z.number().int().nullable(),
+      reps: z.number().int().nullable(),
+      time_per_set_s: z.number().int().nullable(),
+    }),
+  ),
+});
+export type HistoryEntryDto = z.infer<typeof HistoryEntryDto>;
+export const HistoryQuery = z
+  .object({ limit: z.coerce.number().int().min(1).max(50).default(20), cursor: z.string().max(200).optional() })
+  .strict();
+export type HistoryPage = { entries: HistoryEntryDto[]; next_cursor: string | null };

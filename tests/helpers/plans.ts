@@ -42,3 +42,26 @@ export async function insertItem(
     values (${planId}, ${userId}, ${position}, 'exercise', 'reps', ${exerciseId}, 3, 10, 240) returning id`;
   return row!.id;
 }
+
+/** A real draft through API-08 with the fake agents (focus chest, 45 min unless overridden). */
+export async function suggestPlan(
+  user: import('./users').TestUser,
+  over: Record<string, unknown> = {},
+): Promise<any> {
+  const { POST } = await import('@/app/api/v1/plans/route');
+  const { callRoute } = await import('./call-route');
+  const r = await callRoute(POST, {
+    method: 'POST',
+    user,
+    idempotencyKey: crypto.randomUUID(),
+    body: {
+      session_length_min: 45,
+      focus: { mode: 'user', groups: ['chest'] },
+      note: null,
+      after_reset_of: null,
+      ...over,
+    },
+  });
+  if (r.json?.data?.outcome !== 'plan_ready') throw new Error(`suggestPlan failed: ${JSON.stringify(r.json)}`);
+  return r.json.data.plan;
+}
