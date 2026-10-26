@@ -35,7 +35,7 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 - **M6:** EV-3 injection cases (upper-case and spaced closing tags, bidi characters); scripted red-flag abuse test stops at 12/min.
 
 ## 4. Owner items
-- **P-1** Supabase dev project, **P-2** Vercel project (`bom1`), **P-3** Anthropic dev workspace and key ($25 cap), **P-6** GitHub secrets and the `production` environment. These block M0's preview check, M1 curation and M3 smoke evals.
+- **P-1** Supabase dev project, **P-2** Vercel project (`bom1`), **P-3** Anthropic dev workspace and key ($25 cap), **P-6** GitHub secrets (`SUPABASE_DB_URL_DEV`, `ANTHROPIC_API_KEY_EVALS`) and the `production` environment (branch rule only). These block M0's preview check, M1 curation and M3 smoke evals.
 - **Machine:** the build runs in a Claude cloud container. Docker runs there. The Supabase images come from Docker Hub because the default `public.ecr.aws` download host is blocked. Node 24 gets installed in the session (the container ships 22). gitleaks and the Supabase CLI get installed too. The container can't reach Supabase or Vercel, so hosted-database work runs in GitHub Actions and I check previews through GitHub. Owner steps: `docs/runbooks/owner-setup-dev.md`.
 - **Security plan:** approved (§6). It is recorded as D-41 to D-48 in the M0 PR.
 - **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 photos** (10 cases, no people), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
@@ -64,4 +64,9 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 8. One branch and PR per milestone, stacked on the previous one.
 9. OD-08 reviews don't block the next milestone; findings are fixed as they come in.
 
-Deviations this adds (each recorded in its PR): Preview runs `AGENTS_MODE=fake` until M3; a CI preview smoke job uses Vercel's protection-bypass secret; `VERCEL_TOKEN` is created at M7, not M0.
+Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 after the owner's first pass through the runbook):
+- Preview runs `AGENTS_MODE=fake` until M3.
+- **No `SUPABASE_ACCESS_TOKEN`.** Every hosted-database step connects with `SUPABASE_DB_URL_*`.
+- **The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews. Each milestone PR carries the preview's `/api/v1/health` link, and the owner confirms `"db":"ok"`. Vercel Authentication stays on for previews.
+- **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are created at M7, not M0.

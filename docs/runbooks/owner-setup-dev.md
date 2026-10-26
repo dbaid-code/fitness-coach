@@ -2,7 +2,7 @@
 
 | | |
 |-|-|
-| **Status** | Ready for the owner, 2026-10-26 |
+| **Status** | Revised after the owner's first pass, 2026-10-26 |
 | **Source** | `docs/specs/deployment-and-environments.md` §2–3, `docs/specs/auth.md` §2, `docs/specs/supabase-schema.sql` header, `.env.example` |
 | **Not covered** | P-3 prod, P-4 and P-5. Those come at M7 and get their own runbook. |
 | **Caution** | The dashboard menu names below are from memory of each product's UI as of 2026. If a label differs, follow the closest match and tell me so I can fix this page. |
@@ -13,7 +13,7 @@
 3. **Claude's cloud container can't reach Supabase or Vercel** (the network policy blocks them; tested 2026-10-26). That's deliberate, and it shapes this setup:
    - Hosted-database work (migrations, seed) runs in **GitHub Actions** using GitHub secrets.
    - Preview deploys come from **Vercel's GitHub integration**.
-   - I check previews through GitHub (deployment status, plus a CI job that calls `/api/v1/health`).
+   - I watch preview deploys through GitHub's deployment status. The owner opens each milestone's preview health link, because CI can't get past Vercel's preview login on the Hobby plan (P-2 step 8).
    - The only secret the container gets is one capped Anthropic dev key (P-3, step 5).
 
 Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
@@ -61,21 +61,25 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
      - `http://localhost:3000/auth/confirm`
      - `https://*-<vercel-team-slug>.vercel.app/auth/confirm`. You get the slug in P-2 step 2; come back and add this then.
    - Leave Site URL for now. Email templates come in M2.
-7. **Collect connection values** (Project Settings → API Keys, and the **Connect** button at the top of the project):
+7. **Collect connection values.** You're only copying five values into your password manager; nothing gets pasted anywhere else yet.
 
-   | Value | Where | Record as |
+   **Part A: three values you copy as they are** (Project Settings, the gear icon, → **API Keys**; use the new keys page, not the "Legacy API keys" tab):
+
+   | Record as | Looks like | Where |
    |-|-|-|
-   | Project URL | Project Settings → API | `supabase-dev-url` |
-   | Publishable key | API Keys | `supabase-dev-publishable` |
-   | Secret key | API Keys → create a secret key named `vercel-preview` | `supabase-dev-secret` |
-   | Transaction pooler string (port **6543**) | Connect → Transaction pooler | used to build `DATABASE_URL` |
-   | Session pooler string (port **5432**) | Connect → Session pooler | used to build `SUPABASE_DB_URL_DEV` |
+   | `supabase-dev-url` | `https://abcdefghijklmnop.supabase.co` | Project URL. If it isn't on API Keys, look under Settings → Data API or the **Connect** dialog. |
+   | `supabase-dev-publishable` | starts with `sb_publishable_` | API Keys → Publishable key |
+   | `supabase-dev-secret` | starts with `sb_secret_` | API Keys → Secret keys → **New secret key**, named `vercel-preview` |
 
-   Build the two connection strings:
-   - `DATABASE_URL` = `postgresql://gc_app.<project-ref>:<gc_app password>@<pooler host>:6543/postgres`. Take the transaction pooler string, replace the user `postgres` with `gc_app`, and use the gc_app password.
-   - `SUPABASE_DB_URL_DEV` = the session pooler string as shown (user `postgres.<project-ref>`, port 5432), with the database password from step 2.
-8. **Personal access token** (for the Supabase CLI in CI): go to supabase.com/dashboard/account/tokens → Generate new token, named `gym-coach-ci`, with an expiry of 90 days if offered. Record as `supabase-access-token`.
+   The random part of the URL (`abcdefghijklmnop`) is the **project ref**.
 
+   **Part B: two connection addresses you copy and edit** (the **Connect** button at the top of the project → connection string → URI). Don't use "Direct connection".
+   - **`DATABASE_URL`** (for the app). Copy the **Transaction pooler** string (port **6543**). Change `postgres.` at the start to **`gc_app.`** and replace `[YOUR-PASSWORD]` (brackets included) with the **gc_app password from step 4**:
+     `postgresql://gc_app.<ref>:<gc_app password>@<pooler host>:6543/postgres`
+   - **`SUPABASE_DB_URL_DEV`** (for GitHub's database jobs). Copy the **Session pooler** string (port **5432**). Keep `postgres.` and replace `[YOUR-PASSWORD]` with the **database password from step 2**.
+
+   Copy the host part exactly as Supabase shows it. If the database password contains any of `@ : / # ? % &`, the address breaks. Reset it (Settings → Database → Reset database password) to letters and digits only.
+8. **No personal access token.** Nothing in the plan needs one: migrations, migration repair and the seed scripts all connect with `SUPABASE_DB_URL_DEV`. An account token could act on every project in the organisation, so don't create it. If a later milestone needs one, I'll ask, naming the exact permission and limiting it to `gym-coach-dev`.
 ## P-2 Vercel project (about 20 min)
 1. Sign in at **vercel.com** with GitHub.
    **Licence check:** the free Hobby plan is for non-commercial use only under Vercel's terms (from memory; check their fair-use page). That's fine for a private prototype. You'll need Pro ($20/user/month) before any commercial or Phase 1 use.
@@ -83,9 +87,9 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 3. Go to **Add New → Project** → Import Git Repository. Grant the Vercel GitHub app access to **only** `dbaid-code/fitness-coach` → Import.
    - Framework preset: Next.js. Leave the build settings at their defaults.
    - The first production build of `main` will fail, because there's no app on `main` yet. Ignore it. M0 adds `vercel.json` with `git.deploymentEnabled.main = false`, so `main` never auto-deploys to production.
-4. Project → Settings → General → **Node.js Version: 24.x**.
+4. Open the **`fitness-coach` project** (not the team's settings) → **Settings** (left sidebar) → **Build and Deployment** → Node.js Version → **24.x**. Optional: new projects already default to the latest LTS release, and M0 sets `"engines": { "node": "24.x" }` in `package.json`, which overrides the dashboard ([Vercel docs](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions)).
 5. Settings → **Functions** → region **Mumbai (`bom1`)**. `vercel.json` also pins it.
-6. Settings → **Environment Variables**. Add each of these with the **Preview** environment ticked only (not Production, not Development). Mark secret values **Sensitive** where offered:
+6. **Project** → Settings → **Environment Variables**. Not the team-level page of the same name, which holds variables shared across projects. For each row, enter the key and value and tick **only Preview**. For secrets, turn on **Sensitive**: untick Development first, because the switch is disabled while Development is ticked. A sensitive value can't be viewed or edited later; if you mistype one, delete it and add it again.
 
    | Name | Value |
    |-|-|
@@ -101,34 +105,27 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 
    Don't set `NEXT_PUBLIC_SITE_URL`; Preview derives it from `VERCEL_URL`.
    *Deviation from spec §3, which says `AGENTS_MODE=real` on Preview:* the agents don't exist until M3, so `fake` keeps M0–M2 previews from making any Anthropic calls.
-7. Settings → Environment Variables → tick **Automatically expose System Environment Variables**.
-8. Settings → **Deployment Protection**. Keep **Vercel Authentication on for previews**, so strangers can't open previews. Then, under **Protection Bypass for Automation**, create a secret and record it as `vercel-bypass-secret`. A CI job uses it to call `/api/v1/health` on each preview. *This is an addition to the spec; without it, the M0 exit check can't be automated behind protection.*
-9. Settings → General: copy the **Project ID**. Team Settings → General: copy the **Team ID** (this is `VERCEL_ORG_ID`).
-10. **Don't create a `VERCEL_TOKEN` yet.** Only `deploy.yml` uses it, and that's M7. A token that exists but isn't needed is just exposure.
+7. **System environment variables: nothing to do.** "Automatically expose System Environment Variables" is on by default for new projects ([Vercel docs](https://vercel.com/docs/environment-variables/system-environment-variables)). If a preview's health check shows `version: "local"` instead of a commit ID, it's off, and I'll ask you to tick it.
+8. **Deployment Protection: leave it at the default.** Hobby's Standard Protection keeps previews behind a Vercel login ([Vercel docs](https://vercel.com/docs/deployments/deployment-protection)). **Don't turn it off.** Previews hold real Supabase and Anthropic keys, so an open preview would let anyone sign up and spend the budget. *Protection Bypass for Automation* is Enterprise-only, or Pro with a paid add-on ([Vercel docs](https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection)), so CI can't call previews. Instead, at each milestone I post the preview's `/api/v1/health` link on the PR, and you open it while signed in to Vercel and check for `"db":"ok"`.
+9. **Project and Team IDs: nothing to do yet.** They're needed only for the production deploy at M7.
+10. **No `VERCEL_TOKEN` yet.** It's created at M7, for the production deploy only.
 
-## P-6 GitHub secrets and the `production` environment (about 10 min)
+## P-6 GitHub secrets and the `production` environment (about 5 min)
 1. Go to github.com/dbaid-code/fitness-coach → Settings → **Secrets and variables → Actions** → New repository secret:
 
    | Secret | Value |
    |-|-|
-   | `SUPABASE_ACCESS_TOKEN` | `supabase-access-token` |
    | `SUPABASE_DB_URL_DEV` | session-pooler string from P-1 step 7 |
    | `ANTHROPIC_API_KEY_EVALS` | `gc-dev-ci` |
-   | `VERCEL_AUTOMATION_BYPASS_SECRET` | `vercel-bypass-secret` |
 
-2. Settings → **Environments** → New environment named `production`:
-   - **Required reviewers:** add yourself.
-   - **Prevent self-review:** off. You're the only reviewer, so leaving it on would block every deploy.
-   - **Deployment branches and tags:** "Selected branches and tags", with rule `main`.
-   - Leave its secrets (`SUPABASE_DB_URL_PROD`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) empty until M7.
-
-   **Plan check:** the repo is private. From memory, GitHub only allows environment *required reviewers* on private repos with a paid plan, and the exact plan has changed over time. If the "Required reviewers" option is missing or greyed out, tell me. The fallback is a manual `workflow_dispatch` deploy with branch protection, which I'll write up at M7.
+2. Settings → **Environments** → New environment named `production`. Under **Deployment branches and tags**, choose "Selected branches and tags" and add the rule `main`. Add no secrets until M7. If Environments isn't offered on your plan, skip this step; nothing uses it before M7.
+   **No required reviewer:** GitHub offers required reviewers on environments only for public repositories, or private ones on Enterprise ([GitHub docs](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)). Instead, the production deploy workflow (M7) runs only when someone clicks **Run workflow** (`workflow_dispatch`), and only people with write access can click it. With you as the only collaborator, that click is the approval. If you ever add a collaborator with write access, this gate needs revisiting.
 3. Settings → Actions → General → Workflow permissions: **Read repository contents** (the default for new repos). This matches S-8.
 
 ## When you're done
 Send me a message saying which steps are done, with no values. I'll then:
 - push the M0 branch and confirm a preview deploy appears on the PR;
-- have CI call `/api/v1/health` on the preview and expect `db: "ok"`, which proves the schema, `gc_app` and `DATABASE_URL` are all correct;
+- post the preview's `/api/v1/health` link on the PR for you to open; `"db":"ok"` proves the schema, `gc_app` and `DATABASE_URL` are all correct;
 - at M1, record the pasted schema as applied (`supabase migration repair … --status applied`) and apply migration 9 (rate limits, S-5, S-6) through CI.
 
 ## Rotation
