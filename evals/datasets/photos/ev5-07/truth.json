@@ -1,0 +1,10 @@
+{
+  "ev_id": "EV-5-07",
+  "setting": "small_gym",
+  "items": [
+    "dumbbells",
+    "kettlebells",
+    "medicine_ball"
+  ],
+  "unclear": false
+}

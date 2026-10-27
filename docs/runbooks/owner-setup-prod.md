@@ -52,5 +52,5 @@ After the first deploy, sign up in production with the Supabase organisation log
 | 5 | Exercise images in prod Storage | Owner (P-5 step 6) |
 | 6 | E2E smoke on production with a test account, then deleted via API-20 | After the first deploy |
 | 7 | Runbooks exist; `weekly-review.sql` runs on prod | Runbooks done; SQL run after deploy |
-| 8 | `eval-gate` green on the release commit | **Blocked**: needs a real eval run (dev key) and the EV-5 photos |
+| 8 | `eval-gate` green on the release commit | **Blocked**: needs a real eval run (dev key) and the owner's EV-5 truth-list review |
 | 9 | Before Phase 1: Supabase Pro; OD-06; DPDP and Anthropic retention terms | Later |

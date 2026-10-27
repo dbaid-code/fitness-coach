@@ -38,7 +38,7 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 - **P-1** Supabase dev project, **P-2** Vercel project (`bom1`), **P-3** Anthropic dev workspace and key ($25 cap), **P-6** GitHub secrets (`SUPABASE_DB_URL_DEV`, `ANTHROPIC_API_KEY_EVALS`) and the `production` environment (branch rule only). These block M0's preview check, M1 curation and M3 smoke evals.
 - **Machine:** the build runs in a Claude cloud container. Docker runs there. The Supabase images come from Docker Hub because the default `public.ecr.aws` download host is blocked. Node 24 gets installed in the session (the container ships 22). gitleaks and the Supabase CLI get installed too. The container can't reach Supabase or Vercel, so hosted-database work runs in GitHub Actions and I check previews through GitHub. Owner steps: `docs/runbooks/owner-setup-dev.md`.
 - **Security plan:** approved (§6). It is recorded as D-41 to D-48 in the M0 PR.
-- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 photos** (10 cases, no people), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
+- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 truth-list review** (10 photo cases), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
 
 ## 5. Conflicts found (fixed in the PR that touches each one)
 1. `auth.md` §8 `safeNext` lets `/%09/evil.test` through (G-3). Use `safeNextPath` (S-4).
@@ -70,7 +70,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 24. **Resolved (owner, 2026-10-27, D-49 and D-50).** Newbie 60-minute sessions were infeasible for Stay fit and Lose weight (minimum sets cap 12 cards at ~36 min vs ~41 min needed). Now `fill-capacity.ts` decides before AG-3 runs: a newbie gets the full sets range when the minimum can't fill the session (rulebook v2); if even that can't reach 85%, the plan may be short (floor = 85% of the pool's capacity), is stored with `short_session` (migration 10) and shows the static `SHORT_SESSION` message under the outcome banner. Direct edits keep the flag; AI edits recalculate it.
 25. **EV-1** holds by construction: the generation core only returns plans the production validator accepted. The runner reports generation failures alongside it.
 26. **`deploy.yml`** uses the repository's Supabase CLI (devDependency, lockfile-pinned) instead of `supabase/setup-cli`, and Vercel CLI `63.1.2`; it re-runs `evals:check` before migrating.
-27. **EV-5 photos** could not be fetched: the container's network policy refuses `commons.wikimedia.org` and `upload.wikimedia.org`. EV-5 reports `cases: 0` and fails until photos exist.
+27. **EV-5 photos** (2026-10-27): 10 cases fetched from Wikimedia Commons, CC0 or public domain only, cropped to remove people and phone watermarks, re-encoded without metadata (`evals/datasets/photos/SOURCES.md`). Commons rate-limits this container's IP, so they came down at 960 px through `upload.wikimedia.org` (`thumb.wikimedia.org` isn't allowed). Skipped: public-domain "EFTA" gym images in Category:Gyms, which come from the DOJ Epstein-files release. Gap: no benches, racks or selectorised machines (see the photos README). Truth lists await the owner's review.
 28. **Fake AG-3** (tests only) brings in continuous cardio when strength cards can't reach the window, as a planner would; without it, a newbie with a treadmill failed at 60 min in the fake evals although the pool can fill it.
 
 ## 6. Owner decisions (2026-10-26, defaults accepted)
@@ -101,7 +101,7 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 | M2 | Done | Mailpit sign-up E2E, deletion cascade test | Hosted Auth settings (owner) |
 | M3 | Done with fakes | 23 generation integration tests, planner/plan view E2E | Smoke evals on real models (P-3) |
 | M4 | Done | edits, text edits, reset, accept, complete, history: integration + E2E; EV-6 health scan | — |
-| M5 | Done with fakes | photo scan integration + privacy test + E2E | EV-5 photo set (network policy) |
+| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth-list review (owner) |
 | M6 | Harness done | metrics views tested; eval runner plumbing verified with fakes (EV-2: 30/30 generations); `eval-gate` blocking | First real run, owner label/judge reviews |
 | M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
 
