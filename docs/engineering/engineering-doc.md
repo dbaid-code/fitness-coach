@@ -1721,7 +1721,7 @@ Per exercise **E** the user has done before:
 | Time window | 85–100% of the session length |
 | Continuity | Keep about half the exercises when the focus overlaps a recent workout (judged by EV-2, not validated) |
 | After Reset | ≥ half of the main exercises differ (V-9). *Too long* → aim near 85% with fewer exercises. *Too hard* → lighter volume or easier versions. *Too easy* → more volume or harder versions. *Don't like the exercises* → different exercises. |
-| Lose weight | When the coach chooses, a cardio block before the cool-down is allowed |
+| Cardio | Lose weight: when the coach chooses the focus, a cardio block before the cool-down is allowed. Any goal: cardio when the user picks Cardio as a focus. Enforced by the candidate filter and V-4; the prompt's shorter wording can't widen it, because AG-3 only sees filtered candidates |
 | Progression | §8.6.3: cap 15 reps or 60 s; step +2 reps or +10 s; minimum 6 reps or 15 s |
 
 ### 8.7 Plan validator (`src/server/domain/validator/plan-validator.ts`, PRD §8.13)
