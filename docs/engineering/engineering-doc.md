@@ -3,12 +3,12 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | **1.0**, approved by the owner (2026-10-25); records D-38 – D-40. History: 0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applied OD-05, OD-07 and OD-08 and deferred OD-06 to Phase 1; 0.4 applied the Claude Design handoff and its approvals (D-30 – D-37). |
-| **Status** | **Approved by the owner (2026-10-25). Implementation may begin with M0 (§19).** |
+| **Version** | **1.1** (2026-10-27): records the owner-approved D-41 – D-51 (security plan S-1 – S-8, rulebook v2 and short sessions, no rehab rule). 1.0 was approved by the owner (2026-10-25) and records D-38 – D-40. History: 0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applied OD-05, OD-07 and OD-08 and deferred OD-06 to Phase 1; 0.4 applied the Claude Design handoff and its approvals (D-30 – D-37). |
+| **Status** | **Approved by the owner (2026-10-25).** M0 – M7 are built; release status and open items are in `validation-report.md`. |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
-| **Date** | 2026-10-25 |
-| **Requirements source** | `docs/gym-coach-prd.md` v1.1 (v1.0 approved; v1.1 adds the design labels only) |
+| **Date** | 2026-10-25 (v1.0); last updated 2026-10-27 (v1.1) |
+| **Requirements source** | `docs/gym-coach-prd.md` v1.2 (v1.0 approved; v1.1 adds the design labels; v1.2 applies D-49 – D-51) |
 | **Design source** | `docs/design/handoff/` (Claude Design handoff, owner-approved 2026-10-25): layout, look and feel, tokens, UI labels |
 | **Readers** | Owner (approval and the open decisions in §20.2); coding agent (build) |
 
@@ -3331,7 +3331,7 @@ There is no paging for the pilot. Passive signals:
 | Milestone | Features | Exit criteria | Owner input |
 |-|-|-|-|
 | **M0 Foundation** | F-01 | CI green; preview deploys; health check | P-1, P-2, P-3 (dev), P-6 |
-| **M1 Data and engines** | F-02, F-07, F-16 | Migrations and seed apply; RLS tests pass; domain engines at 100% branch coverage; EV-7 and EV-8 pass | Spot-check the 10% exercise sample; approve the equipment list, muscle-group map and rulebook v1 (OD-08) |
+| **M1 Data and engines** | F-02, F-07, F-16 | Migrations and seed apply; RLS tests pass; domain engines at 100% branch coverage; EV-7 and EV-8 pass | Spot-check the 10% exercise sample; approve the equipment list, muscle-group map and rulebook (v2 since D-49) (OD-08) |
 | **M2 Accounts and profile** | F-03, F-04, F-17 | Sign-up → onboarding E2E; deletion cascade test | — (handoff UI copy approved, D-37) |
 | **M3 Agents and generation** | F-08, F-06, F-09, F-10 | Suggest Workout E2E with fake agents; eval runner and smoke subset working against the real models; no full runs yet (D-38) | Review the EV-3 labels |
 | **M4 Plan changes and lifecycle** | F-11, F-12, F-13, F-14, F-15 | Every UF-8 – UF-14 E2E passes; EV-6 passes | — |
@@ -3382,7 +3382,7 @@ There is no paging for the pilot. Passive signals:
 | **OD-05** | UI copy outside Appendix A: `STILL_WORKING`, empty states, network errors (`src/shared/messages/ui-copy.ts`). Also a missing `RECENCY_STRIP` variant for "history exists, but nothing in the last 14 days". | Owner reviews the wording | Variant: "Last trained: nothing in the last 14 days" | **Decided: approved as proposed** (D-29) |
 | **OD-06** | **Reopened for Phase 1.** Resend is parked and auth emails use Supabase's built-in sender (D-28). That sender delivers only to members of the Supabase organisation, at about 2 emails an hour: fine for the owner in Phase 0, but friends would get no verification or reset emails. | (a) Point Supabase's custom SMTP setting at a **dedicated** Gmail account with an app password. No domain and no new vendor; a settings change, no code. Gmail SMTP and app-password details are from memory, so check Google's current rules. (b) The owner creates each friend's account in the Supabase dashboard (auto-confirmed) and handles password resets by hand. Self-service sign-up and reset (FR-1, FR-2) wouldn't work as specified. (c) Bring Resend back with a domain before Phase 1. | **(a)**, with a dedicated Gmail account rather than your personal one, because the app password stored in Supabase gives access to that mailbox | **Deferred by the owner until Phase 1 is reached.** Built-in sender meanwhile; must be settled before Phase 1 starts. |
 | **OD-07** | Whether the verification link signs the user in or sends them to the login page. PRD §6.1 says "verify … then log in". | (a) Sign in automatically. (b) Send them to the login page. | (a): one step fewer, same security | **Decided: (b)**, send them to the login page (D-09) |
-| **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook v1 (PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | **Agreed:** reviews at M1, M3, M5 and M6 (§19.2) |
+| **OD-08** | Owner reviews required by the PRD: equipment list (PRD §10.2), muscle-group map (PRD §10.3), rulebook (v2 since D-49; PRD §8.8), 10% exercise sample, test labels | — | Done during M1, M3, M5 and M6 | **Agreed:** reviews at M1, M3, M5 and M6 (§19.2) |
 | **OD-09** | Confirm the interpretations D-11 – D-19 (Appendix A) in one go when approving this document | Approve or amend | Approve | **Decided: approved** (D-11 – D-19) |
 | **OD-10** | App icon and wordmark export from the design handoff: "GC" in the wordmark face, `primary-foreground` on `primary`, square, at 512, 180, 32 and 16 px; the wordmark as SVG outlines | Approve, or ask for changes | Approve | **Decided 2026-10-25: approved** (D-36). The files still need exporting into `public/icons/` and `manifest.webmanifest` before M7. |
 | **OD-11** | New UI copy from the design handoff, outside PRD Appendix A: screen titles, helper lines, Reset and Discard bodies, toasts, "{n} plans left today" | Approve, or amend the wording | Approve | **Decided 2026-10-25: approved** (D-37) |
