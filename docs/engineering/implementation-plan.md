@@ -43,7 +43,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 - [ ] 🟨 **Step 4: M1 Data and engines (F-02, F-07, F-16)**
   - [x] 🟩 Migrations for all §7 tables, enums, constraints, RLS, grants, the `gc_app` role, triggers, `pg_cron` jobs and `SECURITY DEFINER` functions
   - [ ] 🟨 Seed pipeline: free-exercise-db import (pinned commit), LLM-assisted curation, `validate-seed.ts` in CI, images to Storage, idempotent seed script — *heuristic curation; LLM curation pending the P-3 key*
-  - [ ] 🟥 Owner reviews: 10% exercise sample, equipment list, muscle-group map, rulebook v1 (OD-08)
+  - [ ] 🟨 Owner reviews: 10% exercise sample, equipment list, muscle-group map, rulebook v1 (OD-08) — *equipment list and muscle-group map approved 2026-10-27; 10% sample (after LLM curation) and rulebook v2 (D-49) pending*
   - [x] 🟩 Domain engines at 100% branch coverage: recency, candidate filter, progression, time model, validator V-1 to V-11, plan diff, status resolver, header, state machine, limits policy
   - [ ] 🟨 Limits and spend guard: usage counters in the user's local day, spend ledger, app guard; capture the provider spend-cap error once on the dev workspace — *provider spend-cap error capture pending P-3*
   - [x] 🟩 Integration job in CI (Supabase local): cross-user RLS tests, cron SQL, one-active-plan index; EV-7 and EV-8 pass
