@@ -18,4 +18,5 @@ keywords = ["sb_secret_"]
 description = "Test fixtures with obviously fake values"
 paths = ['''src/lib/security/.*\.test\.ts''', '''src/server/config/env\.test\.ts''', '''tests/helpers/test-env\.ts''']
 # CLAUDE.md:55 is a Playwright command that the generic rule mistakes for a key.
-regexes = ['''chromium-pixel7''']
+# evals/lib/env.ts sets inert `sb_*_evals_placeholder_*` values so env.ts validates; nothing connects to them.
+regexes = ['''chromium-pixel7''', '''sb_(publishable|secret)_evals_placeholder_0+''']
