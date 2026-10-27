@@ -4,6 +4,8 @@ import { expect, suggest, test } from './fixtures';
 
 // frontend-architecture.md §8: axe on every page and open sheet/dialog → 0 serious or critical.
 async function axe(page: Page, label: string) {
+  // Sheets and dialogs fade in (200 ms); measuring contrast mid-animation reports false failures.
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'));
   const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
   expect(bad.map((v) => `${label}: ${v.id} (${v.nodes.length})`)).toEqual([]);

@@ -44,7 +44,7 @@
 Layout per handoff "Plan — draft (hero)" and "Plan — accepted".
 1. **`PlanStatusRow`**: tag **Draft** (outline) or **Accepted** (ink + green check); on the right the **Reset** icon button (`RefreshCw`, `aria-label="Reset"`, desktop tooltip; D-32) → `plan-reset.md`.
 2. **`PlanHeader`**: `renderMessage(plan.header)`, `text-h1`, `tabIndex={-1}`; receives focus after a generation or edit.
-3. **`StatusBanner`**: the last generation/edit `status` (kept in `PlanScreen` state, cleared on the next action).
+3. **`StatusBanner`**: the last generation/edit `status` (kept in `PlanScreen` state, cleared on the next action). Under it, when `plan.short_session`: `SHORT_SESSION` (ink, `Info`), shown whenever the plan is open (D-50).
 4. **`PlanCardList`**: container with 1 px dividers; rows in `position` order.
    - **`ActivityCard`** (warm-up first, cool-down last): kicker WARM-UP / COOL-DOWN, routine name, "5 min". The whole row is a button opening the how-to sheet (API-18). Never movable, no controls.
    - **`ExerciseCard`**: row number, name, meta ("{sets} sets · {reps} reps" or "{sets} sets · {t} s each"), time "{N} min" (`total_time_min`). The row body is a button → how-to (API-17). Draft only: the sliders button (`SlidersHorizontal`, `aria-label="Change {name}"`, `aria-expanded`) opens that row's controls (`plan-direct-edits.md`), one row at a time (D-34). After a text edit, changed rows show the **Updated** tag, `highlight` fill, 4 px left bar, and pulse once (900 ms; none under reduced motion).

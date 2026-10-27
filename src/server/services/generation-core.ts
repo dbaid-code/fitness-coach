@@ -25,7 +25,7 @@ import { deriveFocusReason, focusRestDays } from '@/server/domain/header/plan-he
 import { changedItems } from '@/server/domain/plan-diff/plan-diff';
 import { computeTargets, holdTargetFor, type ProgressionTarget } from '@/server/domain/progression/progression';
 import { daysAgo, daysSinceTrained, historySummary } from '@/server/domain/recency/recency';
-import { rulebookTargets } from '@/server/domain/rulebook/rulebook.v1';
+import { decideFill } from '@/server/domain/fill/fill-capacity';
 import {
   guardShortCircuit,
   resolveEditStatus,
@@ -101,6 +101,8 @@ export type BuiltItem = {
 };
 
 export type BuiltPlan = {
+  /** D-50: the candidates could not fill the session, so the plan is short and shows SHORT_SESSION. */
+  shortSession: boolean;
   focusGroups: MuscleGroup[];
   focusReason: 'user_selected' | 'coach_recency' | 'coach_first_workout';
   focusRestDays: number | null;
@@ -299,7 +301,15 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
   for (const w of [...input.history].sort((a, b) => a.completedAt.getTime() - b.completedAt.getTime())) {
     for (const i of w.mainItems) historyIds.set(i.exerciseId, daysAgo(w.completedAt, input.now, tz));
   }
-  const rb = rulebookTargets(input.profile.goal, input.profile.experience);
+  // D-49 / D-50: can this pool fill the session? Decided by code before AG-3 is called.
+  const fill = decideFill({
+    candidates,
+    targets: targetMap,
+    goal: input.profile.goal,
+    experience: input.profile.experience,
+    sessionLengthMin: input.sessionLengthMin,
+  });
+  const rb = fill.rulebook;
   const routines = [...ref.routines.values()];
 
   const currentPlanCtx = input.currentPlan
@@ -334,6 +344,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     routines,
     progressionTargets: targets,
     rulebookTargets: rb,
+    timeFloorS: fill.minTotalS,
     currentIntents,
     sessionIntents: input.sessionIntents.map((i) => ({ intent_id: i.intent_id, intent: i.intent, applied: i.applied })),
     reset: input.reset,
@@ -372,6 +383,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
           totalS: input.currentPlan.totalS,
         }
       : null,
+    fill: { rulebook: rb, minTotalS: fill.minTotalS },
   };
 
   const resolve = (p: PlannerSummary) => (suggest ? resolveSuggestStatus(guard, p) : resolveEditStatus(guard, p));
@@ -601,6 +613,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     planner: plannerSummary,
     failureReason: null,
     plan: {
+      shortSession: fill.shortSession,
       focusGroups,
       focusReason: reason,
       focusRestDays: restDays,

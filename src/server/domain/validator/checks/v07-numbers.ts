@@ -1,5 +1,5 @@
 import { HARD_BOUNDS } from '@/shared/constants';
-import { CONTINUOUS_CARDIO_S, rulebookTargets } from '../../rulebook/rulebook.v1';
+import { CONTINUOUS_CARDIO_S, rulebookTargets } from '../../rulebook/rulebook.v2';
 import {
   fail,
   pass,
@@ -14,7 +14,7 @@ const inRange = (n: number | null, r: { min: number; max: number }) => n !== nul
 
 // V-7: progression targets, rulebook starts (D-15), continuous cardio, request overrides (§8.6.3).
 export function v07Numbers(plan: Plan, ctx: ValidationContext): CheckResult {
-  const t = rulebookTargets(ctx.goal, ctx.experience);
+  const t = ctx.fill?.rulebook ?? rulebookTargets(ctx.goal, ctx.experience);
   const failures: Record<string, number[]> = {};
   const add = (code: string, i: number) => (failures[code] ??= []).push(i);
 

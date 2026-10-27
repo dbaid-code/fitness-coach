@@ -46,6 +46,7 @@ export type MessageCode = (typeof MESSAGE_CODES)[number];
 | `EXPIRED` | — | This workout expired. Plan a new one when you're ready. |
 | `DISCARD_CONFIRM` | — | Discard your current workout? |
 | `OVER_TIME_WARNING` | `m: number`, `t: number` | This workout now runs about {m} min — longer than your {t} min. |
+| `SHORT_SESSION` | — | This workout is shorter than your session. Your equipment and focus don't have enough exercises to fill it. |
 | `HEADER_USER` | `groups: MuscleGroup[]`, `t: number` | {groups} · {t} min |
 | `HEADER_COACH` | `groups: MuscleGroup[]`, `n?: number` | With `n`: "Coach picked {groups} — rested at least {n} days" (n = 1: "1 day"). Without `n` (no focus group trained yet): "Coach picked {groups} — not trained yet" |
 | `HEADER_FIRST` | `groups: MuscleGroup[]` | First workout — starting with {groups} |

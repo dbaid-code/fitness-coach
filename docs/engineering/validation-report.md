@@ -2,7 +2,7 @@
 
 | | |
 |-|-|
-| **Date** | 2026-10-26 |
+| **Date** | 2026-10-26; updated 2026-10-27 for D-49 / D-50 |
 | **Branch** | `claude/build-application-notes-w22yde` (11 milestone commits, `729de82` … `cb3445c`) |
 | **Scope** | Build notes §2: M0 to M7, with M7 prepared but not deployed |
 | **Environment** | Claude cloud container: local Supabase stack (Docker), `AGENTS_MODE=fake`, Chromium. No Anthropic key, no hosted Supabase or Vercel. |
@@ -10,20 +10,19 @@
 ## 1. Verdict
 The application is built end to end and works with the deterministic fake agents: every journey in the PRD (sign-up → onboarding → plan → edit → accept → complete → history, plus photos, reset, limits and account deletion) passes automated tests and a browser walkthrough.
 
-**It is not release-ready.** Three things stand between this branch and Phase 0:
+**It is not release-ready.** Two things stand between this branch and Phase 0:
 1. **No real-model run has happened.** The container had no Anthropic key, so AG-1/AG-2/AG-3 have only run as fakes. The eval gate (D-38) is wired, blocking, and red until `pnpm evals:full` runs on the dev key.
 2. **EV-5 has no photos.** The owner approved me fetching public-domain photos, but the container's network policy refuses `commons.wikimedia.org` and `upload.wikimedia.org`.
-3. **An open product conflict (§7.1):** a Newbie with goal Stay fit or Lose weight can never get a 60-minute plan. Owner decision needed.
 
-## 2. Test results (all run on 2026-10-26, final commit)
+## 2. Test results (re-run on 2026-10-27 after D-49 / D-50)
 | Check | Command | Result |
 |-|-|-|
 | Lint (incl. import boundaries) | `pnpm lint` | 0 errors, 1 pre-existing warning (`window.location.assign` for the 401 redirect in `api-client.ts`) |
 | Format | `pnpm format:check` | clean |
 | Types | `pnpm typecheck` | 0 errors |
-| Unit + coverage thresholds | `pnpm test` | **365 passed**; `src/server/domain/**`, `src/shared/time-model/**`, `src/shared/messages/**` at 100% statements/branches/functions/lines |
-| Integration (local Supabase, fake agents) | `pnpm test:int` | **138 passed** in 19 files |
-| E2E (Chromium, Pixel 7) | `pnpm test:e2e --project=chromium-pixel7` | **15 passed** in 10 specs, including axe on every page, sheet and dialog (0 serious/critical) |
+| Unit + coverage thresholds | `pnpm test` | **377 passed**; `src/server/domain/**`, `src/shared/time-model/**`, `src/shared/messages/**` at 100% statements/branches/functions/lines |
+| Integration (local Supabase, fake agents) | `pnpm test:int` | **142 passed** in 20 files |
+| E2E (Chromium, Pixel 7) | `pnpm test:e2e --project=chromium-pixel7` | **16 passed** in 11 specs, including axe on every page, sheet and dialog (0 serious/critical) |
 | E2E (WebKit, iPhone 15) | — | **Not run**: WebKit isn't installed in the container. The CI `e2e` job runs it on `main`. |
 | Seed | `pnpm seed:validate` | passed |
 | Build | `pnpm build` | passed |
@@ -31,7 +30,7 @@ The application is built end to end and works with the deterministic fake agents
 | Dependency audit | `pnpm audit --prod --audit-level high` | no known vulnerabilities |
 | Traceability | `pnpm trace:specs` | **59/59** PRD `FR-`/`AG-`/`EV-` IDs have an ID-named test |
 | Eval gate | `pnpm evals:check` | **fails as designed**: no `evals/results/latest.json` (no real run) |
-| Eval plumbing | `evals/run-evals.ts --full --fake` | all five suites run end to end; scores are meaningless with fakes, and nothing is written to `latest.json` |
+| Eval plumbing | `evals/run-evals.ts --full --fake` | all five suites run end to end; scores are meaningless with fakes, and nothing is written to `latest.json`. EV-2: 30/30 generations produce a plan (4 failed before D-49) |
 
 **CI has not run.** No pull request was opened (the brief asked for none), so GitHub Actions hasn't executed `ci.yml`. Every job's commands were run locally except gitleaks and the WebKit project.
 
@@ -102,16 +101,17 @@ Run through the real UI against the local stack with fake agents. Screens are in
 | FR-46 no agent text in UI | mapper test with a sentinel; names come from the DB |
 
 ## 7. Open items and owner decisions
-### 7.1 Decision needed: Newbie 60-minute sessions always fail (Stay fit, Lose weight)
-**Finding.** Rulebook v1 pins newbies to the goal's minimum sets (2 for Stay fit and Lose weight). With `MAX_MAIN_ITEMS = 12` and the default time model, 12 cards at the top of the rep range give at most **~36 min** of main work. A 60-minute session needs **~41 min** (85% of 60 minus 10 min warm-up and cool-down). Continuous cardio is the only filler, and it's allowed only for Lose weight with coach focus or a Cardio focus. Result: `GENERATION_FAILED` every time, whatever the equipment. Seen in the eval run as 4 of 30 EV-2 generations failing (`u3` and `u5`, both at 60 min). Computed from `rulebook.v1.ts` and the seed (build notes §5.24).
+### 7.1 Resolved: sessions the exercises can't fill (D-49, D-50, owner 2026-10-27)
+**Was:** a Newbie with goal Stay fit or Lose weight could never get a 60-minute plan (minimum sets cap 12 cards at ~36 min against ~41 min needed), and any pool too small to fill the session returned `GENERATION_FAILED`.
 
-**Options**, recommended first:
-1. **Let newbies use the full sets range when the session can't otherwise fill** (one rule in the rulebook and V-7). Keeps 60 min, small code change, needs a rulebook bump to v2 and an EV-2 re-run.
-2. Raise `MAX_MAIN_ITEMS` to 14. Simple, but a 14-exercise newbie session is a lot.
-3. Allow continuous cardio as filler for every goal. Changes the plan character for strength-focused users.
-4. Hide 60 min for newbies. Simplest, but removes a choice.
+**Now:** code decides before the planner runs (`src/server/domain/fill/fill-capacity.ts`), from the numbers V-7 allows:
+1. **D-49:** a newbie gets the goal's full sets range when the minimum can't fill the session (rulebook v2). Verified: a Stay-fit newbie with full equipment gets a 51–60 min plan at 60 min.
+2. **D-50:** if even that can't reach 85%, the plan may be shorter, but must reach 85% of what the exercises allow, so a lazy short plan still fails and retries. The plan is stored with `short_session` (migration 10), the `plan_generated` event carries it, and the plan view shows *"This workout is shorter than your session. Your equipment and focus don't have enough exercises to fill it."* under the outcome banner (`validation-screens/41-short-session.jpg`).
+3. Direct edits keep the flag; AI edits recalculate it against that edit's exercises and keep the edit rule (D-04). No main exercise at all is still `GENERATION_FAILED`.
 
-A related, smaller risk: with limited equipment and a single-group focus (for example a Newbie, Back, "only dumbbells today"), the pool can be too small to fill 45 min. The PRD treats this as `GENERATION_FAILED` (PRD §8.10), which the app does. Bodyweight-only users have just 1 back and 2 shoulder exercises in the seed.
+Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-capacity.int.test.ts` (4), `short-session.spec.ts` (E2E, banner order and reload), schema parity with migration 10.
+
+**Still to watch:** the header still says the requested length ("Shoulders & Triceps · 60 min") while the total reads "About 40 min"; the banner explains the gap. The thin bodyweight pools remain (1 back and 2 shoulder exercises), so those users will see the banner often. Adding bodyweight exercises to the seed is the real fix.
 
 ### 7.2 Blocked on owner setup
 | # | Item | Blocks | How to unblock |
@@ -127,7 +127,7 @@ A related, smaller risk: with limited equipment and a single-group focus (for ex
 - **Extra UI copy:** `toast.rateLimited`, `common.close`, `plan.drag` aren't in the approved copy list (build notes §5.17).
 
 ### 7.4 Deviations recorded
-Build notes §5.12 – §5.27 list each one with its resolution: idempotency release by expiry, timezone check, heuristic curation and the custom biceps row, `HEADER_COACH` with 0 rest days, gitleaks binary, extra copy keys, coverage scope, provider spend-error matcher, fake-planner behaviour, the client-bundle allowlist, the base64 probe fix, the concurrency note, the 60-minute conflict, EV-1, the deploy workflow choices and the EV-5 network block.
+Build notes §5.12 – §5.28 list each one with its resolution: idempotency release by expiry, timezone check, heuristic curation and the custom biceps row, `HEADER_COACH` with 0 rest days, gitleaks binary, extra copy keys, coverage scope, provider spend-error matcher, fake-planner behaviour, the client-bundle allowlist, the base64 probe fix, the concurrency note, the 60-minute conflict, EV-1, the deploy workflow choices and the EV-5 network block.
 
 ## 8. Defects found and fixed during the build (selection)
 | Defect | Found by | Fix |

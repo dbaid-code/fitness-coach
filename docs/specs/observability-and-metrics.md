@@ -40,7 +40,7 @@ export const logger = {
 | `event_type` | Written by | `properties` (strict) |
 |-|-|-|
 | `planner_opened` | API-19 (client) | `{}` |
-| `plan_generated` | API-08 tx 2 | `{ session_length_min: 30\|45\|60, focus_mode: 'coach'\|'user', focus_groups: MuscleGroup[], attempts: 1\|2, latency_ms: int, after_reset: boolean }` |
+| `plan_generated` | API-08 tx 2 | `{ session_length_min: 30\|45\|60, focus_mode: 'coach'\|'user', focus_groups: MuscleGroup[], attempts: 1\|2, latency_ms: int, after_reset: boolean, short_session: boolean }` |
 | `generation_failed` | API-08 failure path | `{ session_length_min, focus_mode, reason: 'validation'\|'api'\|'deadline', latency_ms }` |
 | `text_edit_submitted` | API-11 (whenever the edit is counted) | `{ edit_index: 1..5, latency_ms, plan_changed: boolean }` |
 | `plan_reset` | API-12 | `{ reset_reason: ResetReason \| null, from_status: 'draft'\|'accepted' }` |

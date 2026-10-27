@@ -233,7 +233,7 @@ Everything in this section is in MVP scope.
   Cards must not show rest, weight, intensity, speed or incline.
 - **FR-42** Every plan starts with a warm-up card and ends with a cool-down card. Each is a fixed routine taken from the database and matched to the focus (section 10.5).
 - **FR-43** Tapping a card shows how to do it: the instructions and image from the exercise database, or the list of moves for a warm-up or cool-down routine. This text comes from the database and is never written by the LLM.
-- **FR-44 Time.** Code calculates total time (section 8.8). A plan's total must fall between **85% and 100%** of the session length.
+- **FR-44 Time.** Code calculates total time (section 8.8). A plan's total must fall between **85% and 100%** of the session length. Exception (D-50): when the available exercises can't fill the session, the plan may be shorter, must reach 85% of what they allow, and shows `SHORT_SESSION`.
 - **FR-45 Plan header.** Shows the focus and a fixed-format reason (Appendix A): one wording when the user picked the groups, another when the coach picked based on recency, and another for a first workout.
 - **FR-46** The app never shows text written by an agent. All messages come from the fixed catalog in Appendix A.
 
@@ -536,7 +536,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | Claude API error or timeout | The SDK's standard retries, then `GENERATION_FAILED` (or `NOT_UNDERSTOOD` for AG-2, `PHOTO_NONE` for AG-1) |
 | AG-2 returns output that doesn't match the schema | Treated as `NOT_UNDERSTOOD`; plan unchanged |
 | Spend cap reached | `SPEND_CAP`; no LLM calls; viewing plans and history and completing workouts still work |
-| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Generate the best plan it can. If it's still below 85% after the retry, `GENERATION_FAILED` |
+| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Code checks first. A newbie gets the goal's full sets range if the minimum can't fill it (D-49). If even that can't reach 85%, the plan may be shorter: it must reach 85% of what the candidates allow and shows `SHORT_SESSION` in the outcome area (D-50). A plan below that after the retry → `GENERATION_FAILED`. No main exercise at all → `GENERATION_FAILED` |
 | No history, or too little | Rulebook defaults; first-workout header; never refuse to plan |
 
 ---
@@ -875,6 +875,7 @@ These weren't decided explicitly in the interview. The owner confirmed them when
 | `EXPIRED` | Plan expired | "This workout expired. Plan a new one when you're ready." |
 | `DISCARD_CONFIRM` | Reset on an accepted workout | "Discard your current workout?" |
 | `OVER_TIME_WARNING` | Direct edits push the total over the session length | "This workout now runs about {m} min — longer than your {t} min." |
+| `SHORT_SESSION` | The available exercises can't fill the session (D-50); shown under the outcome banner while the plan is open | "This workout is shorter than your session. Your equipment and focus don't have enough exercises to fill it." |
 | `HEADER_USER` | Plan header, user picked the groups | "{groups} · {t} min" |
 | `HEADER_COACH` | Plan header, coach picked | "Coach picked {groups} — rested at least {n} days" (or "— not trained yet") |
 | `HEADER_FIRST` | Plan header, first workout | "First workout — starting with {groups}" |

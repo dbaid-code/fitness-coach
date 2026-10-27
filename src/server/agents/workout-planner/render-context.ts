@@ -3,11 +3,11 @@ import { MUSCLE_GROUPS, type MuscleGroup } from '@/shared/constants';
 import type { Experience, Goal, ResetReason } from '@/shared/schemas/domain/enums';
 import type { NumberedIntent } from '@/shared/schemas/domain/intents';
 import type { WorkoutPlannerOutput } from '@/shared/schemas/domain/workout-plan';
-import { mainTimeWindow, resolveTimeParams } from '@/shared/time-model/time-model';
+import { ACTIVITY_CARD_S, mainTimeWindow, resolveTimeParams } from '@/shared/time-model/time-model';
 import type { Frequency } from '@/server/domain/candidate-filter/focus-rules';
 import type { ProgressionTarget } from '@/server/domain/progression/progression';
 import type { HistorySummaryEntry } from '@/server/domain/recency/recency';
-import type { RulebookTargets } from '@/server/domain/rulebook/rulebook.v1';
+import type { RulebookTargets } from '@/server/domain/rulebook/rulebook.v2';
 import type { CheckResult } from '@/server/domain/validator/plan-validator';
 import type { Exercise, Focus, Routine } from '@/server/domain/types';
 
@@ -28,6 +28,8 @@ export type PlannerContext = {
   routines: Routine[];
   progressionTargets: ProgressionTarget[];
   rulebookTargets: RulebookTargets;
+  /** V-8's lower bound for the whole plan (D-50); the main window's minimum is this less 10 min. */
+  timeFloorS: number;
   currentIntents: NumberedIntent[];
   sessionIntents: Array<NumberedIntent & { applied: boolean }>;
   reset: { discardedExerciseIds: string[]; reason: ResetReason | null } | null;
@@ -52,7 +54,8 @@ export type PlannerContext = {
 const tag = (name: string, value: unknown) => `<${name}>${JSON.stringify(value)}</${name}>`;
 
 export function renderSections(c: PlannerContext) {
-  const w = mainTimeWindow(c.sessionLengthMin);
+  const window = mainTimeWindow(c.sessionLengthMin);
+  const w = { minS: Math.min(window.minS, c.timeFloorS - 2 * ACTIVITY_CARD_S), maxS: window.maxS };
   return {
     request: { mode: c.mode, session_length_min: c.sessionLengthMin, main_time_window_s: { min: w.minS, max: w.maxS } },
     profile: { goal: c.goal, experience: c.experience },

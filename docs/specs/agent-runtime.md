@@ -194,7 +194,7 @@ fakeAgents.calls(agentId): unknown[];      // captured inputs, e.g. to assert th
 - **AG-3 `valid`:** builds a plan that passes V-1 – V-11 from the request context:
   1. Focus: user groups; or, in coach mode, the first group (in `MUSCLE_GROUPS` order) present in the candidates; `focus_reason` echoes code's expectation.
   2. Routines: the first warm-up and cool-down whose `focus_groups` intersect the focus (`*_full_body` otherwise).
-  3. Walk candidates in their given order, skipping IDs in `<reset>.discarded_exercise_ids` until V-9's quota is met; take numbers from `<progression_targets>` or the rulebook start (newbie: minimum sets; reps cards: range minimum; holds: starting hold; continuous cardio: 1 set, 600 s).
+  3. Walk candidates in their given order, skipping IDs in `<reset>.discarded_exercise_ids` until V-9's quota is met; take numbers from `<progression_targets>` or the rulebook start (newbie: minimum sets unless widened, D-49; reps cards: range minimum; holds: starting hold; continuous cardio: 1 set, 600 s). Still short of the window: raise new exercises to the top of `<rulebook_targets>`.
   4. Add items while the main total stays ≤ `L × 60 − 600`; stop once ≥ `0.85 × L × 60 − 600`. If short, extend one continuous-cardio item (≤ 1800 s) when available.
   5. Edit mode: apply `remove_exercise` (drop the target), `adjust_count fewer` (drop the last item), `swap_exercise` (next unused candidate in the same group); keep `origin = 'user_edit'` items unchanged; all intents applied.
 - **AG-3 `invalid_once`:** first attempt returns an item with `exercise_id: 'fake_unknown_exercise'` (fails V-1); the retry is `valid`.

@@ -331,6 +331,41 @@ describe('EV-1 plan validator', () => {
     ).toBe(true);
   });
 
+  it('V-7 (D-49): a newbie may use the full sets range only when the fill decision widened it', async () => {
+    const { rulebookTargets } = await import('../rulebook/rulebook.v2');
+    const four = plan({ items: [item('bench', 4), ...MAIN.slice(1).map((id) => item(id))] });
+    const newbie = { experience: 'newbie' as const };
+    expect(failed(validatePlan(four, ctx(newbie)))).toContain('V-7:start_out_of_range');
+    const widened = { rulebook: rulebookTargets('build_muscle', 'newbie', { widenNewbieSets: true }), minTotalS: 2295 };
+    expect(failed(validatePlan(four, ctx({ ...newbie, fill: widened })))).not.toContain('V-7:start_out_of_range');
+  });
+
+  it('V-8 (D-50): a short session passes at 85% of what the pool allows; a lazier plan still fails', async () => {
+    const { rulebookTargets } = await import('../rulebook/rulebook.v2');
+    const rulebook = rulebookTargets('build_muscle', 'moderately_regular');
+    const six = plan({ items: MAIN.slice(0, 6).map((id) => item(id)) }); // 6 × 240 + 600 = 2040 s
+    const v8 = (c: ValidationContext) => validatePlan(six, c).results.find((x) => x.check === 'V-8')!;
+    expect(v8(ctx({ fill: { rulebook, minTotalS: 2000 } })).passed).toBe(true);
+    expect(v8(ctx({ fill: { rulebook, minTotalS: 2100 } }))).toMatchObject({
+      passed: false,
+      detail_code: 'below_window',
+      values: { total_s: 2040, min_s: 2100, max_s: 2700 },
+    });
+    // Edit mode measures the distance from the lowered floor too.
+    const inputItems = MAIN.slice(0, 6).map((id, i) => ({
+      ref: i + 1,
+      exerciseId: id,
+      sets: 3,
+      reps: 10,
+      timePerSetS: null,
+      origin: 'agent' as const,
+    }));
+    expect(
+      v8(ctx({ mode: 'edit', inputPlan: { items: inputItems, totalS: 1900 }, fill: { rulebook, minTotalS: 2100 } }))
+        .passed,
+    ).toBe(true);
+  });
+
   it('V-8: below and above the window', () => {
     expect(failed(validatePlan(plan({ items: MAIN.slice(0, 6).map((id) => item(id)) }), ctx()))).toContain(
       'V-8:below_window',

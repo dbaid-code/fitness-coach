@@ -53,6 +53,7 @@ const plan: PlanDto = {
   total_time_s: 1320,
   total_time_min: 22,
   over_time: false,
+  short_session: false,
   text_edits_used: 0,
   text_edits_remaining: 5,
   created_at: '2026-10-26T00:00:00.000Z',

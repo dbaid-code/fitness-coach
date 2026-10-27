@@ -16,19 +16,21 @@ export function planCards(plan: Plan, ctx: ValidationContext): Card[] {
   return [{ cardType: 'activity' }, ...main, { cardType: 'activity' }];
 }
 
-// V-8: total within 85–100% of the session. Edit mode (D-04): no further outside than the input plan.
+// V-8: total within 85–100% of the session. D-50: when the candidates cannot fill the session, the floor is
+// 85% of what they allow (ctx.fill.minTotalS). Edit mode (D-04): no further outside than the input plan.
 export function v08TimeWindow(plan: Plan, ctx: ValidationContext): CheckResult {
   const { totalS } = planTotals(planCards(plan, ctx));
   const w = timeWindow(ctx.sessionLengthMin);
-  const distance = windowDistance(totalS, ctx.sessionLengthMin);
+  const minS = ctx.fill?.minTotalS ?? w.minS;
+  const distance = windowDistance(totalS, ctx.sessionLengthMin, minS);
   if (distance === 0) return pass('V-8');
   if (ctx.mode === 'edit' && ctx.inputPlan) {
-    const inputDistance = windowDistance(ctx.inputPlan.totalS, ctx.sessionLengthMin);
+    const inputDistance = windowDistance(ctx.inputPlan.totalS, ctx.sessionLengthMin, minS);
     if (inputDistance > 0 && distance <= inputDistance) return pass('V-8');
   }
-  return fail('V-8', totalS < w.minS ? 'below_window' : 'above_window', [], {
+  return fail('V-8', totalS < minS ? 'below_window' : 'above_window', [], {
     total_s: totalS,
-    min_s: w.minS,
+    min_s: minS,
     max_s: w.maxS,
   });
 }

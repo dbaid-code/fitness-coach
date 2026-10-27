@@ -11,7 +11,7 @@ import {
 import type { Experience, Goal } from '@/shared/schemas/domain/enums';
 import type { Intent } from '@/shared/schemas/domain/intents';
 import { cardSeconds, resolveTimeParams } from '@/shared/time-model/time-model';
-import { CONTINUOUS_CARDIO_S, HOLD_CAP_S, LEVELS_BY_EXPERIENCE, SETS_REPS_BY_GOAL } from '../rulebook/rulebook.v1';
+import { CONTINUOUS_CARDIO_S, HOLD_CAP_S, LEVELS_BY_EXPERIENCE, SETS_REPS_BY_GOAL } from '../rulebook/rulebook.v2';
 import type { CompletedWorkout, Exercise, Focus } from '../types';
 import { groupsTrainedWithin } from './focus-rules';
 

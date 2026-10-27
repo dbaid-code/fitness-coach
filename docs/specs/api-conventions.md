@@ -169,6 +169,7 @@ export const PlanDto = z.object({
   total_time_s: z.number().int(),
   total_time_min: z.number().int(),                // Math.round(total_time_s / 60), from exact seconds
   over_time: z.boolean(),                          // total_time_s > session_length_min * 60
+  short_session: z.boolean(),                      // D-50: the candidates couldn't fill the session
   text_edits_used: z.number().int(),
   text_edits_remaining: z.number().int(),
   created_at: z.iso.datetime(),

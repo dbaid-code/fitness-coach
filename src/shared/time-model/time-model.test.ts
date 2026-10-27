@@ -75,3 +75,12 @@ describe('FR-44 time window', () => {
     expect(isOverTime(1801, 30)).toBe(true);
   });
 });
+
+describe('D-50 windowDistance with a lowered floor', () => {
+  it('D-50: uses minS instead of the 85% floor when given', async () => {
+    const { windowDistance } = await import('./time-model');
+    expect(windowDistance(1500, 45, 1400)).toBe(0);
+    expect(windowDistance(1300, 45, 1400)).toBe(100);
+    expect(windowDistance(2800, 45, 1400)).toBe(100);
+  });
+});

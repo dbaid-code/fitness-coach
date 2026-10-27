@@ -10,7 +10,7 @@ import {
   REP_STEP,
   SETS_REPS_BY_GOAL,
   STARTING_HOLD_S,
-} from '../rulebook/rulebook.v1';
+} from '../rulebook/rulebook.v2';
 import type { CompletedWorkout, Exercise } from '../types';
 
 export type ProgressionInput = {

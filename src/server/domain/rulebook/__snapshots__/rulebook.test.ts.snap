@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EV-1 rulebook v1 > renders every number, deterministically 1`] = `
-"## Training rulebook (rulebook.v1)
+exports[`EV-1 rulebook v2 > renders every number, deterministically 1`] = `
+"## Training rulebook (rulebook.v2)
 
 | Goal | Sets | Reps |
 |-|-|-|
@@ -15,10 +15,10 @@ exports[`EV-1 rulebook v1 > renders every number, deterministically 1`] = `
 | Moderately regular | beginner, intermediate | 30 s |
 | Experienced | beginner, intermediate, expert | 45 s |
 
-- Newbies use the minimum of the sets range.
+- Newbies use the minimum of the sets range; when that cannot fill the session, the request says so and the full range applies.
 - Order: warmup → compound → isolation → cardio → cooldown.
 - Warm-up 300 s and cool-down 300 s are always included and count toward the session.
-- The plan fills 85–100% of the session length.
+- The plan fills 85–100% of the session length. When the candidates cannot fill that, the request's time window is lowered; then use nearly every candidate at the top of its range.
 - When the focus overlaps a recent workout, keep about half of its exercises for continuity.
 - After a Reset, at least half of the main exercises differ from the reset plan.
 - Lose weight: you may add a cardio block before the cool-down.

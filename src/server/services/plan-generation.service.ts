@@ -12,7 +12,7 @@ import type { ProfileRow } from '@/server/db/repositories/profile.repo';
 import * as profileRepo from '@/server/db/repositories/profile.repo';
 import * as usageRepo from '@/server/db/repositories/usage.repo';
 import { assertCanGenerate, localUsageDate, plansRemaining } from '@/server/domain/limits/limits-policy';
-import { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v1';
+import { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v2';
 import { createDeadline } from '@/server/http/deadline';
 import { AppError } from '@/server/http/errors';
 import { assertNoOtherInflight } from '@/server/http/idempotency';
@@ -157,6 +157,7 @@ export async function suggest(
         textEditCount: 0,
         generationAttempts: plan.attempts,
         afterResetOf: body.after_reset_of,
+        shortSession: plan.shortSession,
         promptVersion: AGENT_CONFIG.ag3_workout_planner.promptVersion,
         rulebookVersion: RULEBOOK_VERSION,
         datasetVersion: ref.datasetVersion,
@@ -180,6 +181,7 @@ export async function suggest(
           attempts: plan.attempts,
           latency_ms: Date.now() - started,
           after_reset: body.after_reset_of !== null,
+          short_session: plan.shortSession,
         },
         occurredAt: now,
       });

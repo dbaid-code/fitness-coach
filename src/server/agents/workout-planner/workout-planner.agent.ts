@@ -1,7 +1,7 @@
 import 'server-only';
 import { MUSCLE_GROUPS } from '@/shared/constants';
 import { WorkoutPlannerOutput } from '@/shared/schemas/domain/workout-plan';
-import { renderRulebookForPrompt, RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v1';
+import { renderRulebookForPrompt, RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v2';
 import type { AgentDefinition } from '../run-agent';
 import { loadSystemPrompt } from '../prompt-loader';
 import { contextForLog, renderContext, type PlannerContext } from './render-context';

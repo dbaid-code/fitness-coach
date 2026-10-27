@@ -48,6 +48,8 @@ export const plans = app.table(
     discardedAt: timestamp('discarded_at', { withTimezone: true }),
     expiredAt: timestamp('expired_at', { withTimezone: true }),
     expiresAt: timestamp('expires_at', { withTimezone: true }),
+    // D-50: the candidates could not fill the session (set by generation and AI edits, not by direct edits).
+    shortSession: boolean('short_session').notNull().default(false),
   },
   (t) => [
     primaryKey({ name: 'plans_pkey', columns: [t.id] }),

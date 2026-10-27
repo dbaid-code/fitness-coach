@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { EXPERIENCES, GOALS } from '@/shared/schemas/domain/enums';
-import { renderRulebookForPrompt, rulebookTargets, SETS_REPS_BY_GOAL, STARTING_HOLD_S } from './rulebook.v1';
+import { renderRulebookForPrompt, rulebookTargets, SETS_REPS_BY_GOAL, STARTING_HOLD_S } from './rulebook.v2';
 
-describe('EV-1 rulebook v1', () => {
+describe('EV-1 rulebook v2', () => {
   it.each(GOALS.flatMap((g) => EXPERIENCES.map((e) => [g, e] as const)))('targets for %s × %s', (goal, experience) => {
     const t = rulebookTargets(goal, experience);
     const g = SETS_REPS_BY_GOAL[goal];
@@ -41,5 +41,17 @@ describe('EV-1 rulebook v1', () => {
     ])
       expect(text).toContain(n);
     expect(text).toMatchSnapshot();
+  });
+});
+
+describe('D-49 newbie sets', () => {
+  it('D-49: newbies use the minimum unless the fill decision widens the range', async () => {
+    const { rulebookTargets } = await import('./rulebook.v2');
+    expect(rulebookTargets('stay_fit', 'newbie')).toMatchObject({ sets: { min: 2, max: 2 }, newbieMinSetsOnly: true });
+    expect(rulebookTargets('stay_fit', 'newbie', { widenNewbieSets: true })).toMatchObject({
+      sets: { min: 2, max: 3 },
+      newbieMinSetsOnly: false,
+    });
+    expect(rulebookTargets('stay_fit', 'experienced', { widenNewbieSets: true }).sets).toEqual({ min: 2, max: 3 });
   });
 });

@@ -1,10 +1,10 @@
-# Spec: Time model and training rulebook v1 (F-07, part 1)
+# Spec: Time model and training rulebook v2 (F-07, part 1)
 
 | | |
 |-|-|
 | **Implements** | FR-30, FR-41, FR-44, FR-50 (instant totals); PRD §8.8; engineering doc §8.6.4, §8.6.6, Appendix B |
 | **Milestone** | M1 |
-| **Canonical files** | `src/shared/time-model/time-model.ts` (shared with the client), `src/server/domain/rulebook/rulebook.v1.ts` |
+| **Canonical files** | `src/shared/time-model/time-model.ts` (shared with the client), `src/server/domain/rulebook/rulebook.v2.ts` |
 | **Coverage** | 100% branches |
 
 ## 1. Time model (`time-model.ts`)
@@ -94,9 +94,9 @@ Edge tests: total exactly 1530 and exactly 1800 for 30 min are inside; 1529 and 
 ## 2. Hard bounds
 From `HARD_BOUNDS` (`configuration-and-constants.md` §2): sets 1–10, reps 1–50, time per set 5–3600 s. They are enforced by API-10, by V-6 and by DB check constraints.
 
-## 3. Rulebook v1 (`rulebook.v1.ts`, owner-approved, PRD §8.8)
+## 3. Rulebook v2 (`rulebook.v2.ts`, owner-approved, PRD §8.8)
 ```ts
-export const RULEBOOK_VERSION = 'rulebook.v1';
+export const RULEBOOK_VERSION = 'rulebook.v2';
 
 export const SETS_REPS_BY_GOAL = {
   build_muscle: { sets: { min: 3, max: 4 }, reps: { min: 8,  max: 12 } },
@@ -151,9 +151,18 @@ export function renderRulebookForPrompt(): string;   // deterministic Markdown t
 | Lose weight | coach may add a cardio block before the cool-down |
 | Progression | cap 15 reps / 60 s; step +2 reps / +10 s; minimum 6 reps / 15 s (`domain-progression.md`) |
 
-**"New exercise" numbers (V-7, D-15):** reps cards → `sets` in the goal range (newbie: exactly the minimum) and `reps` in the goal range; holds → `sets` in the goal range (newbie: minimum) and `time_per_set_s = startingHoldS`; continuous cardio → `sets = 1`, `time_per_set_s` in 300–1800.
+**"New exercise" numbers (V-7, D-15):** reps cards → `sets` in the goal range (newbie: exactly the minimum, or the full range when `decideFill` widened it, D-49) and `reps` in the goal range; holds → `sets` in the goal range (newbie: minimum, same exception) and `time_per_set_s = startingHoldS`; continuous cardio → `sets = 1`, `time_per_set_s` in 300–1800.
+
+## 3a. Fill capacity (`src/server/domain/fill/fill-capacity.ts`, D-49, D-50)
+Code decides, before AG-3 is called, whether the candidate pool can fill the session:
+1. `maxCardSeconds(e)`: the longest card V-7 allows: the progression target's numbers; else the top of the rulebook range (`sets.max × reps.max`, holds `sets.max × startingHoldS`); continuous cardio `1 × 1800 s`.
+2. `capacity = 600 + Σ` of the `MAX_MAIN_ITEMS` (12) longest cards.
+3. If `capacity < 0.85·L·60` and the user is a newbie on minimum sets, retry with the full sets range (**D-49**, `rulebookTargets(goal, exp, { widenNewbieSets: true })`).
+4. Still below → `shortSession = true` and V-8's floor becomes `floor(0.85 × capacity)` (**D-50**). Otherwise the floor stays `0.85·L·60`.
+The decision feeds AG-3 (`<rulebook_targets>`, `main_time_window_s.min`) and the validator (`ctx.fill`), and `short_session` is stored on the plan.
 
 ## 4. Tests
 - `time-model.test.ts`: every vector and edge above; overrides; 100% branches.
 - `rulebook.test.ts`: `rulebookTargets` for all 9 goal × experience pairs; `renderRulebookForPrompt()` is stable (snapshot) and contains every number in §3.
-- Any change to `rulebook.v1.ts` changes the eval manifest hash (full eval required).
+- Any change to `rulebook.v2.ts` changes the eval manifest hash (full eval required).
+- `fill-capacity.test.ts`: capacity per card kind, the 12-card cap, newbie widening that fills, widening that is still short, non-newbie short sessions.

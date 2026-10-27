@@ -179,6 +179,8 @@ export async function applyTextEdit(
         warmupRoutineId: built.warmupRoutineId,
         cooldownRoutineId: built.cooldownRoutineId,
         rule48hRelaxed: built.rule48hRelaxed,
+        // Recalculated against this edit's candidates (owner Q5, 2026-10-27).
+        shortSession: built.shortSession,
         totalTimeS: built.totalTimeS,
         textEditCount: editIndex,
         lastChangedAt: now,

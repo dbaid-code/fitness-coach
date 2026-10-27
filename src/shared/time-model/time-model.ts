@@ -70,10 +70,14 @@ export const isWithinWindow = (totalS: number, sessionLengthMin: number) => {
 
 export const isOverTime = (totalS: number, sessionLengthMin: number) => totalS > sessionLengthMin * 60;
 
-/** V-8 edit mode (D-04): how far a total lies outside the window, 0 inside. */
-export function windowDistance(totalS: number, sessionLengthMin: number): number {
+/**
+ * V-8 edit mode (D-04): how far a total lies outside the window, 0 inside. `minS` replaces the 85% floor
+ * for a session the candidates cannot fill (D-50).
+ */
+export function windowDistance(totalS: number, sessionLengthMin: number, minS?: number): number {
   const w = timeWindow(sessionLengthMin);
-  if (totalS < w.minS) return w.minS - totalS;
+  const floor = minS ?? w.minS;
+  if (totalS < floor) return floor - totalS;
   if (totalS > w.maxS) return totalS - w.maxS;
   return 0;
 }

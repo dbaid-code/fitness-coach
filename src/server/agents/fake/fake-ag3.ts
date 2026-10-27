@@ -128,7 +128,19 @@ export function fakePlan(c: PlannerContext): WorkoutPlannerOutput {
       if (total() > w.maxS && it.card_type === 'reps') it.reps! -= 1;
     }
   }
-  // Fill up with continuous cardio if short and allowed.
+  // Fill up with continuous cardio if short and allowed: bring one in (replacing the last strength item when
+  // the list is full) the way a planner would, then size it to the window.
+  if (
+    total() < w.minS &&
+    c.mode === 'generate' &&
+    !items.some((it) => byId.get(it.exercise_id)?.timedKind === 'continuous')
+  ) {
+    const e = c.candidates.find((x) => x.timedKind === 'continuous' && !items.some((it) => it.exercise_id === x.id));
+    if (e) {
+      if (items.length >= 12) items.pop();
+      items.push({ exercise_id: e.id, card_type: 'timed', sets: 1, reps: null, time_per_set_s: 300 });
+    }
+  }
   if (total() < w.minS) {
     const cardio = items.find((it) => byId.get(it.exercise_id)?.timedKind === 'continuous');
     if (cardio) cardio.time_per_set_s = Math.min(1800, cardio.time_per_set_s! + (w.minS - total()));

@@ -1087,6 +1087,7 @@ If tx 2's version re-check fails, the LLM result is discarded, the request retur
 | `focus_reason` | `app.focus_reason` | no | — | For the header (FR-45) |
 | `focus_rest_days` | `smallint` | yes | — | `{n}` in `HEADER_COACH`; `null` means "not trained yet" |
 | `rule_48h_relaxed` | `boolean` | no | `false` | True when the 48-hour rule was lifted because nothing else could fill the session (PRD §8.10) |
+| `short_session` | `boolean` | no | `false` | The candidates couldn't fill the session (D-50). Set by generation and AI edits, never by direct edits. Migration 10. |
 | `warmup_routine_id` | `text` | no | — | FK → `app.routines(id)` |
 | `cooldown_routine_id` | `text` | no | — | FK → `app.routines(id)` |
 | `total_time_s` | `integer` | no | — | Code-calculated (FR-44) |
@@ -1095,7 +1096,7 @@ If tx 2's version re-check fails, the LLM result is discarded, the request retur
 | `reset_reason` | `app.reset_reason` | yes | — | Set when the user resets **this** plan (FR-56) |
 | `after_reset_of` | `uuid` | yes | — | FK → `app.plans(id)` `ON DELETE SET NULL`: the discarded plan this generation replaced |
 | `prompt_version` | `text` | no | — | e.g., `ag3.v1` |
-| `rulebook_version` | `text` | no | — | e.g., `rulebook.v1` |
+| `rulebook_version` | `text` | no | — | e.g., `rulebook.v2` |
 | `dataset_version` | `text` | no | — | e.g., `exercises.v1` |
 | `created_at` | `timestamptz` | no | `now()` | |
 | `last_changed_at` | `timestamptz` | no | `now()` | Drives draft expiry |
@@ -1269,7 +1270,7 @@ The text-edit limit (FR-82) lives on `plans.text_edit_count`, not here.
 | `event_type` | Allowed properties |
 |-|-|
 | `planner_opened` | `{}` |
-| `plan_generated` | `{session_length_min, focus_mode, focus_groups, attempts, latency_ms, after_reset: boolean}` |
+| `plan_generated` | `{session_length_min, focus_mode, focus_groups, attempts, latency_ms, after_reset: boolean, short_session: boolean}` |
 | `generation_failed` | `{session_length_min, focus_mode, reason: 'validation' \| 'api' \| 'deadline', latency_ms}` |
 | `text_edit_submitted` | `{edit_index, latency_ms, plan_changed: boolean}` |
 | `plan_reset` | `{reset_reason \| null, from_status}` |
@@ -1515,7 +1516,7 @@ const response = await anthropic.messages.parse(
 
 | Part | Content |
 |-|-|
-| System (cached) | Role: build plans **only** from the candidate list. **Training rulebook v1** (§8.6.6), rendered from `rulebook.v1.ts`. Focus selection rules (PRD §8.10). Frequency and style guidance. Continuity rule (keep about half the exercises when the focus overlaps a recent workout). After-Reset rules per reason (PRD §8.8). How to apply each request type, including health ("only avoid, swap or lighten; never add rehab or 'therapeutic' exercises"). Time sizing (the time model, and aiming for a total between 85% and 100% of the session). Edit-mode rules (keep the user's direct edits unless a request targets them; change only what the requests need). Output contract (IDs and numbers only). Two worked examples. |
+| System (cached) | Role: build plans **only** from the candidate list. **Training rulebook v2** (§8.6.6), rendered from `rulebook.v2.ts`. Focus selection rules (PRD §8.10). Frequency and style guidance. Continuity rule (keep about half the exercises when the focus overlaps a recent workout). After-Reset rules per reason (PRD §8.8). How to apply each request type, including health ("only avoid, swap or lighten; never add rehab or 'therapeutic' exercises"). Time sizing (the time model, and aiming for a total between 85% and 100% of the session). Edit-mode rules (keep the user's direct edits unless a request targets them; change only what the requests need). Output contract (IDs and numbers only). Two worked examples. |
 | User | Tagged JSON sections: `<request>` (mode `generate` \| `edit`, session length, main-time budget in seconds = length × 60 − 600), `<profile>` (goal, experience), `<focus>` (mode, groups), `<recency>` (days since each group was trained), `<frequency>` (§8.6.1), `<history>` (§8.5.2), `<candidates>`, `<routines>`, `<progression_targets>`, `<rulebook_targets>`, `<intents>`, `<reset>` (discarded main exercise IDs and the reason, or null), `<current_plan>` (edit mode: items with `origin`), `<previous_attempt>` (retry only). |
 | Post-processing (code) | Card times and plan total (time model), `focus_reason` derived by code (§8.6.5), plan header, validator (§8.7), diff (edit mode), status (§8.8). |
 
@@ -1673,7 +1674,7 @@ Per exercise **E** the user has done before:
 | Condition | Target | `progression_action` |
 |-|-|-|
 | E is continuous cardio (`timed_kind = 'continuous'`) | Not progressed. `sets = 1`; `time_per_set_s` chosen by AG-3 within 300–1800 s | `not_progressed` |
-| No appearances | Rulebook start: reps cards: `sets ∈ goal range` (newbie: the minimum only), `reps ∈ goal range`. Holds: `sets ∈ goal range` (newbie: minimum), `time = starting hold by experience`. | `start` |
+| No appearances | Rulebook start: reps cards: `sets ∈ goal range` (newbie: the minimum only, unless the minimum can't fill the session, D-49), `reps ∈ goal range`. Holds: `sets ∈ goal range` (newbie: minimum, same exception), `time = starting hold by experience`. | `start` |
 | One appearance | Same as `a1` | `hold` |
 | `a1` and `a2` both not *Hard*, **below the cap** | Reps: `min(a1.reps + 2, 15)`. Holds: `min(a1.time + 10, 60)`. Sets = `a1.sets`. | `step_up` |
 | `a1` and `a2` both not *Hard*, **at the cap** (reps ≥ 15 or time ≥ 60 s) | `harder_version_id`, if it exists **and** passes the equipment and body-area filters (the level filter is waived): sets = `a1.sets`; reps = goal range minimum, or hold = starting hold. Otherwise hold at the cap. | `harder_version` (or `hold`) |
@@ -1707,13 +1708,13 @@ Per exercise **E** the user has done before:
 
 - **Group list format:** display names joined as `A`, `A & B`, or `A, B & C`.
 
-#### 8.6.6 Training rulebook v1 (`src/server/domain/rulebook/rulebook.v1.ts`, owner-approved; PRD §8.8)
+#### 8.6.6 Training rulebook v2 (`src/server/domain/rulebook/rulebook.v2.ts`, owner-approved; PRD §8.8; v2 adds D-49)
 
 | Rule | Value in code |
 |-|-|
 | Sets × reps by goal | `build_muscle`: sets 3–4, reps 8–12. `lose_weight`: sets 2–3, reps 12–15. `stay_fit`: sets 2–3, reps 10–15. |
 | Level by experience | newbie: `beginner`; moderately regular: `beginner`, `intermediate`; experienced: all |
-| Volume by experience | Newbies use the minimum of the sets range |
+| Volume by experience | Newbies use the minimum of the sets range; the full range when the minimum can't fill the session (D-49, `fill-capacity.ts`) |
 | Starting hold | newbie 20 s, moderately regular 30 s, experienced 45 s |
 | Order | warm-up → compound → isolation → cardio → cool-down (prompt rule; judged by EV-2) |
 | Warm-up / cool-down | 300 s each, always included |
@@ -1734,8 +1735,8 @@ V-1 to V-10 are PRD checks 1–10 in the same order. V-11 is added to enforce FR
 | **V-4** | Every main exercise's `muscle_group ∈ focus_groups`. Cardio exercises are allowed only if `cardio ∈ focus_groups`, or the coach chose and the goal is `lose_weight`. |
 | **V-5** | Coach mode without `rule_48h_relaxed`: no focus group was trained in the last 48 hours. |
 | **V-6** | `card_type` equals the exercise's card type. Reps cards have `reps` and no `time_per_set_s`; timed cards the reverse. All numbers are within the hard bounds (Appendix B). |
-| **V-7** | Exercises done before use exactly the progression target. New exercises use rulebook ranges (newbie: minimum sets) and starting holds (D-15). Continuous cardio has `sets = 1` and a time in 300–1800 s. Exempt: items covered by an applied volume request (direction rule, §8.6.3) and, in edit mode, items with `origin = 'user_edit'`. |
-| **V-8** | Plan total within 85–100% of the session. **Edit mode (D-04):** also passes when the input plan was already outside the window (because of direct edits) and the output is **no further outside** than the input. Distance = 0 inside the window, `0.85L − total` below it, `total − L` above it. |
+| **V-7** | Exercises done before use exactly the progression target. New exercises use rulebook ranges (newbie: minimum sets, or the full range when the fill decision widened it, D-49) and starting holds (D-15). Continuous cardio has `sets = 1` and a time in 300–1800 s. Exempt: items covered by an applied volume request (direction rule, §8.6.3) and, in edit mode, items with `origin = 'user_edit'`. |
+| **V-8** | Plan total within 85–100% of the session; when the candidates can't fill the session, the floor is 85% of their capacity (`fill-capacity.ts`, D-50). **Edit mode (D-04):** also passes when the input plan was already outside the window (because of direct edits) and the output is **no further outside** than the input. Distance = 0 inside the window, `0.85L − total` below it, `total − L` above it. |
 | **V-9** | After a Reset: the number of main exercises **not** in the discarded plan ≥ `min(ceil(n / 2), available_new)`, where `n` = the main exercises in the new plan and `available_new` = candidates not in the discarded plan (D-05). |
 | **V-10** | Output matches the schema (strict, no extra keys, no free-text fields). No duplicate `exercise_id`. 1–12 main items. Intent IDs refer to real intents. |
 | **V-11** | Edit mode: every input item with `origin = 'user_edit'` appears unchanged (same exercise and numbers). **Exceptions:** an applied item-level intent targets it; it now fails V-2, V-3 or V-4 because of this session's requests; or an applied whole-plan `adjust_volume` changes its numbers (D-16). |
@@ -1843,7 +1844,7 @@ The pipeline is PRD §8.4 unchanged. Latency is handled by a request deadline an
 | AG-1 found nothing above the threshold | Post-processing | Selection unchanged | `PHOTO_NONE` | Yes |
 | Spend cap reached | Spend guard or provider error | No LLM calls; non-LLM features keep working | `SPEND_CAP` | — |
 | Deadline reached | Request deadline | Abort; as an API error | `GENERATION_FAILED` / `PHOTO_NONE` | No |
-| No candidates can fill the session | `canFill = false` even after relaxing the 48-hour rule | Generate the best plan; V-8 fails → retry → `GENERATION_FAILED` if still below 85% | `GENERATION_FAILED` | No |
+| No candidates can fill the session | `decideFill`: capacity (12 longest cards V-7 allows) below the 85% floor, after widening newbie sets (D-49) | V-8's floor drops to 85% of capacity; the plan is stored with `short_session = true` (D-50). Below that after the retry → `GENERATION_FAILED` | `SHORT_SESSION` banner (plus any outcome status) | Yes |
 | No or little history | Recency and progression | Rulebook defaults, `HEADER_FIRST`; never refuse to plan | — | — |
 | Database unavailable | Repository error | 500 `INTERNAL`; no LLM call if tx 1 fails | — | No |
 
@@ -1864,7 +1865,7 @@ The pipeline is PRD §8.4 unchanged. Latency is handled by a request deadline an
 | Health data leakage | Health data only in `planning_context`, `agent_logs` and `idempotency_keys` (§16.4); Vercel request logs exclude bodies | EV-6, code review checklist |
 
 ### 8.13 Versioning and evaluation hooks
-- **Configuration.** `src/server/agents/agent-config.ts` exports the model, effort, `max_tokens` and prompt version per agent. Alongside it: `RULEBOOK_VERSION` (from `rulebook.v1.ts`), `DATASET_VERSION` (from the seed header) and `PHOTO_CONFIDENCE_THRESHOLD`. Each plan row and log row stores the versions it used.
+- **Configuration.** `src/server/agents/agent-config.ts` exports the model, effort, `max_tokens` and prompt version per agent. Alongside it: `RULEBOOK_VERSION` (from `rulebook.v2.ts`), `DATASET_VERSION` (from the seed header) and `PHOTO_CONFIDENCE_THRESHOLD`. Each plan row and log row stores the versions it used.
 - **Eval gate (PRD §9.4).** `evals/manifest.ts` computes a SHA-256 over:
   - every `prompt.v*.md` file,
   - `agent-config.ts`,
@@ -1932,6 +1933,7 @@ type PlanDto = {
   total_time_s: number;
   total_time_min: number;
   over_time: boolean;                     // total_time_s > session_length_min * 60
+  short_session: boolean;                 // D-50: shows SHORT_SESSION
   text_edits_used: number;
   text_edits_remaining: number;
   created_at: string;
@@ -2344,7 +2346,7 @@ flowchart LR
 - **Dependencies:** F-04, F-07.
 
 ### F-07 Domain engines (this document §8.6 – §8.8; PRD §8.8 – PRD §8.10, PRD §8.13)
-- **Description:** recency and frequency, candidate filter and the 48-hour rule, progression engine, time model (shared), rulebook v1, plan validator V-1 – V-11, plan diff, status resolver, plan header, state machine, limits policy.
+- **Description:** recency and frequency, candidate filter and the 48-hour rule, progression engine, time model (shared), rulebook v2, plan validator V-1 – V-11, plan diff, status resolver, plan header, state machine, limits policy.
 - **Acceptance criteria:**
   - 100% branch coverage on these modules.
   - EV-7 covers every row of §8.6.3.
@@ -2651,7 +2653,8 @@ fitness-coach/
 │   │   │   ├── candidate-filter/candidate-filter.ts
 │   │   │   ├── candidate-filter/focus-rules.ts
 │   │   │   ├── progression/progression.ts
-│   │   │   ├── rulebook/rulebook.v1.ts
+│   │   │   ├── rulebook/rulebook.v2.ts
+│   │   │   ├── fill/fill-capacity.ts
 │   │   │   ├── validator/plan-validator.ts
 │   │   │   ├── validator/checks/v01-ids.ts … v11-user-edits.ts
 │   │   │   ├── plan-diff/plan-diff.ts
@@ -2724,7 +2727,7 @@ fitness-coach/
 | Repositories | `<entity>.repo.ts` | `plan.repo.ts` |
 | Agents | `<agent>.agent.ts`, `<agent>.schema.ts`, `prompt.v<N>.md` | `input-guard.agent.ts`, `prompt.v1.md` |
 | Validator checks | `v<NN>-<name>.ts` | `v08-time-window.ts` |
-| Versioned data | `<name>.v<N>.<ext>` | `exercises.v1.json`, `rulebook.v1.ts` |
+| Versioned data | `<name>.v<N>.<ext>` | `exercises.v1.json`, `rulebook.v2.ts` |
 | Unit tests | `<file>.test.ts(x)` beside the source | `progression.test.ts` |
 | Integration tests | `<area>.int.test.ts` | `plans-lifecycle.int.test.ts` |
 | E2E tests | `<journey>.spec.ts` | `suggest-edit-accept.spec.ts` |
@@ -2901,7 +2904,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | Agent prompts | `src/server/agents/*/prompt.v*.md` | §8.3 |
 | Agent models, effort, tokens | `src/server/agents/agent-config.ts` | §8.2 |
 | Fixed messages | `src/shared/messages/catalog.ts` | PRD Appendix A |
-| Rulebook | `src/server/domain/rulebook/rulebook.v1.ts` | §8.6.6 |
+| Rulebook | `src/server/domain/rulebook/rulebook.v2.ts` | §8.6.6 |
 | Time model | `src/shared/time-model/time-model.ts` | §8.6.4 |
 | Constants | `src/shared/constants.ts`, `src/server/config/app-config.ts` | Appendix B |
 | Reference data | `data/seed/*.v1.json` | §7.6 |
@@ -2989,7 +2992,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | AG-1 Equipment Vision | `equipment-scan.service` → `runAgent(equipmentVision)` | `server/agents/equipment-vision/*` | `equipment-vision.test.ts` (mocked); EV-5 |
 | AG-2 Input Guard | `plan-generation` / `plan-edit` → `runAgent(inputGuard)` → post-process | `server/agents/input-guard/*` | `input-guard.test.ts`; EV-3 |
 | AG-3 Workout Planner | services → `render-context` → `runAgent(workoutPlanner)` → validator | `server/agents/workout-planner/*` | `workout-planner.test.ts`; EV-1, EV-2, EV-4 |
-| PRD §8.8 Rulebook | `rulebook.v1.ts` → prompt rendering + V-7 | `server/domain/rulebook/rulebook.v1.ts` | `rulebook.test.ts` |
+| PRD §8.8 Rulebook | `rulebook.v2.ts` → prompt rendering + V-7 | `server/domain/rulebook/rulebook.v2.ts` | `rulebook.test.ts` |
 | PRD §8.9 Progression | `progression.computeTargets` | `server/domain/progression/progression.ts` | EV-7 |
 | PRD §8.10 Focus rules | `focus-rules.ts` (48 h, frequency) | `server/domain/candidate-filter/focus-rules.ts` | `focus-rules.test.ts` |
 | PRD §8.13 Validator | `plan-validator.validate` | `server/domain/validator/*` | `plan-validator.test.ts`; EV-1 |
@@ -3438,6 +3441,8 @@ There is no paging for the pilot. Passive signals:
 | D-46 | S-6: deny-by-default privileges for `app`, `app_private` and `public`; the Supabase Data API is off on hosted projects | **Approved** (owner, security plan) | 2026-10-26 | §7.4, §15.1 |
 | D-47 | S-7: `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin` join the static headers; the CSP adds `object-src 'none'` and `font-src 'self'` | **Approved** (owner, security plan) | 2026-10-26 | §16.3 |
 | D-48 | S-8: every GitHub Action pinned to a commit SHA, the Vercel CLI to an exact version, workflows default to `permissions: contents: read`, `evals.yml` never on `pull_request_target`, previews behind Vercel Deployment Protection. gitleaks runs as a checksum-pinned binary (no third-party action). | **Approved** (owner, security plan) | 2026-10-26 | §13.6, §17 |
+| D-49 | Newbies use the goal's full sets range for a plan when the minimum sets can't fill the session (rulebook v2; decided by code in `fill-capacity.ts`, checked by V-7) | **Approved** (owner, validation report §7.1) | 2026-10-27 | PRD §8.10, §8.6, V-7 |
+| D-50 | When the candidates can't fill the session even then, the plan may be shorter: V-8's floor is 85% of what they allow, the plan is flagged `short_session`, and the plan view shows the static `SHORT_SESSION` message under the outcome banner. The flag is set by generation and AI edits, not direct edits; AI edits keep the D-04 edit rule | **Approved** (owner) | 2026-10-27 | PRD FR-44, §8.10, V-8, §7 `plans` |
 
 ## Appendix B. Configuration constants
 
@@ -3456,11 +3461,11 @@ There is no paging for the pilot. Passive signals:
 | `RECENCY_WINDOW_DAYS` | 14 | FR-32 | `shared/constants.ts` |
 | `RULE_48H_HOURS` | 48 | PRD §8.10 | `server/config/app-config.ts` |
 | `FREQUENCY_MIN_COMPLETED` | 3 | PRD §8.10 | `server/config/app-config.ts` |
-| `REP_STEP`, `HOLD_STEP_S` | 2, 10 | PRD §8.9 | `server/domain/rulebook/rulebook.v1.ts` |
-| `REP_CAP`, `HOLD_CAP_S` | 15, 60 | PRD §8.9 | `rulebook.v1.ts` |
-| `REP_MIN`, `HOLD_MIN_S` | 6, 15 | PRD §8.9 | `rulebook.v1.ts` |
-| `STARTING_HOLD_S` | newbie 20, moderately regular 30, experienced 45 | PRD §8.8 | `rulebook.v1.ts` |
-| `CONTINUOUS_CARDIO_S` | 300–1800 | D-15 | `rulebook.v1.ts` |
+| `REP_STEP`, `HOLD_STEP_S` | 2, 10 | PRD §8.9 | `server/domain/rulebook/rulebook.v2.ts` |
+| `REP_CAP`, `HOLD_CAP_S` | 15, 60 | PRD §8.9 | `rulebook.v2.ts` |
+| `REP_MIN`, `HOLD_MIN_S` | 6, 15 | PRD §8.9 | `rulebook.v2.ts` |
+| `STARTING_HOLD_S` | newbie 20, moderately regular 30, experienced 45 | PRD §8.8 | `rulebook.v2.ts` |
+| `CONTINUOUS_CARDIO_S` | 300–1800 | D-15 | `rulebook.v2.ts` |
 | Hard bounds (direct edits and V-6) | sets 1–10, reps 1–50, time per set 5–3600 s | DB checks | `shared/constants.ts` |
 | Direct-edit stepper steps | sets ±1, reps ±1, time per set ±5 s; steppers stop at the hard bounds above | Design handoff (D-34) | `shared/constants.ts` |
 | `HISTORY_SUMMARY_MAX_WORKOUTS`, `HISTORY_SUMMARY_DAYS` | 5, 28 | §8.5.2 | `server/config/app-config.ts` |

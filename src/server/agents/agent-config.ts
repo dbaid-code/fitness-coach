@@ -46,5 +46,5 @@ export const REFUSAL_FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 /** runAgent does not start a call with less than this left on the deadline. */
 export const MIN_CALL_BUDGET_MS = 1_000;
 
-export { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v1';
+export { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v2';
 export { DATASET_VERSION } from '@/server/config/dataset-version';

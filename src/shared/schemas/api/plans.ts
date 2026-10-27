@@ -35,6 +35,8 @@ export const PlanDto = z.object({
   total_time_s: z.number().int(),
   total_time_min: z.number().int(),
   over_time: z.boolean(),
+  /** D-50: the candidates could not fill the session; the plan view shows SHORT_SESSION. */
+  short_session: z.boolean(),
   text_edits_used: z.number().int(),
   text_edits_remaining: z.number().int(),
   created_at: z.iso.datetime(),

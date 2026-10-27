@@ -70,7 +70,7 @@ No DB transaction is open during an LLM call (§6.5). Agent logs are written in 
 4. Insert `app.planning_context` only when there are note intents (`PlanningContextIntents`, `source 'note'`, `edit_index 0`).
 5. `usage.repo.incrementPlans` → `null` (race to the cap) → roll back, 429 `PLAN_LIMIT`.
 6. `profile.repo.setLastSessionLength(session_length_min)` (FR-12).
-7. Event `plan_generated { session_length_min, focus_mode, focus_groups, attempts, latency_ms, after_reset: after_reset_of !== null }`.
+7. Event `plan_generated { session_length_min, focus_mode, focus_groups, attempts, latency_ms, after_reset: after_reset_of !== null, short_session }`; the plan row stores `short_session` (D-50).
 8. A `23505` on `uq_plans__one_active_per_user` → 409 `ACTIVE_PLAN_EXISTS`.
 
 **Step 8 — respond** `{ outcome: 'plan_ready', plan: toPlanDto(...), status, plans_remaining_today }`. `apiHandler` stores the response on the idempotency key.

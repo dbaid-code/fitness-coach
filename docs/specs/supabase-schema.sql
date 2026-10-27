@@ -132,7 +132,7 @@ as $$
       where k.key <> all (
         case p_event_type
           when 'planner_opened'        then array[]::text[]
-          when 'plan_generated'        then array['session_length_min', 'focus_mode', 'focus_groups', 'attempts', 'latency_ms', 'after_reset']
+          when 'plan_generated'        then array['session_length_min', 'focus_mode', 'focus_groups', 'attempts', 'latency_ms', 'after_reset', 'short_session']
           when 'generation_failed'     then array['session_length_min', 'focus_mode', 'reason', 'latency_ms']
           when 'text_edit_submitted'   then array['edit_index', 'latency_ms', 'plan_changed']
           when 'plan_reset'            then array['reset_reason', 'from_status']
@@ -300,6 +300,7 @@ create table app.plans (
   discarded_at         timestamptz,
   expired_at           timestamptz,
   expires_at           timestamptz,
+  short_session        boolean            not null default false,  -- D-50: the candidates could not fill the session
   constraint plans_pkey primary key (id),
   constraint uq_plans__id_user unique (id, user_id),
   constraint fk_plans__profile foreign key (user_id) references app.profiles (user_id) on delete cascade,

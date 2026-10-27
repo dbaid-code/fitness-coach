@@ -25,6 +25,7 @@ const KIND: Partial<Record<MessageCode | 'STILL_WORKING' | 'EMAIL_VERIFIED' | 'L
   OUT_OF_SCOPE_NOTE: 'ink-info',
   PHOTO_NONE: 'ink-info',
   OVER_TIME_WARNING: 'warning',
+  SHORT_SESSION: 'ink-info',
   RED_FLAG: 'danger',
   SPEND_CAP: 'outline-clock',
   PLAN_LIMIT: 'outline-clock',

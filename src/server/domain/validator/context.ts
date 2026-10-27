@@ -5,6 +5,7 @@ import type { Intent, NumberedIntent } from '@/shared/schemas/domain/intents';
 import type { WorkoutPlannerOutput } from '@/shared/schemas/domain/workout-plan';
 import type { ProgressionTarget } from '../progression/progression';
 import type { Exercise, Focus, Routine } from '../types';
+import type { RulebookTargets } from '../rulebook/rulebook.v2';
 
 export type InputPlanItem = {
   ref: number;
@@ -34,6 +35,11 @@ export type ValidationContext = {
   sessionIntents: Array<NumberedIntent & { applied: boolean }>;
   reset: { discardedExerciseIds: string[] } | null;
   inputPlan: { items: InputPlanItem[]; totalS: number } | null;
+  /**
+   * D-49 / D-50 fill decision (fill-capacity.ts): the rulebook targets for this plan and V-8's lower bound.
+   * Absent → the plain rulebook for the goal and experience, and the normal 85% floor.
+   */
+  fill?: { rulebook: RulebookTargets; minTotalS: number };
 };
 
 export type CheckId = 'V-1' | 'V-2' | 'V-3' | 'V-4' | 'V-5' | 'V-6' | 'V-7' | 'V-8' | 'V-9' | 'V-10' | 'V-11';

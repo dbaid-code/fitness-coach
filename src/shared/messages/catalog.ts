@@ -24,6 +24,7 @@ export const MESSAGE_CODES = [
   'EXPIRED',
   'DISCARD_CONFIRM',
   'OVER_TIME_WARNING',
+  'SHORT_SESSION',
   'HEADER_USER',
   'HEADER_COACH',
   'HEADER_FIRST',
@@ -55,4 +56,7 @@ export const STATIC_TEMPLATES = {
   SPEND_CAP: 'Coach is resting right now. Please try again later.',
   EXPIRED: "This workout expired. Plan a new one when you're ready.",
   DISCARD_CONFIRM: 'Discard your current workout?',
+  // D-50 (owner-approved wording, 2026-10-27).
+  SHORT_SESSION:
+    "This workout is shorter than your session. Your equipment and focus don't have enough exercises to fill it.",
 } as const satisfies Partial<Record<MessageCode, string>>;

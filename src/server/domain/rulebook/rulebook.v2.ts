@@ -1,8 +1,9 @@
-// Training rulebook v1 (owner-approved, PRD §8.8; time-model spec §3). Any change needs a full eval run.
+// Training rulebook v2 (owner-approved, PRD §8.8; time-model spec §3). Any change needs a full eval run.
+// v2 (D-49): newbies may use the goal's full sets range when the minimum cannot fill the session.
 import type { Experience, ExerciseLevel, Goal } from '@/shared/schemas/domain/enums';
 import { COOLDOWN_S, TIME_WINDOW_MAX_RATIO, TIME_WINDOW_MIN_RATIO, WARMUP_S } from '@/shared/constants';
 
-export const RULEBOOK_VERSION = 'rulebook.v1';
+export const RULEBOOK_VERSION = 'rulebook.v2';
 
 type Range = { readonly min: number; readonly max: number };
 
@@ -45,14 +46,18 @@ export type RulebookTargets = {
   continuousCardioS: Range;
 };
 
-export function rulebookTargets(goal: Goal, experience: Experience): RulebookTargets {
+export function rulebookTargets(
+  goal: Goal,
+  experience: Experience,
+  opts: { widenNewbieSets?: boolean } = {},
+): RulebookTargets {
   const g = SETS_REPS_BY_GOAL[goal];
-  const newbie = experience === 'newbie';
+  // Newbies use the minimum of the sets range, unless that cannot fill the session (D-49).
+  const minOnly = experience === 'newbie' && !opts.widenNewbieSets;
   return {
-    // Newbies use the minimum of the sets range.
-    sets: newbie ? { min: g.sets.min, max: g.sets.min } : g.sets,
+    sets: minOnly ? { min: g.sets.min, max: g.sets.min } : g.sets,
     reps: g.reps,
-    newbieMinSetsOnly: newbie,
+    newbieMinSetsOnly: minOnly,
     startingHoldS: STARTING_HOLD_S[experience],
     continuousCardioS: CONTINUOUS_CARDIO_S,
   };
@@ -86,10 +91,10 @@ export function renderRulebookForPrompt(): string {
     '|-|-|-|',
     levels,
     '',
-    '- Newbies use the minimum of the sets range.',
+    '- Newbies use the minimum of the sets range; when that cannot fill the session, the request says so and the full range applies.',
     `- Order: ${ORDER.join(' → ')}.`,
     `- Warm-up ${WARMUP_S} s and cool-down ${COOLDOWN_S} s are always included and count toward the session.`,
-    `- The plan fills ${TIME_WINDOW_MIN_RATIO * 100}–${TIME_WINDOW_MAX_RATIO * 100}% of the session length.`,
+    `- The plan fills ${TIME_WINDOW_MIN_RATIO * 100}–${TIME_WINDOW_MAX_RATIO * 100}% of the session length. When the candidates cannot fill that, the request's time window is lowered; then use nearly every candidate at the top of its range.`,
     '- When the focus overlaps a recent workout, keep about half of its exercises for continuity.',
     '- After a Reset, at least half of the main exercises differ from the reset plan.',
     '- Lose weight: you may add a cardio block before the cool-down.',

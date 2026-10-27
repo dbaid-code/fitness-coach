@@ -151,6 +151,8 @@ export function PlanView({
       <PlanHeader header={plan.header} focusToken={focusToken} />
       {spendCapReached ? <StatusBanner code="SPEND_CAP" /> : null}
       {status ? <StatusBanner code={status.code} params={status.params} /> : null}
+      {/* D-50: stacked under the outcome banner (owner, 2026-10-27). */}
+      {plan.short_session ? <StatusBanner code="SHORT_SESSION" /> : null}
       <PlanCardList
         items={items}
         draft={draft}

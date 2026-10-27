@@ -58,6 +58,7 @@ export function toPlanDto(plan: PlanRow, items: PlanItemRow[], ref: ReferenceDat
     total_time_s: plan.totalTimeS,
     total_time_min: toMinutes(plan.totalTimeS),
     over_time: plan.totalTimeS > plan.sessionLengthMin * 60,
+    short_session: plan.shortSession,
     text_edits_used: plan.textEditCount,
     text_edits_remaining: editsRemaining(plan.textEditCount),
     created_at: plan.createdAt.toISOString(),
