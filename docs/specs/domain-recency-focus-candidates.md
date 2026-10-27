@@ -85,7 +85,7 @@ Steps, in order:
 4. **Focus.**
    - `effectiveFocus`: the latest `change_focus` intent's groups (mode `user`), else the planner focus.
    - **User mode:** keep `muscle_group ∈ groups`. Cardio exercises only when `cardio ∈ groups`.
-   - **Coach mode:** remove groups in `groupsTrainedWithin48h`. Cardio exercises only when `goal = 'lose_weight'`. If the remaining pool **cannot fill** the session (§5.1), restore the removed groups and set `rule48hRelaxed = true`.
+   - **Coach mode:** remove groups in `groupsTrainedWithin48h`. Cardio exercises for every goal (D-52; V-4 and V-7 apply the per-goal limits). If the remaining pool **cannot fill** the session (§5.1), restore the removed groups and set `rule48hRelaxed = true`.
 5. **Sort** by `muscle_group` (`MUSCLE_GROUPS` order), then `mechanic` (`compound` before `isolation`), then `name` (`localeCompare`, `en`).
 
 ### 5.1 `canFill`

@@ -287,7 +287,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     .filter((t) => t.replaces !== null)
     .map((t) => ({ replaces: t.replaces!, version: ref.exercises.get(t.exercise_id)! }))
     .filter((s) => !!s.version);
-  const switched = applyVersionSwitches(cand, switches, input.profile.goal);
+  const switched = applyVersionSwitches(cand, switches);
   for (const dropped of switched.dropped) {
     // The switch failed focus: E stays with a hold at its latest numbers.
     targets = targets.filter((t) => t.replaces !== dropped);
@@ -306,6 +306,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     candidates,
     targets: targetMap,
     goal: input.profile.goal,
+    cardioChosen: cand.effectiveFocus.mode === 'user' && cand.effectiveFocus.groups.includes('cardio'),
     experience: input.profile.experience,
     sessionLengthMin: input.sessionLengthMin,
   });

@@ -26,7 +26,7 @@ These specs expand `docs/engineering/engineering-doc.md` (v1.0, approved 2026-10
 | all | [`messages-and-ui-copy.md`](messages-and-ui-copy.md) | Appendix A catalog and every UI string (FR-46) |
 | M1 | [`database-access-layer.md`](database-access-layer.md) | F-02 migrations, `withUserTx`, repositories, cron |
 | M1 | [`reference-data-seed.md`](reference-data-seed.md) | F-02 seed: equipment, exercises, routines, images |
-| M1 | [`domain-time-model-and-rulebook.md`](domain-time-model-and-rulebook.md) | Time model, rulebook v2, fill capacity |
+| M1 | [`domain-time-model-and-rulebook.md`](domain-time-model-and-rulebook.md) | Time model, rulebook v3, fill capacity |
 | M1 | [`domain-recency-focus-candidates.md`](domain-recency-focus-candidates.md) | Recency, frequency, 48-hour rule, candidate filter |
 | M1 | [`domain-progression.md`](domain-progression.md) | Progression engine (EV-7) |
 | M1 | [`domain-plan-validator.md`](domain-plan-validator.md) | V-1 – V-11 |

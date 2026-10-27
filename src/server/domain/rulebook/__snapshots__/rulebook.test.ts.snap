@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EV-1 rulebook v2 > renders every number, deterministically 1`] = `
-"## Training rulebook (rulebook.v2)
+exports[`EV-1 rulebook v3 > renders every number, deterministically 1`] = `
+"## Training rulebook (rulebook.v3)
 
 | Goal | Sets | Reps |
 |-|-|-|
@@ -21,8 +21,9 @@ exports[`EV-1 rulebook v2 > renders every number, deterministically 1`] = `
 - The plan fills 85–100% of the session length. When the candidates cannot fill that, the request's time window is lowered; then use nearly every candidate at the top of its range.
 - When the focus overlaps a recent workout, keep about half of its exercises for continuity.
 - After a Reset, at least half of the main exercises differ from the reset plan.
-- Lose weight: you may add a cardio block before the cool-down.
-- Continuous cardio: 1 set of 300–1800 s.
+- Cardio: when Cardio is a chosen focus, or when you choose the focus (any goal), placed before the cool-down.
+- When you choose the focus: Lose weight may add a cardio block; Build muscle and Stay fit at most 1 cardio exercise, continuous cardio 300–600 s.
+- Continuous cardio: 1 set of 300–1800 s, within the request's continuous_cardio_s range; no more cardio exercises than max_cardio_items (null = no limit).
 - Progression: cap 15 reps / 60 s; step +2 reps / +10 s; minimum 6 reps / 15 s.
 - After a Reset, follow the reason:
   - too_long: Aim near the 85% lower bound of the time window with fewer exercises.

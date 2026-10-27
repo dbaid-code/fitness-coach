@@ -6,6 +6,7 @@ import {
   availableEquipmentFor,
   buildCandidates,
   canFill,
+  longestCards,
   sortCandidates,
   type CandidateInput,
 } from './candidate-filter';
@@ -95,9 +96,9 @@ describe('FR-25 candidate filter', () => {
     expect(ids(buildCandidates(input({ focus: { mode: 'user', groups: ['cardio'] } })))).toEqual(['bike']);
   });
 
-  it('step 4: coach + lose weight keeps cardio; coach + build muscle drops it', () => {
-    expect(ids(buildCandidates(input({ goal: 'lose_weight' })))).toContain('bike');
-    expect(ids(buildCandidates(input()))).not.toContain('bike');
+  it('D-52: a coach-chosen focus keeps cardio for every goal', () => {
+    for (const goal of ['lose_weight', 'build_muscle', 'stay_fit'] as const)
+      expect(ids(buildCandidates(input({ goal })))).toContain('bike');
   });
 
   it('step 4: change_focus overrides the planner focus', () => {
@@ -170,7 +171,19 @@ describe('FR-25 candidate filter', () => {
         30,
       ),
     ).toBe(false);
-    expect(canFill([ex('c', { cardType: 'timed', timedKind: 'continuous' })], 'build_muscle', 30)).toBe(true);
+    // D-52: continuous cardio counts at the goal's coach maximum (build muscle 600 + 30 = 630; lose weight 1830)
+    expect(canFill([ex('c', { cardType: 'timed', timedKind: 'continuous' })], 'build_muscle', 30)).toBe(false);
+    expect(canFill([ex('c', { cardType: 'timed', timedKind: 'continuous' })], 'lose_weight', 30)).toBe(true);
+  });
+
+  it('D-52: longestCards keeps at most maxCardio cardio cards', () => {
+    const cards = [
+      { s: 900, cardio: true },
+      { s: 800, cardio: true },
+      { s: 300, cardio: false },
+    ];
+    expect(longestCards(cards, 2, 1)).toEqual([900, 300]);
+    expect(longestCards(cards, 2, null)).toEqual([900, 800]);
   });
 });
 
@@ -178,7 +191,7 @@ describe('PRD §8.9 version switches', () => {
   it('adds a harder version above the level filter and drops the original', () => {
     const r = buildCandidates(input());
     const harder = ex('archer_push_up', { muscleGroup: 'chest', level: 'expert' });
-    const out = applyVersionSwitches(r, [{ replaces: 'push_up', version: harder }], 'build_muscle');
+    const out = applyVersionSwitches(r, [{ replaces: 'push_up', version: harder }]);
     expect(out.candidates.map((e) => e.id)).toContain('archer_push_up');
     expect(out.candidates.map((e) => e.id)).not.toContain('push_up');
     expect(out.dropped).toEqual([]);
@@ -186,11 +199,7 @@ describe('PRD §8.9 version switches', () => {
 
   it('a harder version failing focus is not added', () => {
     const r = buildCandidates(input({ focus: { mode: 'user', groups: ['chest'] } }));
-    const out = applyVersionSwitches(
-      r,
-      [{ replaces: 'push_up', version: ex('pistol2', { muscleGroup: 'legs' }) }],
-      'build_muscle',
-    );
+    const out = applyVersionSwitches(r, [{ replaces: 'push_up', version: ex('pistol2', { muscleGroup: 'legs' }) }]);
     expect(out.candidates.map((e) => e.id)).toContain('push_up');
     expect(out.dropped).toEqual(['push_up']);
   });
@@ -200,11 +209,7 @@ describe('PRD §8.9 version switches', () => {
     const r = buildCandidates(
       input({ exercises: big, history: [workout({ hoursAgo: 20, items: [{ id: 'squat', group: 'legs' }] }, now)] }),
     );
-    const out = applyVersionSwitches(
-      r,
-      [{ replaces: 'row', version: ex('lunge', { muscleGroup: 'legs' }) }],
-      'build_muscle',
-    );
+    const out = applyVersionSwitches(r, [{ replaces: 'row', version: ex('lunge', { muscleGroup: 'legs' }) }]);
     expect(out.dropped).toEqual(['row']);
   });
 });

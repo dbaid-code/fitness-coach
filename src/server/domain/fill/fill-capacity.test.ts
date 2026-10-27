@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ex } from '../../../../tests/fixtures/domain';
 import type { ProgressionTarget } from '../progression/progression';
 import { decideFill, mainCapacitySeconds, maxCardSeconds } from './fill-capacity';
-import { rulebookTargets } from '../rulebook/rulebook.v2';
+import { rulebookTargets } from '../rulebook/rulebook.v3';
 
 // Default time model: reps card = sets × reps × 3 + (sets − 1) × 60 + 30.
 const reps = (n: number) => Array.from({ length: n }, (_, i) => ex(`r${i}`));
@@ -37,13 +37,24 @@ describe('D-49 / D-50 fill capacity', () => {
       ),
     ).toBe(2 * 60 + 30);
     expect(maxCardSeconds(ex('h', { cardType: 'timed', timedKind: 'hold' }), undefined, rb)).toBe(4 * 30 + 3 * 60 + 30);
-    expect(maxCardSeconds(ex('c', { cardType: 'timed', timedKind: 'continuous' }), undefined, rb)).toBe(1800 + 30);
+    // D-52: continuous cardio at the goal's coach maximum (Build muscle 600 s, Lose weight 1800 s)
+    expect(maxCardSeconds(ex('c', { cardType: 'timed', timedKind: 'continuous' }), undefined, rb)).toBe(600 + 30);
+    const lw = rulebookTargets('lose_weight', 'moderately_regular');
+    expect(maxCardSeconds(ex('c', { cardType: 'timed', timedKind: 'continuous' }), undefined, lw)).toBe(1800 + 30);
   });
 
   it('mainCapacitySeconds counts at most 12 cards, the longest first', () => {
     const rb = rulebookTargets('build_muscle', 'moderately_regular');
     const pool = [...reps(13), ex('c', { cardType: 'timed', timedKind: 'continuous' })];
-    expect(mainCapacitySeconds(pool, none, rb)).toBe(1830 + 11 * 354);
+    expect(mainCapacitySeconds(pool, none, rb)).toBe(630 + 11 * 354);
+  });
+
+  it('D-52: mainCapacitySeconds counts one cardio card for a coach-chosen Build muscle plan', () => {
+    const cardio = (id: string) => ex(id, { muscleGroup: 'cardio', cardType: 'timed', timedKind: 'continuous' });
+    const pool = [...reps(2), cardio('c1'), cardio('c2')];
+    expect(mainCapacitySeconds(pool, none, rulebookTargets('build_muscle', 'moderately_regular'))).toBe(630 + 2 * 354);
+    const lw = rulebookTargets('lose_weight', 'moderately_regular'); // sets 2–3, reps 12–15: 3 × 15 × 3 + 2 × 60 + 30
+    expect(mainCapacitySeconds(pool, none, lw)).toBe(2 * 1830 + 2 * (3 * 15 * 3 + 2 * 60 + 30));
   });
 
   it('D-49: a fillable pool keeps the plain rulebook and the 85% floor', () => {

@@ -8,7 +8,7 @@ describe('D-38 eval manifest and gate', () => {
     expect(files).toContain('src/server/agents/input-guard/prompt.v1.md');
     expect(files).toContain('src/server/agents/workout-planner/prompt.v1.md');
     expect(files).toContain('src/server/agents/equipment-vision/prompt.v1.md');
-    expect(files).toContain('src/server/domain/rulebook/rulebook.v2.ts');
+    expect(files).toContain('src/server/domain/rulebook/rulebook.v3.ts');
     expect(files).toContain('data/seed/exercises.v1.json');
     expect(manifestHash()).toMatch(/^[0-9a-f]{64}$/);
   });

@@ -12,7 +12,7 @@ import type { ProfileRow } from '@/server/db/repositories/profile.repo';
 import * as profileRepo from '@/server/db/repositories/profile.repo';
 import * as usageRepo from '@/server/db/repositories/usage.repo';
 import { assertCanGenerate, localUsageDate, plansRemaining } from '@/server/domain/limits/limits-policy';
-import { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v2';
+import { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v3';
 import { createDeadline } from '@/server/http/deadline';
 import { AppError } from '@/server/http/errors';
 import { assertNoOtherInflight } from '@/server/http/idempotency';

@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -397,7 +397,7 @@ Loosely based on public strength-training guidance from the ACSM (American Colle
 
 | Rule | Value |
 |-|-|
-| Sets × reps by goal | Build muscle **3–4 × 8–12** · Lose weight **2–3 × 12–15** (cardio allowed) · Stay fit **2–3 × 10–15** |
+| Sets × reps by goal | Build muscle **3–4 × 8–12** · Lose weight **2–3 × 12–15** · Stay fit **2–3 × 10–15** |
 | Exercise level by experience | Newbie: *beginner* only · Moderately regular: *beginner + intermediate* · Experienced: all levels |
 | Volume by experience | Newbies stay at the low end of the sets range |
 | Starting hold time (timed holds) | Newbie 20 s · Moderately regular 30 s · Experienced 45 s |
@@ -406,7 +406,7 @@ Loosely based on public strength-training guidance from the ACSM (American Colle
 | Time window | Plan total between 85% and 100% of the session length |
 | Continuity | When there is a completed workout with an overlapping focus, keep about half of its exercises (checked by the LLM judge, not the validator) |
 | After a Reset | At least half of the main exercises differ from the discarded plan (validator check). *Too long* → aim near the 85% lower bound with fewer exercises · *Too hard* → lighter volume or easier versions · *Too easy* → more volume or harder versions · *Don't like the exercises* → different exercises |
-| Lose-weight goal | When the coach chooses, it may add a short cardio block before the cool-down |
+| Cardio (when the coach chooses the focus) | Any goal may get cardio before the cool-down. Lose weight: a cardio block. Build muscle and Stay fit: at most one cardio exercise, at most 10 minutes (D-52) |
 
 **Time model (code):**
 - Reps card total = `sets × reps × seconds_per_rep + (sets − 1) × rest + setup`
@@ -499,7 +499,7 @@ A **planning session** starts when a plan is generated. It ends when the workout
 1. Every `exercise_id` is in this request's candidate list. Warm-up and cool-down routine IDs exist.
 2. Every exercise's required equipment is available today: the profile, or the override, plus bodyweight.
 3. No exercise strains a body area being avoided.
-4. Main exercises belong to the focus groups. Cardio is allowed only if Cardio was chosen, or if the coach chose and the goal is Lose weight.
+4. Main exercises belong to the focus groups. Cardio is allowed if Cardio was chosen, or if the coach chose the focus (any goal; Build muscle and Stay fit at most one cardio exercise of at most 10 minutes, D-52).
 5. When the coach chose, the 48-hour rule holds.
 6. Card fields match the card type: reps cards have reps, timed cards have time per set.
 7. Exercises the user has done before use the progression targets, unless a request in this session overrides them.

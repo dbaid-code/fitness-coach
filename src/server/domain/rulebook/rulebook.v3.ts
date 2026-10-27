@@ -1,9 +1,11 @@
-// Training rulebook v2 (owner-approved, PRD §8.8; time-model spec §3). Any change needs a full eval run.
+// Training rulebook v3 (owner-approved, PRD §8.8; time-model spec §3). Any change needs a full eval run.
 // v2 (D-49): newbies may use the goal's full sets range when the minimum cannot fill the session.
+// v3 (D-52): a coach-chosen focus may add cardio for every goal; Build muscle and Stay fit get at most one
+// cardio exercise and at most 10 min of continuous cardio.
 import type { Experience, ExerciseLevel, Goal } from '@/shared/schemas/domain/enums';
 import { COOLDOWN_S, TIME_WINDOW_MAX_RATIO, TIME_WINDOW_MIN_RATIO, WARMUP_S } from '@/shared/constants';
 
-export const RULEBOOK_VERSION = 'rulebook.v2';
+export const RULEBOOK_VERSION = 'rulebook.v3';
 
 type Range = { readonly min: number; readonly max: number };
 
@@ -29,6 +31,13 @@ export const REP_MIN = 6;
 export const HOLD_MIN_S = 15;
 export const CONTINUOUS_CARDIO_S = { min: 300, max: 1800 } as const;
 
+/** D-52: cardio when the coach chooses the focus. `maxItems: null` = no limit beyond MAX_MAIN_ITEMS. */
+export const COACH_CARDIO_BY_GOAL: Record<Goal, { maxItems: number | null; continuousS: Range }> = {
+  build_muscle: { maxItems: 1, continuousS: { min: 300, max: 600 } },
+  lose_weight: { maxItems: null, continuousS: CONTINUOUS_CARDIO_S },
+  stay_fit: { maxItems: 1, continuousS: { min: 300, max: 600 } },
+};
+
 export const ORDER = ['warmup', 'compound', 'isolation', 'cardio', 'cooldown'] as const; // prompt rule, judged by EV-2
 
 export const AFTER_RESET_GUIDANCE = {
@@ -44,14 +53,18 @@ export type RulebookTargets = {
   newbieMinSetsOnly: boolean;
   startingHoldS: number;
   continuousCardioS: Range;
+  /** D-52: most cardio exercises allowed in the plan; null = no limit. */
+  maxCardioItems: number | null;
 };
 
 export function rulebookTargets(
   goal: Goal,
   experience: Experience,
-  opts: { widenNewbieSets?: boolean } = {},
+  opts: { widenNewbieSets?: boolean; cardioChosen?: boolean } = {},
 ): RulebookTargets {
   const g = SETS_REPS_BY_GOAL[goal];
+  // D-52: the coach's cardio limits apply unless the user picked Cardio as a focus.
+  const cardio = opts.cardioChosen ? { maxItems: null, continuousS: CONTINUOUS_CARDIO_S } : COACH_CARDIO_BY_GOAL[goal];
   // Newbies use the minimum of the sets range, unless that cannot fill the session (D-49).
   const minOnly = experience === 'newbie' && !opts.widenNewbieSets;
   return {
@@ -59,7 +72,8 @@ export function rulebookTargets(
     reps: g.reps,
     newbieMinSetsOnly: minOnly,
     startingHoldS: STARTING_HOLD_S[experience],
-    continuousCardioS: CONTINUOUS_CARDIO_S,
+    continuousCardioS: cardio.continuousS,
+    maxCardioItems: cardio.maxItems,
   };
 }
 
@@ -97,8 +111,9 @@ export function renderRulebookForPrompt(): string {
     `- The plan fills ${TIME_WINDOW_MIN_RATIO * 100}–${TIME_WINDOW_MAX_RATIO * 100}% of the session length. When the candidates cannot fill that, the request's time window is lowered; then use nearly every candidate at the top of its range.`,
     '- When the focus overlaps a recent workout, keep about half of its exercises for continuity.',
     '- After a Reset, at least half of the main exercises differ from the reset plan.',
-    '- Lose weight: you may add a cardio block before the cool-down.',
-    `- Continuous cardio: 1 set of ${CONTINUOUS_CARDIO_S.min}–${CONTINUOUS_CARDIO_S.max} s.`,
+    '- Cardio: when Cardio is a chosen focus, or when you choose the focus (any goal), placed before the cool-down.',
+    `- When you choose the focus: Lose weight may add a cardio block; Build muscle and Stay fit at most ${COACH_CARDIO_BY_GOAL.build_muscle.maxItems} cardio exercise, continuous cardio ${COACH_CARDIO_BY_GOAL.build_muscle.continuousS.min}–${COACH_CARDIO_BY_GOAL.build_muscle.continuousS.max} s.`,
+    `- Continuous cardio: 1 set of ${CONTINUOUS_CARDIO_S.min}–${CONTINUOUS_CARDIO_S.max} s, within the request's continuous_cardio_s range; no more cardio exercises than max_cardio_items (null = no limit).`,
     `- Progression: cap ${REP_CAP} reps / ${HOLD_CAP_S} s; step +${REP_STEP} reps / +${HOLD_STEP_S} s; minimum ${REP_MIN} reps / ${HOLD_MIN_S} s.`,
     '- After a Reset, follow the reason:',
     ...Object.entries(AFTER_RESET_GUIDANCE).map(([k, v]) => `  - ${k}: ${v}`),

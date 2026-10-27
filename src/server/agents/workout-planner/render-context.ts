@@ -7,7 +7,7 @@ import { ACTIVITY_CARD_S, mainTimeWindow, resolveTimeParams } from '@/shared/tim
 import type { Frequency } from '@/server/domain/candidate-filter/focus-rules';
 import type { ProgressionTarget } from '@/server/domain/progression/progression';
 import type { HistorySummaryEntry } from '@/server/domain/recency/recency';
-import type { RulebookTargets } from '@/server/domain/rulebook/rulebook.v2';
+import type { RulebookTargets } from '@/server/domain/rulebook/rulebook.v3';
 import type { CheckResult } from '@/server/domain/validator/plan-validator';
 import type { Exercise, Focus, Routine } from '@/server/domain/types';
 
@@ -97,6 +97,7 @@ export function renderSections(c: PlannerContext) {
       newbie_min_sets_only: c.rulebookTargets.newbieMinSetsOnly,
       starting_hold_s: c.rulebookTargets.startingHoldS,
       continuous_cardio_s: c.rulebookTargets.continuousCardioS,
+      max_cardio_items: c.rulebookTargets.maxCardioItems, // D-52
     },
     intents: { current: c.currentIntents, session: c.sessionIntents },
     reset: c.reset ? { discarded_exercise_ids: c.reset.discardedExerciseIds, reason: c.reset.reason } : null,

@@ -11,7 +11,7 @@ import {
 import type { Experience, Goal } from '@/shared/schemas/domain/enums';
 import type { Intent } from '@/shared/schemas/domain/intents';
 import { cardSeconds, resolveTimeParams } from '@/shared/time-model/time-model';
-import { CONTINUOUS_CARDIO_S, HOLD_CAP_S, LEVELS_BY_EXPERIENCE, SETS_REPS_BY_GOAL } from '../rulebook/rulebook.v2';
+import { COACH_CARDIO_BY_GOAL, HOLD_CAP_S, LEVELS_BY_EXPERIENCE, SETS_REPS_BY_GOAL } from '../rulebook/rulebook.v3';
 import type { CompletedWorkout, Exercise, Focus } from '../types';
 import { groupsTrainedWithin } from './focus-rules';
 
@@ -69,26 +69,48 @@ export const hasEquipment = (e: Exercise, available: Set<string>) =>
   e.requiredEquipment.every((id) => available.has(id));
 export const stressesAvoided = (e: Exercise, avoided: Set<BodyArea>) => e.bodyAreasStressed.some((a) => avoided.has(a));
 
-export function passesFocus(e: Exercise, focus: Focus, goal: Goal, excluded: Set<MuscleGroup>): boolean {
+// D-52: a coach-chosen focus may include cardio for every goal; V-4 and V-7 enforce the per-goal limits.
+export function passesFocus(e: Exercise, focus: Focus, excluded: Set<MuscleGroup>): boolean {
   if (focus.mode === 'user') return focus.groups.includes(e.muscleGroup);
-  if (e.muscleGroup === 'cardio') return goal === 'lose_weight' && !excluded.has('cardio');
   return !excluded.has(e.muscleGroup);
 }
 
 /** §5.1: the 8 longest cards at the top of the goal's range must cover the main-time minimum. */
 export function canFill(pool: Exercise[], goal: Goal, sessionLengthMin: number): boolean {
   const { sets, reps } = SETS_REPS_BY_GOAL[goal];
-  const times = pool.map((e) => {
+  const cardio = COACH_CARDIO_BY_GOAL[goal];
+  const time = (e: Exercise) => {
     const params = resolveTimeParams({ seconds_per_rep: e.secondsPerRep, rest_s: e.restS, setup_s: e.setupS });
     if (e.cardType === 'reps') return cardSeconds({ cardType: 'reps', sets: sets.max, reps: reps.max, params });
     if (e.timedKind === 'continuous') {
-      return cardSeconds({ cardType: 'timed', sets: 1, timePerSetS: CONTINUOUS_CARDIO_S.max, params });
+      return cardSeconds({ cardType: 'timed', sets: 1, timePerSetS: cardio.continuousS.max, params });
     }
     return cardSeconds({ cardType: 'timed', sets: sets.max, timePerSetS: HOLD_CAP_S, params });
-  });
-  const longest = times.sort((a, b) => b - a).slice(0, CAN_FILL_LONGEST_CARDS);
+  };
+  const longest = longestCards(
+    pool.map((e) => ({ s: time(e), cardio: e.muscleGroup === 'cardio' })),
+    CAN_FILL_LONGEST_CARDS,
+    cardio.maxItems,
+  );
   const need = TIME_WINDOW_MIN_RATIO * sessionLengthMin * 60 - (WARMUP_S + COOLDOWN_S);
   return longest.reduce((a, b) => a + b, 0) >= need;
+}
+
+/** The `count` longest card times, with at most `maxCardio` cardio cards (null = no limit; D-52). */
+export function longestCards(
+  cards: { s: number; cardio: boolean }[],
+  count: number,
+  maxCardio: number | null,
+): number[] {
+  let cardio = 0;
+  const out: number[] = [];
+  for (const c of [...cards].sort((a, b) => b.s - a.s)) {
+    if (out.length >= count) break;
+    if (c.cardio && maxCardio !== null && cardio >= maxCardio) continue;
+    if (c.cardio) cardio++;
+    out.push(c.s);
+  }
+  return out;
 }
 
 const GROUP_ORDER = new Map(MUSCLE_GROUPS.map((g, i) => [g, i]));
@@ -118,12 +140,12 @@ export function buildCandidates(input: CandidateInput): CandidateResult {
   let excludedBy48h: MuscleGroup[] = [];
   let rule48hRelaxed = false;
   if (effectiveFocus.mode === 'user') {
-    pool = base.filter((e) => passesFocus(e, effectiveFocus, input.goal, new Set()));
+    pool = base.filter((e) => passesFocus(e, effectiveFocus, new Set()));
   } else {
-    pool = base.filter((e) => passesFocus(e, effectiveFocus, input.goal, recent));
+    pool = base.filter((e) => passesFocus(e, effectiveFocus, recent));
     excludedBy48h = MUSCLE_GROUPS.filter((g) => recent.has(g));
     if (excludedBy48h.length > 0 && !canFill(pool, input.goal, input.sessionLengthMin)) {
-      pool = base.filter((e) => passesFocus(e, effectiveFocus, input.goal, new Set()));
+      pool = base.filter((e) => passesFocus(e, effectiveFocus, new Set()));
       rule48hRelaxed = true;
     }
   }
@@ -147,7 +169,6 @@ export function buildCandidates(input: CandidateInput): CandidateResult {
 export function applyVersionSwitches(
   result: CandidateResult,
   switches: Array<{ replaces: string; version: Exercise }>,
-  goal: Goal,
 ): { candidates: Exercise[]; dropped: string[] } {
   const excluded =
     result.effectiveFocus.mode === 'coach' && !result.rule48hRelaxed
@@ -156,7 +177,7 @@ export function applyVersionSwitches(
   let list = [...result.candidates];
   const dropped: string[] = [];
   for (const s of switches) {
-    if (!passesFocus(s.version, result.effectiveFocus, goal, excluded)) {
+    if (!passesFocus(s.version, result.effectiveFocus, excluded)) {
       dropped.push(s.replaces);
       continue;
     }

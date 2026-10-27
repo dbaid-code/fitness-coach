@@ -20,6 +20,7 @@ const exercises: Exercise[] = [
   ex('squat', { muscleGroup: 'legs' }),
   ex('plank', { muscleGroup: 'core', cardType: 'timed', timedKind: 'hold' }),
   ex('bike', { muscleGroup: 'cardio', cardType: 'timed', timedKind: 'continuous' }),
+  ex('rower', { muscleGroup: 'cardio', cardType: 'timed', timedKind: 'continuous' }),
 ];
 const byId = new Map(exercises.map((e) => [e.id, e]));
 const routines = [routine('warmup_upper'), routine('cooldown_upper'), routine('warmup_old', { isActive: false })];
@@ -138,7 +139,7 @@ describe('EV-1 plan validator', () => {
     );
   });
 
-  it('V-4: cardio allowed when in focus, or coach + lose weight', () => {
+  it('V-4: cardio allowed when in focus, or coach for any goal (D-52)', () => {
     const withBike = (groups: MuscleGroup[]) =>
       plan({ focus_groups: groups, items: [...MAIN.slice(0, 6).map((id) => item(id)), item('bike', 1, null, 600)] });
     const r1 = validatePlan(
@@ -151,6 +152,24 @@ describe('EV-1 plan validator', () => {
       ctx({ effectiveFocus: { mode: 'coach' }, goal: 'lose_weight' }),
     );
     expect(r2.results.find((x) => x.check === 'V-4')!.passed).toBe(true);
+    const r3 = validatePlan(withBike(['chest', 'triceps']), ctx({ effectiveFocus: { mode: 'coach' } }));
+    expect(r3.results.find((x) => x.check === 'V-4')!.passed).toBe(true);
+  });
+
+  it('D-52: V-4 coach + build muscle or stay fit allows one cardio exercise; lose weight and a Cardio pick have no limit', () => {
+    const two = plan({
+      focus_groups: ['chest', 'triceps'],
+      items: [...MAIN.slice(0, 5).map((id) => item(id)), item('bike', 1, null, 300), item('rower', 1, null, 300)],
+    });
+    const v4 = (c: ValidationContext) => validatePlan(two, c).results.find((x) => x.check === 'V-4')!;
+    for (const goal of ['build_muscle', 'stay_fit'] as const)
+      expect(v4(ctx({ effectiveFocus: { mode: 'coach' }, goal }))).toMatchObject({
+        passed: false,
+        detail_code: 'too_much_cardio',
+        item_indices: [6],
+      });
+    expect(v4(ctx({ effectiveFocus: { mode: 'coach' }, goal: 'lose_weight' })).passed).toBe(true);
+    expect(v4(ctx({ effectiveFocus: { mode: 'user', groups: ['chest', 'triceps', 'cardio'] } })).passed).toBe(true);
   });
 
   it('V-5: coach focus on a group trained within 48 h; passes when relaxed or user mode', () => {
@@ -253,6 +272,22 @@ describe('EV-1 plan validator', () => {
     expect(failed(validatePlan(mk(1, 200), c))).toContain('V-7:cardio_out_of_range');
   });
 
+  it('D-52: V-7 coach continuous cardio is 300–600 s for build muscle and stay fit, 300–1800 s for lose weight', () => {
+    const mk = (t: number) =>
+      plan({
+        focus_groups: ['chest', 'triceps'],
+        items: [...MAIN.slice(0, 6).map((id) => item(id, 3, 12)), item('bike', 1, null, t)],
+      });
+    const coach = (goal: 'build_muscle' | 'stay_fit' | 'lose_weight') =>
+      ctx({ effectiveFocus: { mode: 'coach' }, goal });
+    const v7 = (t: number, goal: 'build_muscle' | 'stay_fit' | 'lose_weight') =>
+      validatePlan(mk(t), coach(goal)).results.find((x) => x.check === 'V-7')!;
+    expect(v7(600, 'build_muscle')).toMatchObject({ passed: true });
+    expect(v7(900, 'build_muscle')).toMatchObject({ passed: false, detail_code: 'cardio_out_of_range' });
+    expect(v7(900, 'stay_fit')).toMatchObject({ passed: false, detail_code: 'cardio_out_of_range' });
+    expect(v7(900, 'lose_weight')).toMatchObject({ passed: true });
+  });
+
   it('V-7: request override direction (whole plan and item), new exercise baseline', () => {
     const lighter = {
       intent_id: 1,
@@ -332,7 +367,7 @@ describe('EV-1 plan validator', () => {
   });
 
   it('V-7 (D-49): a newbie may use the full sets range only when the fill decision widened it', async () => {
-    const { rulebookTargets } = await import('../rulebook/rulebook.v2');
+    const { rulebookTargets } = await import('../rulebook/rulebook.v3');
     const four = plan({ items: [item('bench', 4), ...MAIN.slice(1).map((id) => item(id))] });
     const newbie = { experience: 'newbie' as const };
     expect(failed(validatePlan(four, ctx(newbie)))).toContain('V-7:start_out_of_range');
@@ -341,7 +376,7 @@ describe('EV-1 plan validator', () => {
   });
 
   it('V-8 (D-50): a short session passes at 85% of what the pool allows; a lazier plan still fails', async () => {
-    const { rulebookTargets } = await import('../rulebook/rulebook.v2');
+    const { rulebookTargets } = await import('../rulebook/rulebook.v3');
     const rulebook = rulebookTargets('build_muscle', 'moderately_regular');
     const six = plan({ items: MAIN.slice(0, 6).map((id) => item(id)) }); // 6 × 240 + 600 = 2040 s
     const v8 = (c: ValidationContext) => validatePlan(six, c).results.find((x) => x.check === 'V-8')!;

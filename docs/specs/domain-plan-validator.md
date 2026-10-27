@@ -41,7 +41,7 @@ export function validatePlan(output: unknown, ctx: ValidationContext): { passed:
 | **V-1** | Every `items[].exercise_id` ∈ `ctx.candidates`. `warmup_routine_id` exists, is active and `routine_type = 'warmup'`; `cooldown_routine_id` likewise with `cooldown`. | `not_in_candidates`, `unknown_warmup`, `unknown_cooldown` |
 | **V-2** | Every exercise's `required_equipment ⊆ availableEquipment` (empty always passes). | `missing_equipment` (`values.missing`) |
 | **V-3** | No exercise's `body_areas_stressed` overlaps `avoidedBodyAreas`. | `stresses_avoided_area` (`values.areas`) |
-| **V-4** | User focus: every main exercise's `muscle_group ∈ groups`. Coach focus: `muscle_group ∈ output.focus_groups`, and `output.focus_groups` ⊆ groups present in candidates. Cardio exercises allowed only if `cardio ∈ focus groups`, or (coach mode and goal `lose_weight`). | `outside_focus`, `cardio_not_allowed`, `focus_group_not_available` |
+| **V-4** | User focus: every main exercise's `muscle_group ∈ groups`. Coach focus: `muscle_group ∈ output.focus_groups`, and `output.focus_groups` ⊆ groups present in candidates. Cardio exercises allowed if `cardio ∈ focus groups`, or in coach mode (any goal, D-52); coach mode with Build muscle or Stay fit allows at most 1 cardio exercise (`COACH_CARDIO_BY_GOAL`). | `outside_focus`, `cardio_not_allowed`, `too_much_cardio`, `focus_group_not_available` |
 | **V-5** | Coach mode and `!rule48hRelaxed`: `output.focus_groups ∩ groupsTrainedWithin48h = ∅`. | `trained_within_48h` |
 | **V-6** | `card_type` equals the exercise's `card_type`. Reps cards: `reps` set, `time_per_set_s` null. Timed: the reverse. `sets` 1–10, `reps` 1–50, `time_per_set_s` 5–3600. | `card_type_mismatch`, `fields_mismatch`, `out_of_bounds` |
 | **V-7** | See §3. | `progression_mismatch`, `start_out_of_range`, `cardio_out_of_range`, `override_wrong_direction` |
@@ -53,7 +53,7 @@ export function validatePlan(output: unknown, ctx: ValidationContext): { passed:
 ## 3. V-7 in detail
 For each main item `i` with exercise `E`:
 1. **Exempt** when: an applied `adjust_volume` intent (current or session) covers it → instead apply the direction rule in `domain-progression.md` §4 (`override_wrong_direction` on failure); or edit mode and the matching input item has `origin = 'user_edit'` and is unchanged.
-2. `E.timed_kind = 'continuous'`: `sets = 1` and `time_per_set_s ∈ [300, 1800]` (`cardio_out_of_range`).
+2. `E.timed_kind = 'continuous'`: `sets = 1` and `time_per_set_s ∈ continuousCardioS`: [300, 1800], or [300, 600] for a coach-chosen Build muscle or Stay fit plan (D-52) (`cardio_out_of_range`).
 3. `progressionTargets.has(E)`: `sets`, `reps`, `time_per_set_s` equal the target exactly (`progression_mismatch`).
 4. Otherwise (new exercise, D-15): reps card → `sets ∈ goal.sets` (newbie: `= goal.sets.min`), `reps ∈ goal.reps`; hold → `sets` as reps card, `time_per_set_s = startingHoldS` (`start_out_of_range`).
 

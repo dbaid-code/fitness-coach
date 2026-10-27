@@ -1,10 +1,10 @@
-# Spec: Time model and training rulebook v2 (F-07, part 1)
+# Spec: Time model and training rulebook v3 (F-07, part 1)
 
 | | |
 |-|-|
 | **Implements** | FR-30, FR-41, FR-44, FR-50 (instant totals); PRD §8.8; engineering doc §8.6.4, §8.6.6, Appendix B |
 | **Milestone** | M1 |
-| **Canonical files** | `src/shared/time-model/time-model.ts` (shared with the client), `src/server/domain/rulebook/rulebook.v2.ts` |
+| **Canonical files** | `src/shared/time-model/time-model.ts` (shared with the client), `src/server/domain/rulebook/rulebook.v3.ts` |
 | **Coverage** | 100% branches |
 
 ## 1. Time model (`time-model.ts`)
@@ -94,9 +94,9 @@ Edge tests: total exactly 1530 and exactly 1800 for 30 min are inside; 1529 and 
 ## 2. Hard bounds
 From `HARD_BOUNDS` (`configuration-and-constants.md` §2): sets 1–10, reps 1–50, time per set 5–3600 s. They are enforced by API-10, by V-6 and by DB check constraints.
 
-## 3. Rulebook v2 (`rulebook.v2.ts`, owner-approved, PRD §8.8)
+## 3. Rulebook v3 (`rulebook.v3.ts`, owner-approved, PRD §8.8)
 ```ts
-export const RULEBOOK_VERSION = 'rulebook.v2';
+export const RULEBOOK_VERSION = 'rulebook.v3';
 
 export const SETS_REPS_BY_GOAL = {
   build_muscle: { sets: { min: 3, max: 4 }, reps: { min: 8,  max: 12 } },
@@ -120,6 +120,13 @@ export const REP_MIN = 6;
 export const HOLD_MIN_S = 15;
 export const CONTINUOUS_CARDIO_S = { min: 300, max: 1800 } as const;
 
+// D-52: cardio when the coach chooses the focus. maxItems null = no limit beyond MAX_MAIN_ITEMS.
+export const COACH_CARDIO_BY_GOAL = {
+  build_muscle: { maxItems: 1, continuousS: { min: 300, max: 600 } },
+  lose_weight:  { maxItems: null, continuousS: CONTINUOUS_CARDIO_S },
+  stay_fit:     { maxItems: 1, continuousS: { min: 300, max: 600 } },
+};
+
 export const ORDER = ['warmup', 'compound', 'isolation', 'cardio', 'cooldown'] as const;   // prompt rule, judged by EV-2
 
 export const AFTER_RESET_GUIDANCE = {
@@ -132,8 +139,11 @@ export const AFTER_RESET_GUIDANCE = {
 export type RulebookTargets = {
   sets: { min: number; max: number }; reps: { min: number; max: number };
   newbieMinSetsOnly: boolean; startingHoldS: number; continuousCardioS: { min: number; max: number };
+  maxCardioItems: number | null;   // D-52
 };
-export function rulebookTargets(goal: Goal, experience: Experience): RulebookTargets;
+// cardioChosen: the user picked Cardio as a focus, so COACH_CARDIO_BY_GOAL doesn't apply (300–1800 s, no item limit).
+export function rulebookTargets(goal: Goal, experience: Experience,
+  opts?: { widenNewbieSets?: boolean; cardioChosen?: boolean }): RulebookTargets;
 export function renderRulebookForPrompt(): string;   // deterministic Markdown table of every rule above; used for {{RULEBOOK}}
 ```
 
@@ -148,15 +158,15 @@ export function renderRulebookForPrompt(): string;   // deterministic Markdown t
 | Time window | 85–100% of the session |
 | Continuity | keep about half the exercises when the focus overlaps a recent workout (EV-2, not validated) |
 | After Reset | ≥ half of main exercises differ (V-9) + reason guidance above |
-| Lose weight | coach may add a cardio block before the cool-down |
+| Cardio | before the cool-down; when the user picks Cardio (300–1800 s, no item limit) or the coach chooses the focus, any goal (D-52): Lose weight 300–1800 s, no item limit; Build muscle and Stay fit at most 1 cardio exercise, 300–600 s |
 | Progression | cap 15 reps / 60 s; step +2 reps / +10 s; minimum 6 reps / 15 s (`domain-progression.md`) |
 
-**"New exercise" numbers (V-7, D-15):** reps cards → `sets` in the goal range (newbie: exactly the minimum, or the full range when `decideFill` widened it, D-49) and `reps` in the goal range; holds → `sets` in the goal range (newbie: minimum, same exception) and `time_per_set_s = startingHoldS`; continuous cardio → `sets = 1`, `time_per_set_s` in 300–1800.
+**"New exercise" numbers (V-7, D-15):** reps cards → `sets` in the goal range (newbie: exactly the minimum, or the full range when `decideFill` widened it, D-49) and `reps` in the goal range; holds → `sets` in the goal range (newbie: minimum, same exception) and `time_per_set_s = startingHoldS`; continuous cardio → `sets = 1`, `time_per_set_s` in `continuousCardioS` (300–1800, or 300–600 for a coach-chosen Build muscle or Stay fit plan, D-52).
 
 ## 3a. Fill capacity (`src/server/domain/fill/fill-capacity.ts`, D-49, D-50)
 Code decides, before AG-3 is called, whether the candidate pool can fill the session:
-1. `maxCardSeconds(e)`: the longest card V-7 allows: the progression target's numbers; else the top of the rulebook range (`sets.max × reps.max`, holds `sets.max × startingHoldS`); continuous cardio `1 × 1800 s`.
-2. `capacity = 600 + Σ` of the `MAX_MAIN_ITEMS` (12) longest cards.
+1. `maxCardSeconds(e)`: the longest card V-7 allows: the progression target's numbers; else the top of the rulebook range (`sets.max × reps.max`, holds `sets.max × startingHoldS`); continuous cardio `1 × continuousCardioS.max` (D-52).
+2. `capacity = 600 + Σ` of the `MAX_MAIN_ITEMS` (12) longest cards, with at most `maxCardioItems` cardio cards (D-52).
 3. If `capacity < 0.85·L·60` and the user is a newbie on minimum sets, retry with the full sets range (**D-49**, `rulebookTargets(goal, exp, { widenNewbieSets: true })`).
 4. Still below → `shortSession = true` and V-8's floor becomes `floor(0.85 × capacity)` (**D-50**). Otherwise the floor stays `0.85·L·60`.
 The decision feeds AG-3 (`<rulebook_targets>`, `main_time_window_s.min`) and the validator (`ctx.fill`), and `short_session` is stored on the plan.
@@ -164,5 +174,5 @@ The decision feeds AG-3 (`<rulebook_targets>`, `main_time_window_s.min`) and the
 ## 4. Tests
 - `time-model.test.ts`: every vector and edge above; overrides; 100% branches.
 - `rulebook.test.ts`: `rulebookTargets` for all 9 goal × experience pairs; `renderRulebookForPrompt()` is stable (snapshot) and contains every number in §3.
-- Any change to `rulebook.v2.ts` changes the eval manifest hash (full eval required).
+- Any change to `rulebook.v3.ts` changes the eval manifest hash (full eval required).
 - `fill-capacity.test.ts`: capacity per card kind, the 12-card cap, newbie widening that fills, widening that is still short, non-newbie short sessions.

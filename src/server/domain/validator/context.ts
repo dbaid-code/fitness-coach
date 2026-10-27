@@ -5,7 +5,7 @@ import type { Intent, NumberedIntent } from '@/shared/schemas/domain/intents';
 import type { WorkoutPlannerOutput } from '@/shared/schemas/domain/workout-plan';
 import type { ProgressionTarget } from '../progression/progression';
 import type { Exercise, Focus, Routine } from '../types';
-import type { RulebookTargets } from '../rulebook/rulebook.v2';
+import type { RulebookTargets } from '../rulebook/rulebook.v3';
 
 export type InputPlanItem = {
   ref: number;

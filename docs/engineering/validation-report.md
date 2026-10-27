@@ -118,13 +118,13 @@ Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-c
 |-|-|-|-|
 | 1 | Anthropic dev key in the build environment (P-3) | real-model smoke and full evals; LLM curation; F-16 provider-error capture | Add `GC_ANTHROPIC_API_KEY` (dev, $25 cap) to the cloud environment's variables (`ANTHROPIC_API_KEY` doesn't reach the session), or run the `evals` workflow with `ANTHROPIC_API_KEY_EVALS` |
 | 2 | EV-5 truth-list review | EV-5 sign-off | Owner reviews the 10 cases in `evals/datasets/photos/README.md` |
-| 3 | Label and judge reviews (OD-08) | 20% judged plans, 10% exercise sample (EV-3 labels, EV-4 cases, equipment list, muscle-group map and rulebook v2 approved 2026-10-27) | Owner review |
+| 3 | Label and judge reviews (OD-08) | 20% judged plans, 10% exercise sample (EV-3 labels, EV-4 cases, equipment list, muscle-group map, rulebook v2 and v3 (D-52) approved 2026-10-27) | Owner review |
 | 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | preview health check, deploy | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |
 
 ### 7.3 Behaviour worth knowing (not defects)
 - **Concurrent Suggest taps:** the in-flight guard can make every concurrent request back off with `REQUEST_IN_PROGRESS` (none succeeds). Never two active plans. The client refetches after 2 s, so the user taps again. Only reachable by deliberately parallel requests.
 - **EV-1 holds by construction:** the core only returns validator-approved plans. The real quality signals are EV-2's generation-failure count and first-attempt validator failures (logged per call).
-- **Rulebook v2, deferred to Phase 0 feedback (owner, 2026-10-27):** (1) progression never adds sets, so a user's sets stay where they started (a newbie on Stay fit stays at 2), even after their experience changes; (2) the 15-rep cap applies to every goal, so Build muscle (8–12) progresses to 15 reps before a harder version. Either fix is a rulebook v3 and a new full eval run.
+- **Rulebook (v2, still open in v3), deferred to Phase 0 feedback (owner, 2026-10-27):** (1) progression never adds sets, so a user's sets stay where they started (a newbie on Stay fit stays at 2), even after their experience changes; (2) the 15-rep cap applies to every goal, so Build muscle (8–12) progresses to 15 reps before a harder version. Either fix is a new rulebook version and a new full eval run.
 - **Extra UI copy:** `toast.rateLimited`, `common.close`, `plan.drag` aren't in the approved copy list (build notes §5.17).
 
 ### 7.4 Deviations recorded

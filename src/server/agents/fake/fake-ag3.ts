@@ -143,7 +143,11 @@ export function fakePlan(c: PlannerContext): WorkoutPlannerOutput {
   }
   if (total() < w.minS) {
     const cardio = items.find((it) => byId.get(it.exercise_id)?.timedKind === 'continuous');
-    if (cardio) cardio.time_per_set_s = Math.min(1800, cardio.time_per_set_s! + (w.minS - total()));
+    if (cardio)
+      cardio.time_per_set_s = Math.min(
+        c.rulebookTargets.continuousCardioS.max, // D-52: 600 s for a coach-chosen Build muscle / Stay fit plan
+        cardio.time_per_set_s! + (w.minS - total()),
+      );
   }
   const applied = c.currentIntents.map((i) => i.intent_id);
   const groups = MUSCLE_GROUPS.filter(

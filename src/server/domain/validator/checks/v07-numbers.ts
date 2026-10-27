@@ -1,5 +1,5 @@
 import { HARD_BOUNDS } from '@/shared/constants';
-import { CONTINUOUS_CARDIO_S, rulebookTargets } from '../../rulebook/rulebook.v2';
+import { rulebookTargets } from '../../rulebook/rulebook.v3';
 import {
   fail,
   pass,
@@ -14,7 +14,9 @@ const inRange = (n: number | null, r: { min: number; max: number }) => n !== nul
 
 // V-7: progression targets, rulebook starts (D-15), continuous cardio, request overrides (§8.6.3).
 export function v07Numbers(plan: Plan, ctx: ValidationContext): CheckResult {
-  const t = ctx.fill?.rulebook ?? rulebookTargets(ctx.goal, ctx.experience);
+  const f = ctx.effectiveFocus;
+  const cardioChosen = f.mode === 'user' && f.groups.includes('cardio');
+  const t = ctx.fill?.rulebook ?? rulebookTargets(ctx.goal, ctx.experience, { cardioChosen });
   const failures: Record<string, number[]> = {};
   const add = (code: string, i: number) => (failures[code] ??= []).push(i);
 
@@ -51,7 +53,7 @@ export function v07Numbers(plan: Plan, ctx: ValidationContext): CheckResult {
     }
 
     if (e.timedKind === 'continuous') {
-      if (it.sets !== 1 || !inRange(it.time_per_set_s, CONTINUOUS_CARDIO_S)) add('cardio_out_of_range', i);
+      if (it.sets !== 1 || !inRange(it.time_per_set_s, t.continuousCardioS)) add('cardio_out_of_range', i); // D-52: per-goal coach range
       return;
     }
 

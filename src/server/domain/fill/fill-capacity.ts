@@ -2,7 +2,8 @@ import { MAX_MAIN_ITEMS, TIME_WINDOW_MIN_RATIO } from '@/shared/constants';
 import type { Experience, Goal } from '@/shared/schemas/domain/enums';
 import { ACTIVITY_CARD_S, cardSeconds, resolveTimeParams, timeWindow } from '@/shared/time-model/time-model';
 import type { ProgressionTarget } from '../progression/progression';
-import { CONTINUOUS_CARDIO_S, rulebookTargets, type RulebookTargets } from '../rulebook/rulebook.v2';
+import { longestCards } from '../candidate-filter/candidate-filter';
+import { rulebookTargets, type RulebookTargets } from '../rulebook/rulebook.v3';
 import type { Exercise } from '../types';
 
 // Fill capacity (D-49, D-50): can the candidate pool fill the session at all? Decided by code from the
@@ -25,7 +26,7 @@ export type FillDecision = {
 export function maxCardSeconds(e: Exercise, target: ProgressionTarget | undefined, rb: RulebookTargets): number {
   const params = resolveTimeParams({ seconds_per_rep: e.secondsPerRep, rest_s: e.restS, setup_s: e.setupS });
   if (e.timedKind === 'continuous')
-    return cardSeconds({ cardType: 'timed', sets: 1, timePerSetS: CONTINUOUS_CARDIO_S.max, params });
+    return cardSeconds({ cardType: 'timed', sets: 1, timePerSetS: rb.continuousCardioS.max, params });
   if (target)
     return target.reps !== null
       ? cardSeconds({ cardType: 'reps', sets: target.sets, reps: target.reps, params })
@@ -35,17 +36,17 @@ export function maxCardSeconds(e: Exercise, target: ProgressionTarget | undefine
     : cardSeconds({ cardType: 'timed', sets: rb.sets.max, timePerSetS: rb.startingHoldS, params });
 }
 
-/** Main-work capacity: the MAX_MAIN_ITEMS longest cards the pool allows. */
+/** Main-work capacity: the MAX_MAIN_ITEMS longest cards the pool allows, within the cardio limit (D-52). */
 export function mainCapacitySeconds(
   candidates: readonly Exercise[],
   targets: ReadonlyMap<string, ProgressionTarget>,
   rb: RulebookTargets,
 ): number {
-  return candidates
-    .map((e) => maxCardSeconds(e, targets.get(e.id), rb))
-    .sort((a, b) => b - a)
-    .slice(0, MAX_MAIN_ITEMS)
-    .reduce((a, b) => a + b, 0);
+  return longestCards(
+    candidates.map((e) => ({ s: maxCardSeconds(e, targets.get(e.id), rb), cardio: e.muscleGroup === 'cardio' })),
+    MAX_MAIN_ITEMS,
+    rb.maxCardioItems,
+  ).reduce((a, b) => a + b, 0);
 }
 
 export function decideFill(input: {
@@ -53,15 +54,18 @@ export function decideFill(input: {
   targets: ReadonlyMap<string, ProgressionTarget>;
   goal: Goal;
   experience: Experience;
+  /** D-52: the user picked Cardio as a focus, so the coach's cardio limits don't apply. */
+  cardioChosen?: boolean;
   sessionLengthMin: number;
 }): FillDecision {
   const activities = 2 * ACTIVITY_CARD_S;
   const floorS = timeWindow(input.sessionLengthMin).minS;
-  let rulebook = rulebookTargets(input.goal, input.experience);
+  const cardioChosen = input.cardioChosen ?? false;
+  let rulebook = rulebookTargets(input.goal, input.experience, { cardioChosen });
   let main = mainCapacitySeconds(input.candidates, input.targets, rulebook);
   let newbieSetsWidened = false;
   if (main + activities < floorS && rulebook.newbieMinSetsOnly) {
-    rulebook = rulebookTargets(input.goal, input.experience, { widenNewbieSets: true });
+    rulebook = rulebookTargets(input.goal, input.experience, { widenNewbieSets: true, cardioChosen });
     main = mainCapacitySeconds(input.candidates, input.targets, rulebook);
     newbieSetsWidened = true;
   }

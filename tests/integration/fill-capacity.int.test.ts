@@ -34,7 +34,7 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
     expect(plan.total_time_s).toBeLessThanOrEqual(3600);
     expect(mains(plan).some((i: any) => i.sets === 3)).toBe(true); // above the newbie minimum of 2
     const [row] = await adminSql`select rulebook_version from app.plans where id = ${plan.id}`;
-    expect(row!.rulebook_version).toBe('rulebook.v2');
+    expect(row!.rulebook_version).toBe('rulebook.v3');
   });
 
   it('D-50: bodyweight shoulders + triceps at 60 min → short plan, flagged, event carries short_session', async () => {
