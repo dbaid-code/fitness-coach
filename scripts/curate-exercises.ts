@@ -101,7 +101,11 @@ const LlmRow = z
 async function llmDrafts(rows: RawExercise[]): Promise<Map<string, Drafted>> {
   const { default: Anthropic } = await import('@anthropic-ai/sdk');
   const { zodOutputFormat } = await import('@anthropic-ai/sdk/helpers/zod');
-  const client = new Anthropic({ baseURL: process.env.ANTHROPIC_API_BASE_URL || 'https://api.anthropic.com' });
+  // GC_ANTHROPIC_API_KEY: the Claude cloud environment withholds ANTHROPIC_API_KEY (build notes §6).
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.GC_ANTHROPIC_API_KEY,
+    baseURL: process.env.ANTHROPIC_API_BASE_URL || 'https://api.anthropic.com',
+  });
   const system = readFileSync('scripts/curation/prompt.v1.md', 'utf8')
     .replace('{{BODY_AREAS}}', BODY_AREAS.join(', '))
     .replace('{{EQUIPMENT_LIST}}', equipment.items.map((i) => `${i.id} | ${i.name}`).join('\n'))

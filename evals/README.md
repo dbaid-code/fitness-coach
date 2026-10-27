@@ -11,7 +11,7 @@ post-processing, validator and generation core) against synthetic fixtures, with
 | `… --full --fake` | Plumbing check with the deterministic fakes. Never writes `latest.json`; its scores mean nothing. |
 | `pnpm evals:check` | The CI `eval-gate`: fails when `latest.json` is missing, was produced for other prompts / config / rulebook / seed data (manifest hash), or any suite failed. |
 
-Keys: `ANTHROPIC_API_KEY_EVALS` (or `ANTHROPIC_API_KEY`) from the **dev** workspace. The runner prints the
+Keys: `ANTHROPIC_API_KEY_EVALS` (or `ANTHROPIC_API_KEY`, or `GC_ANTHROPIC_API_KEY` in the Claude cloud environment) from the **dev** workspace. The runner prints the
 running cost and aborts above $8. In CI, run the `evals` workflow (Actions → evals → Run workflow) and
 commit the `latest.json` from its artifact.
 

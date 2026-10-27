@@ -31,9 +31,9 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
    |-|-|-|
    | `gc-dev-vercel` | Vercel Preview `ANTHROPIC_API_KEY` (P-2 step 6) | now |
    | `gc-dev-ci` | GitHub secret `ANTHROPIC_API_KEY_EVALS` (P-6 step 1) | now |
-   | `gc-dev-claude` | Claude cloud environment variable `ANTHROPIC_API_KEY` (see below) | now |
+   | `gc-dev-claude` | Claude cloud environment variable `GC_ANTHROPIC_API_KEY` (see below) | now |
 
-   To add `gc-dev-claude`: in the Claude app, open the cloud environment menu in this session's title bar → **Edit** → environment variables. Add `ANTHROPIC_API_KEY=<key>` and save. New sessions pick it up. I use it only for seed curation (about $2–4) and the M3 smoke evals. `api.anthropic.com` is already reachable from the container.
+   To add `gc-dev-claude`: in the Claude app, open the cloud environment menu in this session's title bar → **Edit** → environment variables. Add `GC_ANTHROPIC_API_KEY=<key>` and save. New sessions pick it up. Use that name, not `ANTHROPIC_API_KEY`: the cloud environment doesn't pass `ANTHROPIC_API_KEY` through to the session (it's the name Claude Code uses for its own auth). `pnpm seed:curate` and the evals runner fall back to `GC_ANTHROPIC_API_KEY`; the app itself still reads `ANTHROPIC_API_KEY` on Vercel and in CI. I use it only for seed curation (about $2–4) and the M3 smoke evals. `api.anthropic.com` is already reachable from the container.
 
 **Record:** `gc-dev-vercel`, `gc-dev-ci`, `gc-dev-claude`.
 

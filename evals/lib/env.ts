@@ -16,7 +16,11 @@ export function prepareEvalEnv(opts: { fake: boolean }): void {
     return;
   }
   process.env.AGENTS_MODE = 'real';
-  const key = process.env.ANTHROPIC_API_KEY_EVALS ?? process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('evals need ANTHROPIC_API_KEY_EVALS or ANTHROPIC_API_KEY (dev workspace), or --fake');
+  // The Claude cloud environment withholds ANTHROPIC_API_KEY, so the dev key arrives as GC_ANTHROPIC_API_KEY there (build notes §6).
+  const key = process.env.ANTHROPIC_API_KEY_EVALS ?? process.env.ANTHROPIC_API_KEY ?? process.env.GC_ANTHROPIC_API_KEY;
+  if (!key)
+    throw new Error(
+      'evals need ANTHROPIC_API_KEY_EVALS, ANTHROPIC_API_KEY or GC_ANTHROPIC_API_KEY (dev workspace), or --fake',
+    );
   process.env.ANTHROPIC_API_KEY = key;
 }

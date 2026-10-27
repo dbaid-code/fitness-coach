@@ -90,6 +90,7 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 - **The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews. Each milestone PR carries the preview's `/api/v1/health` link, and the owner confirms `"db":"ok"`. Vercel Authentication stays on for previews.
 - **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are created at M7, not M0.
+- **The Claude cloud environment holds the dev key as `GC_ANTHROPIC_API_KEY`** (2026-10-27). An `ANTHROPIC_API_KEY` set there never reached the session. `scripts/curate-exercises.ts` and `evals/lib/env.ts` fall back to it; `env.ts`, Vercel and CI keep `ANTHROPIC_API_KEY`.
 
 
 ## 7. Build status (2026-10-26)
