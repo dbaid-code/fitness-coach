@@ -24,9 +24,12 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
   });
   afterAll(truncateUserData);
 
+  // Every strength group but no Cardio: since D-52 a coach-chosen focus may fill with a cardio finisher instead.
+  const STRENGTH = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
+
   it('D-49: a Stay-fit newbie gets a full 60-minute plan using the full sets range', async () => {
     const u = await createUser({ onboard: true, goal: 'stay_fit', experience: 'newbie' });
-    const r = await go(u, { session_length_min: 60 });
+    const r = await go(u, { session_length_min: 60, focus: { mode: 'user', groups: STRENGTH } });
     expect(r.json.data.outcome).toBe('plan_ready');
     const plan = r.json.data.plan;
     expect(plan.short_session).toBe(false);
@@ -35,6 +38,17 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
     expect(mains(plan).some((i: any) => i.sets === 3)).toBe(true); // above the newbie minimum of 2
     const [row] = await adminSql`select rulebook_version from app.plans where id = ${plan.id}`;
     expect(row!.rulebook_version).toBe('rulebook.v3');
+  });
+
+  it('D-52: a coach-chosen Stay-fit newbie 60-minute plan is full, with at most one cardio exercise of ≤ 600 s', async () => {
+    const u = await createUser({ onboard: true, goal: 'stay_fit', experience: 'newbie' });
+    const r = await go(u, { session_length_min: 60 });
+    expect(r.json.data.outcome).toBe('plan_ready');
+    const plan = r.json.data.plan;
+    expect(plan.total_time_s).toBeGreaterThanOrEqual(3060);
+    const cardio = mains(plan).filter((i: any) => i.muscle_group === 'cardio');
+    expect(cardio.length).toBeLessThanOrEqual(1);
+    for (const c of cardio) if (c.card_type === 'timed') expect(c.time_per_set_s).toBeLessThanOrEqual(600);
   });
 
   it('D-50: bodyweight shoulders + triceps at 60 min → short plan, flagged, event carries short_session', async () => {
