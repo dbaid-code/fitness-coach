@@ -19,7 +19,6 @@ commit the `latest.json` from its artifact.
 - `users.v1.json`: 5 fictional users covering the three goals, three experience levels and five equipment setups.
 - `ag2-inputs.v1.json`: 20 labelled AG-2 inputs (EV-3); disjoint from the prompt examples (a unit test checks).
 - `health-cases.v1.json`: 10 health notes (EV-4), every body area plus one "slept badly" case.
-- `rehab-denylist.v1.json`: rehab / physio movements a health plan must never pick.
 - `photos/`: **owner task.** EV-5 needs real equipment photos with no people; see `photos/README.md`.
   Until they exist EV-5 reports `cases: 0` and the gate stays red.
 

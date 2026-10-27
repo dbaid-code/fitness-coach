@@ -2867,7 +2867,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | EV-1 | `evals/suites/ev1-rule-checks.ts`: runs the **production validator** over every plan generated in EV-2 and EV-4 | Generated plans | **100%** |
 | EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt) scores 5 criteria from 1 to 5 | `users.v1.json` | No plan below 3; the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
 | EV-3 | `ev3-input-guard.ts`: 20 labelled inputs → AG-2 → compare category, red flag and intents | `ag2-inputs.v1.json` | Red-flag recall **100%**; ≥ 90% correct; out-of-scope never changes a plan (**100%**), checked by running out-of-scope edits through API-11 with real agents and comparing the plans |
-| EV-4 | `ev4-health.ts`: 10 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v1.json` | No exercise straining the named area (**100%**); no rehab exercises (**100%**, the exercise IDs are checked against a rehab denylist) |
+| EV-4 | `ev4-health.ts`: 10 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v1.json` | No exercise straining the named area (**100%**) |
 | EV-5 | `ev5-photos.ts`: 10 cases → AG-1 → threshold | `photos/*` | A case passes if ≥ 80% of the true items are found; ≥ 90% of cases pass; ≤ 10% of detected items are wrong; unclear photos give `PHOTO_NONE` (**100%**) |
 | EV-6 | Vitest integration (§13.3, lifecycle) | Fixtures | **100%** |
 | EV-7 | Vitest unit (`progression.test.ts`) | Fixtures | **100%** |
@@ -3443,6 +3443,7 @@ There is no paging for the pilot. Passive signals:
 | D-48 | S-8: every GitHub Action pinned to a commit SHA, the Vercel CLI to an exact version, workflows default to `permissions: contents: read`, `evals.yml` never on `pull_request_target`, previews behind Vercel Deployment Protection. gitleaks runs as a checksum-pinned binary (no third-party action). | **Approved** (owner, security plan) | 2026-10-26 | §13.6, §17 |
 | D-49 | Newbies use the goal's full sets range for a plan when the minimum sets can't fill the session (rulebook v2; decided by code in `fill-capacity.ts`, checked by V-7) | **Approved** (owner, validation report §7.1) | 2026-10-27 | PRD §8.10, §8.6, V-7 |
 | D-50 | When the candidates can't fill the session even then, the plan may be shorter: V-8's floor is 85% of what they allow, the plan is flagged `short_session`, and the plan view shows the static `SHORT_SESSION` message under the outcome banner. The flag is set by generation and AI edits, not direct edits; AI edits keep the D-04 edit rule | **Approved** (owner) | 2026-10-27 | PRD FR-44, §8.10, V-8, §7 `plans` |
+| D-51 | The health-adjustment rule "never add rehab or therapeutic exercises" is dropped from the PRD, with EV-4's rehab-denylist check and `rehab-denylist.v1.json`. V-3 and the candidate filter still keep the named area out, and health adjustments still only avoid, swap or lighten. The AG-3 prompt keeps its one-line instruction as guidance, untested. The PRD non-goals (no rehab or clinical use) are unchanged | **Approved** (owner) | 2026-10-27 | PRD §8.11, PRD §9.2 EV-4, §13 EV-4 |
 
 ## Appendix B. Configuration constants
 

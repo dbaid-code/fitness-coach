@@ -41,8 +41,8 @@ Distribution: 4 `workout_change` (incl. 2 with synonyms, 1 in edit mode with a p
 ### 2.3 `health-cases.v1.json` — 10 cases (EV-4)
 `{ "ev_id", "user_ref", "session_length_min", "focus": {"mode": "user", "groups": ["legs"]} | {"mode": "coach"}, "note": "knee is sore", "expected_avoided_areas": ["knees"] }`. Covers every body area at least once across cases (9 areas + one "slept badly" lighter case).
 
-### 2.4 `rehab-denylist.v1.json`
-Exercise IDs from `exercises.v1.json` that are rehab, physiotherapy or "therapeutic" movements (e.g. band external rotations for the rotator cuff, ankle circles, neck isometrics), chosen at curation and reviewed by the owner with the 10% sample. Format: `{ "version": "rehab-denylist.v1", "exercise_ids": ["…"] }`.
+### 2.4 (removed)
+The rehab denylist was dropped with its EV-4 check (D-51). The section number is kept so references to §2.5 stay valid.
 
 ### 2.5 `photos/` — 10 cases (EV-5)
 `photos/<case_id>/photo-1.jpg … photo-n.jpg` (1–5, already ≤ 1568 px) + `truth.json`: `{ "ev_id": "EV-5-03", "setting": "small_gym" | "large_gym" | "home", "items": ["dumbbells", "flat_bench"], "unclear": false }`. At least 2 cases are deliberately unclear (`unclear: true`, `items: []`). Owner reviews the truth lists in M5.
@@ -53,7 +53,7 @@ Exercise IDs from `exercises.v1.json` that are rehab, physiotherapy or "therapeu
 | **EV-1** | `ev1-rule-checks.ts` | Run the production validator (`validatePlan`) over **every plan generated in EV-2 and EV-4**, with each plan's own context | **100%** of plans pass all of V-1 – V-11 |
 | **EV-2** | `ev2-plan-quality.ts` | 5 users × {30, 45, 60} × {user-picked focus (the user's least-recent group pair), coach} = **30** generations through `runGenerationCore`; each plan scored by the judge (§4) | No plan has any criterion below 3. The owner reviews 6 judged plans (20%, stratified by user) in `evals/results/owner-review.v1.json` and agrees with ≥ 80% of scores (agreement = owner score within ±1 of the judge). Below 80% → switch the judge to `claude-opus-5-5` and re-run. |
 | **EV-3** | `ev3-input-guard.ts` | Each of the 20 inputs → AG-2 (+ post-processing) → compare (§2.2). Plus: every `out_of_scope_fitness`/`unrelated` input is sent as a text edit through `plan-edit` core with real agents against a fixed fixture draft; the resulting items must equal the input items exactly. | Red-flag recall **100%**; ≥ **90%** correct (≥ 18/20); out-of-scope never changes a plan (**100%**) |
-| **EV-4** | `ev4-health.ts` | Each case → full generation with the note | No main exercise's `body_areas_stressed` overlaps `expected_avoided_areas` (**100%**); no exercise ID in the rehab denylist (**100%**); status is `APPLIED_HEALTH_AREA`/`APPLIED_HEALTH_LIGHTER`/`PARTIAL` |
+| **EV-4** | `ev4-health.ts` | Each case → full generation with the note | No main exercise's `body_areas_stressed` overlaps `expected_avoided_areas` (**100%**); status is `APPLIED_HEALTH_AREA`/`APPLIED_HEALTH_LIGHTER`/`PARTIAL` |
 | **EV-5** | `ev5-photos.ts` | Each case → AG-1 → post-processing at `PHOTO_CONFIDENCE_THRESHOLD` | A case passes if ≥ 80% of `truth.items` are found; ≥ 90% of clear cases pass; ≤ 10% of all detected items are wrong (not in `truth.items`); unclear cases give `PHOTO_NONE` (**100%**). The runner also prints precision/recall at thresholds 0.5–0.9 (step 0.05) for tuning; the chosen value is recorded in `agent-config.ts` with the date. |
 | **EV-6** | Vitest integration (`*.int.test.ts` named `EV-6 …`) | Lifecycle and memory rules (`plan-accept-complete-expiry.md`, `account-deletion-and-data-isolation.md`, health-text scan) | **100%** |
 | **EV-7** | Vitest unit (`progression.test.ts`) | `domain-progression.md` §5 | **100%** |
@@ -87,7 +87,7 @@ Exercise IDs from `exercises.v1.json` that are rehab, physiotherapy or "therapeu
     "models": { "ag1": "claude-sonnet-5-5", "ag2": "claude-haiku-5-5", "ag3": "claude-sonnet-5-5", "judge": "claude-sonnet-5-5" },
     "suites": { "EV-1": { "passed": true, "metric": 1.0, "bar": 1.0 }, "EV-2": { "passed": true, "min_score": 3, "owner_agreement": 0.83 },
                 "EV-3": { "passed": true, "red_flag_recall": 1.0, "accuracy": 0.95, "out_of_scope_unchanged": 1.0 },
-                "EV-4": { "passed": true, "area_safe": 1.0, "no_rehab": 1.0 },
+                "EV-4": { "passed": true, "area_safe": 1.0, "status_ok": 1.0 },
                 "EV-5": { "passed": true, "case_pass_rate": 0.9, "wrong_item_rate": 0.06, "unclear_none": 1.0, "threshold": 0.7 } },
     "cost_usd": 4.12 }
   ```

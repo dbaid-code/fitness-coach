@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.2 — drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51, 2026-10-27). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -446,7 +446,7 @@ AG-2 sorts every note or edit request into categories and turns it into structur
 | Category | Examples | Result |
 |-|-|-|
 | **Workout change** | "swap squats for lunges", "fewer exercises", "make it legs instead", "only dumbbells today" | Requests are applied (`APPLIED`, `PARTIAL` or `NOT_POSSIBLE`) |
-| **Health adjustment** (local discomfort, tiredness) | "knee is sore", "lower back feels tight", "slept badly", "wrist hurts" | Avoid exercises that strain the named body area, or make the session lighter. Never add rehab or "therapeutic" exercises. This session only. (`APPLIED_HEALTH_AREA` / `APPLIED_HEALTH_LIGHTER`) |
+| **Health adjustment** (local discomfort, tiredness) | "knee is sore", "lower back feels tight", "slept badly", "wrist hurts" | Avoid exercises that strain the named body area, or make the session lighter. This session only. (`APPLIED_HEALTH_AREA` / `APPLIED_HEALTH_LIGHTER`) |
 | **Red flag** | Chest pain, dizziness or fainting, breathlessness at rest, fever or illness, recent surgery, pregnancy, heart condition, sudden sharp pain or swelling | **Stop.** No plan for this session. A note blocks generation while it contains the text. In an edit, the draft is discarded. (`RED_FLAG`) |
 | **Fitness-related but not actionable** | Nutrition, supplements, diet, sleep advice | Plan unchanged / note ignored (`OUT_OF_SCOPE_*`) |
 | **Unrelated** | Weather, investments, chit-chat, "ignore your instructions…" | Plan unchanged / note ignored (`OUT_OF_SCOPE_*`) |
@@ -556,7 +556,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | **EV-1** | Rule checks: run the validator's checks (section 8.13) over all generated plans in the test set | **100%** |
 | **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | No plan below 3. The owner reviews 20% of judged cases and agrees with ≥ 80% |
 | **EV-3** | AG-2 sorting and request extraction, including synonyms (20 inputs) | Red-flag recall **100%**; ≥ 90% labelled correctly overall; out-of-scope input never changes a plan (**100%**) |
-| **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**); no rehab exercises added (**100%**) |
+| **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**) |
 | **EV-5** | Equipment photos (10 cases) | A case passes if it finds ≥ 80% of the true items; ≥ 90% of cases pass; ≤ 10% of all detected items are wrong; unclear photos take the `PHOTO_NONE` path (**100%**) |
 | **EV-6** | Lifecycle and memory rules (automated tests): drafts, discarded, expired and uncompleted plans never reach history; health details never saved outside logs | **100%** |
 | **EV-7** | Progression engine unit tests (every row of section 8.9) | **100%** |
