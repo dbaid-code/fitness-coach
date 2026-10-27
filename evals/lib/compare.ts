@@ -1,4 +1,5 @@
-// EV-3 correctness (evaluations.md §2.2): category, red_flag and the intent multiset on key fields.
+// EV-3 correctness (evaluations.md §2.2): category, red_flag, has_non_actionable_part (actionable categories only)
+// and the intent multiset on key fields.
 type AnyIntent = Record<string, unknown> & { type: string };
 
 const sorted = (v: unknown) => (Array.isArray(v) ? [...v].map(String).sort().join(',') : '');
@@ -29,7 +30,15 @@ export function intentKey(i: AnyIntent, mode: 'note' | 'edit'): string {
   }
 }
 
-export type Ag2Result = { category: string; red_flag: boolean; intents: AnyIntent[] };
+export type Ag2Result = {
+  category: string;
+  red_flag: boolean;
+  has_non_actionable_part: boolean;
+  intents: AnyIntent[];
+};
+
+// The flag only drives PARTIAL for applied categories; red flags, out-of-scope and not-understood resolve first.
+const ACTIONABLE = new Set(['workout_change', 'health_adjustment']);
 
 export function ag2Correct(
   expected: Ag2Result,
@@ -38,6 +47,8 @@ export function ag2Correct(
 ): { correct: boolean; reason: string | null } {
   if (expected.category !== actual.category) return { correct: false, reason: `category ${actual.category}` };
   if (expected.red_flag !== actual.red_flag) return { correct: false, reason: `red_flag ${actual.red_flag}` };
+  if (ACTIONABLE.has(expected.category) && expected.has_non_actionable_part !== actual.has_non_actionable_part)
+    return { correct: false, reason: `has_non_actionable_part ${actual.has_non_actionable_part}` };
   const a = actual.intents.map((i) => intentKey(i, mode)).sort();
   const e = expected.intents.map((i) => intentKey(i, mode)).sort();
   if (a.join('|') !== e.join('|')) return { correct: false, reason: `intents ${a.join('|')} ≠ ${e.join('|')}` };

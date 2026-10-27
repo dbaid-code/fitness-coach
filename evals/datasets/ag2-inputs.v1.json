@@ -1,5 +1,6 @@
 {
   "version": "ag2-inputs.v1",
+  "review": "Labels reviewed and approved by the owner 2026-10-27 (OD-08); EV-3-01 relabelled as mixed (has_non_actionable_part true).",
   "cases": [
     {
       "ev_id": "EV-3-01",
@@ -14,7 +15,7 @@
       "expected": {
         "category": "workout_change",
         "red_flag": false,
-        "has_non_actionable_part": false,
+        "has_non_actionable_part": true,
         "intents": [
           {
             "type": "equipment_today",

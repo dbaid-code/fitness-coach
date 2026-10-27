@@ -56,7 +56,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
   - [x] 🟩 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
-  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 label review and smoke run pending owner/key*
+  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); smoke run pending*
   - [x] 🟩 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
   - [x] 🟩 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
   - [x] 🟩 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet — *plumbing verified with fakes only*
@@ -74,7 +74,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
   - [x] 🟩 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
-  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built; EV-5 photos blocked (network policy)*
+  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 photos blocked (network policy)*
   - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *blocked: no dev key in the container*
   - [ ] 🟨 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job added and blocking; no real latest.json yet*
   - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job added; verified locally on Chromium only*

@@ -21,8 +21,8 @@ describe('EV-3 dataset', () => {
     expect(count('out_of_scope_fitness')).toBe(2);
     expect(count('unrelated')).toBe(3);
     expect(count('not_understood')).toBe(2);
-    expect(data.cases.filter((c) => c.expected.has_non_actionable_part)).toHaveLength(2);
-    expect(count('workout_change')).toBe(6); // 4 plain + the 2 mixed
+    expect(data.cases.filter((c) => c.expected.has_non_actionable_part)).toHaveLength(3);
+    expect(count('workout_change')).toBe(6); // 3 plain + 3 mixed (EV-3-01 relabelled by the owner)
     expect(new Set(data.cases.map((c) => c.ev_id)).size).toBe(20);
   });
 });

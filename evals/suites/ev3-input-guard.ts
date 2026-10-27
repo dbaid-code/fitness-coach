@@ -80,7 +80,12 @@ export async function runEv3(deps: GenDeps, opts: { only?: string[] } = {}) {
       if (r.outcome !== 'ok')
         return { ev_id: c.ev_id, correct: false, reason: `outcome ${r.outcome}`, expected: c.expected, actual: null };
       const g = postProcessGuard(r.output, c.mode as 'note' | 'edit', c.plan_items.length, 1);
-      const actual = { category: g.category, red_flag: g.redFlag, intents: g.intents.map((i) => i.intent as never) };
+      const actual = {
+        category: g.category,
+        red_flag: g.redFlag,
+        has_non_actionable_part: g.hasNonActionablePart,
+        intents: g.intents.map((i) => i.intent as never),
+      };
       const verdict = ag2Correct(c.expected as never, actual, c.mode as 'note' | 'edit');
       return { ev_id: c.ev_id, ...verdict, expected: c.expected, actual };
     } finally {

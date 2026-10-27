@@ -31,12 +31,12 @@ Coverage across the 5: all three goals; all three experience levels; setups **fu
 { "version": "ag2-inputs.v1",
   "cases": [ { "ev_id": "EV-3-01", "source": "PRD §8.11", "mode": "note", "plan_items": [],
                "text": "only DBs today and keep it short on time", "tags": ["synonym", "mixed"],
-               "expected": { "category": "workout_change", "red_flag": false, "has_non_actionable_part": false,
+               "expected": { "category": "workout_change", "red_flag": false, "has_non_actionable_part": true,
                              "intents": [ { "type": "equipment_today", "available": ["dumbbells"], "unavailable": [] } ] } } ] }
 ```
-Distribution: 4 `workout_change` (incl. 2 with synonyms, 1 in edit mode with a plan-item reference), 3 `health_adjustment`, 4 `red_flag` (incl. 1 mixed with a workout change, 1 ambiguous that must resolve to red flag), 2 `out_of_scope_fitness`, 3 `unrelated` (incl. 2 injection attempts), 2 `not_understood`, 2 mixed actionable + non-actionable (`has_non_actionable_part: true`). None may duplicate an AG-2 prompt example (`ag2-examples-disjoint.test.ts`).
+Distribution: 3 `workout_change` (incl. 1 with synonyms, 1 in edit mode with a plan-item reference), 3 `health_adjustment`, 4 `red_flag` (incl. 1 mixed with a workout change, 1 ambiguous that must resolve to red flag), 2 `out_of_scope_fitness`, 3 `unrelated` (incl. 2 injection attempts), 2 `not_understood`, 3 mixed actionable + non-actionable (`has_non_actionable_part: true`; EV-3-01's session-length request is non-actionable because length is set in the picker, owner 2026-10-27). None may duplicate an AG-2 prompt example (`ag2-examples-disjoint.test.ts`).
 
-**Correct** = category matches **and** `red_flag` matches **and** the intent multiset matches on `type` plus these key fields: `swap/remove` → `target_ref` (edit) or a non-null term (note); `add` → `muscle_group` or a non-null term; `reorder` → both numbers; `adjust_volume` → `direction`, `scope`, `reason`; `adjust_count` → `direction`; `change_focus` → set of groups; `equipment_today` → both sets; `avoid_body_area` → set of areas. Terms are not compared word for word.
+**Correct** = category matches **and** `red_flag` matches **and**, when the expected category is `workout_change` or `health_adjustment`, `has_non_actionable_part` matches (it drives `PARTIAL`, PRD §8.11) **and** the intent multiset matches on `type` plus these key fields: `swap/remove` → `target_ref` (edit) or a non-null term (note); `add` → `muscle_group` or a non-null term; `reorder` → both numbers; `adjust_volume` → `direction`, `scope`, `reason`; `adjust_count` → `direction`; `change_focus` → set of groups; `equipment_today` → both sets; `avoid_body_area` → set of areas. Terms are not compared word for word.
 
 ### 2.3 `health-cases.v1.json` — 10 cases (EV-4)
 `{ "ev_id", "user_ref", "session_length_min", "focus": {"mode": "user", "groups": ["legs"]} | {"mode": "coach"}, "note": "knee is sore", "expected_avoided_areas": ["knees"] }`. Covers every body area at least once across cases (9 areas + one "slept badly" lighter case).
