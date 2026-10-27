@@ -20,6 +20,6 @@
     "abductors": "legs",
     "adductors": "legs",
     "abdominals": "core",
-    "neck": null
+    "neck": "shoulders"
   }
 }
