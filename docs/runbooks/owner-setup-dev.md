@@ -91,7 +91,9 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 5. Settings → **Functions** → region **Mumbai (`bom1`)**. `vercel.json` also pins it.
 6. **Project** → Settings → **Environment Variables**. Not the team-level page of the same name, which holds variables shared across projects. For each row, enter the key and value and tick **only Preview**. For secrets, turn on **Sensitive**: untick Development first, because the switch is disabled while Development is ticked. A sensitive value can't be viewed or edited later; if you mistype one, delete it and add it again.
 
-   | Name | Value |
+   Each password-manager name below stands for **the value stored under it**: paste the URL or key itself, never the entry's name. A name such as `supabase-dev-url` in a Value field breaks the build with `TypeError: Invalid URL`.
+
+   | Name | Value (paste the stored value, not the name) |
    |-|-|
    | `NEXT_PUBLIC_SUPABASE_URL` | `supabase-dev-url` |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `supabase-dev-publishable` |
@@ -113,7 +115,7 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 ## P-6 GitHub secrets and the `production` environment (about 5 min)
 1. Go to github.com/dbaid-code/fitness-coach → Settings → **Secrets and variables → Actions** → New repository secret:
 
-   | Secret | Value |
+   | Secret | Value (paste the stored value, not the name) |
    |-|-|
    | `SUPABASE_DB_URL_DEV` | session-pooler string from P-1 step 7 |
    | `ANTHROPIC_API_KEY_EVALS` | `gc-dev-ci` |
