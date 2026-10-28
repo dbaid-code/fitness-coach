@@ -3,12 +3,12 @@
 | | |
 |-|-|
 | **Document** | `docs/engineering/engineering-doc.md` |
-| **Version** | **1.1** (2026-10-27): records the owner-approved D-41 – D-52 (security plan S-1 – S-8, rulebook v2 and short sessions, no rehab rule, rulebook v3 coach cardio). 1.0 was approved by the owner (2026-10-25) and records D-38 – D-40. History: 0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applied OD-05, OD-07 and OD-08 and deferred OD-06 to Phase 1; 0.4 applied the Claude Design handoff and its approvals (D-30 – D-37). |
+| **Version** | **1.2** (2026-10-28): records D-53 (62-item equipment master list and the assumed-available items). 1.1 (2026-10-27) records the owner-approved D-41 – D-52 (security plan S-1 – S-8, rulebook v2 and short sessions, no rehab rule, rulebook v3 coach cardio). 1.0 was approved by the owner (2026-10-25) and records D-38 – D-40. History: 0.2 applied OD-01, OD-03, OD-06 and OD-09; 0.3 applied OD-05, OD-07 and OD-08 and deferred OD-06 to Phase 1; 0.4 applied the Claude Design handoff and its approvals (D-30 – D-37). |
 | **Status** | **Approved by the owner (2026-10-25).** M0 – M7 are built; release status and open items are in `validation-report.md`. |
 | **Owner / approver** | Deepak Baid |
 | **Author** | Coding agent (Claude Code) |
-| **Date** | 2026-10-25 (v1.0); last updated 2026-10-27 (v1.1) |
-| **Requirements source** | `docs/gym-coach-prd.md` v1.2 (v1.0 approved; v1.1 adds the design labels; v1.2 applies D-49 – D-52) |
+| **Date** | 2026-10-25 (v1.0); last updated 2026-10-28 (v1.2) |
+| **Requirements source** | `docs/gym-coach-prd.md` v1.3 (v1.0 approved; v1.1 adds the design labels; v1.2 applies D-49 – D-52; v1.3 applies D-53) |
 | **Design source** | `docs/design/handoff/` (Claude Design handoff, owner-approved 2026-10-25): layout, look and feel, tokens, UI labels |
 | **Readers** | Owner (approval and the open decisions in §20.2); coding agent (build) |
 
@@ -983,7 +983,7 @@ If tx 2's version re-check fails, the LLM result is discarded, the request retur
 **Indexes:** PK only.
 
 #### 7.3.2 `app.equipment` (reference data)
-**Purpose:** the equipment master list (PRD §10.2, FR-20). The only vocabulary AG-1 and AG-2 may use.
+**Purpose:** the equipment master list (PRD §10.2, FR-20). The only vocabulary AG-1 and AG-2 may use. Seed `data/seed/equipment.v1.json`: 62 active items plus the retired `exercise_mat` (D-53). Items assumed available everywhere (PRD §10.2) are never rows and never appear in `exercises.required_equipment`.
 
 | Column | Type | Null | Default | Notes |
 |-|-|-|-|-|
@@ -1399,7 +1399,7 @@ erDiagram
 
 ### 7.6 Seed and reference-data pipeline (PRD §10.1 – PRD §10.5)
 1. `scripts/import-free-exercise-db.ts` downloads the pinned commit of `yuhonas/free-exercise-db`, records the commit SHA in the seed header, drops the `strongman` and `olympic weightlifting` categories, and writes `data/seed/exercises.raw.v1.json`.
-2. `scripts/curate-exercises.ts` drafts the added columns with LLM help (dev API key). Its output is `data/seed/exercises.v1.json`:
+2. `scripts/curate-exercises.ts` drafts the added columns with LLM help (dev API key). Its output is `data/seed/exercises.v2.json`:
    - `required_equipment` (mapped from the dataset's coarse `equipment`, the name and the instructions);
    - `muscle_group` (PRD §10.3 mapping);
    - `body_areas_stressed`;
@@ -1418,7 +1418,7 @@ erDiagram
    - routine coverage;
    - each routine's move durations sum to its duration.
 5. `scripts/upload-exercise-images.ts` copies the dataset images into the public Storage bucket `exercise-images/<exercise_id>/<n>.jpg`. Pages never hotlink GitHub.
-6. `scripts/seed-reference-data.ts` upserts `equipment.v1.json`, `exercises.v1.json` and `routines.v1.json`. It is idempotent and keyed by ID. It runs locally, in CI (local Supabase) and for each environment via `pnpm db:seed --env <env>`.
+6. `scripts/seed-reference-data.ts` upserts `equipment.v2.json`, `exercises.v2.json` and `routines.v2.json`. It is idempotent and keyed by ID. It runs locally, in CI (local Supabase) and for each environment via `pnpm db:seed --env <env>`.
 7. Any change to the seed bumps `dataset_version` and triggers the full eval suite (PRD §9.4).
 
 ---
@@ -2503,7 +2503,7 @@ fitness-coach/
 │   └── seed/                         # versioned reference data (PRD §10)
 │       ├── equipment.v1.json
 │       ├── exercises.raw.v1.json     # trimmed free-exercise-db import (pinned commit)
-│       ├── exercises.v1.json         # curated, with our added columns
+│       ├── exercises.v2.json         # curated, with our added columns
 │       ├── routines.v1.json
 │       ├── muscle-group-map.v1.json  # PRD §10.3
 │       └── review-sample.v1.csv      # owner 10% spot-check sample
@@ -3445,6 +3445,7 @@ There is no paging for the pilot. Passive signals:
 | D-50 | When the candidates can't fill the session even then, the plan may be shorter: V-8's floor is 85% of what they allow, the plan is flagged `short_session`, and the plan view shows the static `SHORT_SESSION` message under the outcome banner. The flag is set by generation and AI edits, not direct edits; AI edits keep the D-04 edit rule | **Approved** (owner) | 2026-10-27 | PRD FR-44, §8.10, V-8, §7 `plans` |
 | D-51 | The health-adjustment rule "never add rehab or therapeutic exercises" is dropped from the PRD, with EV-4's rehab-denylist check and `rehab-denylist.v1.json`. V-3 and the candidate filter still keep the named area out, and health adjustments still only avoid, swap or lighten. The AG-3 prompt keeps its one-line instruction as guidance, untested. The PRD non-goals (no rehab or clinical use) are unchanged | **Approved** (owner) | 2026-10-27 | PRD §8.11, PRD §9.2 EV-4, §13 EV-4 |
 | D-52 | A coach-chosen focus may add cardio for every goal, not only Lose weight (rulebook v3). Build muscle and Stay fit: at most 1 cardio exercise and at most 600 s of continuous cardio, so cardio can't pad strength sessions; Lose weight and a user's Cardio pick keep 300–1800 s with no item limit. Enforced by the candidate filter, V-4 (`too_much_cardio`), V-7 and `fill-capacity.ts` | **Approved** (owner) | 2026-10-27 | PRD §8.8, PRD §8.13 rule 4, §8.6.6, V-4, V-7 |
+| D-53 | The equipment master list is rebuilt from what the exercises need: 62 active items (33 added). Items assumed available everywhere (floor, wall, door, chair, step, towel, exercise mat, plates, collars, chalk, straps, belts, cones, mini hurdles, ankle straps, heavy bag) and attachments implied by a listed item are never required. `exercise_mat` is retired (inactive). Leverage machines map to the chest press, seated row and trap bar; exercises needing other unlisted items stay inactive. Curation prompt `curation.v2` drafts `required_equipment` against the new list | **Approved** (owner) | 2026-10-28 | PRD §10.2, §7.3.2, `reference-data-seed.md` |
 
 ## Appendix B. Configuration constants
 

@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.3 (2026-10-28) — equipment master list grows to 62 items found by analysing every exercise, with a list of items assumed available everywhere (D-53). 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -614,10 +614,14 @@ Any safety miss reported by a user is added to EV-3 or EV-4 as a new case.
   - Check that the `level` and `mechanic` values are filled in for every active exercise.
 - **Curation:** the coding agent drafts the new columns with LLM help, the owner spot-checks 10%, and problems found in testing are fixed. It is stored as a versioned seed file.
 
-### 10.2 Equipment master list (draft for owner review)
-Each item has an `id`, a display name and an `active` flag. Draft list (30 items):
+### 10.2 Equipment master list
+Each item has an `id`, a display name and an `active` flag. The list was built by analysing the equipment every exercise in the dataset needs, then approved by the owner (D-53). 62 active items:
 
-> Dumbbells · Adjustable bench · Flat bench · Barbell · EZ curl bar · Squat / power rack · Smith machine · Cable machine · Lat pulldown machine · Seated row machine · Chest press machine · Shoulder press machine · Pec deck · Leg press machine · Leg curl machine · Leg extension machine · Pull-up bar · Dip station · Kettlebells · Resistance bands · Medicine ball · Stability ball · Foam roller · Exercise mat · Jump rope · Treadmill · Stationary bike · Rowing machine · Elliptical · Stair climber
+> Dumbbells · Barbell · EZ curl bar · Trap bar · Cambered bar · Kettlebells · Medicine ball · Lifting chains · Landmine · Flat bench · Adjustable bench · Decline bench · Preacher bench · Hyperextension bench · Glute-ham developer · Plyo box · Squat / power rack · Smith machine · Pull-up bar · Dip station · Gymnastic rings · Suspension trainer · Climbing rope · Cable machine · Lat pulldown machine · Seated row machine · Chest-supported T-bar row · Chest press machine · Shoulder press machine · Pec deck · Dip machine · Biceps curl machine · Triceps extension machine · Ab crunch machine · Leg press machine · Hack squat machine · Lying squat machine · Leg curl machine · Leg extension machine · Hip abductor machine · Hip adductor machine · Reverse hyperextension machine · Standing calf raise machine · Seated calf raise machine · Donkey calf raise machine · Calf press machine · Resistance bands · Stability ball · BOSU ball · Ab roller · Wrist roller · Foam roller · Jump rope · Battle rope · Sled · Tire · Sledgehammer · Treadmill · Stationary bike · Rowing machine · Elliptical · Stair climber
+
+**Assumed available everywhere** (never listed, never required by an exercise): the floor, a wall, a door or door frame, a chair, a step or stair, a towel, an exercise mat, weight plates, collars, chalk, lifting straps and belts, cones, mini hurdles, ankle straps and a heavy bag. Attachments that come with a listed item (cable handles and ropes, sled straps) are implied by it.
+
+Exercise mat was on the original 30-item list. It is retired (inactive), because nothing requires it. Plate-loaded "leverage" machines are not separate items: their exercises use the nearest listed item (chest press, seated row, trap bar). Exercises that need anything else not on the list (balance board, press board, bicycle, roller skates, neck harness) stay inactive.
 
 ### 10.3 User-facing muscle groups
 
@@ -894,7 +898,7 @@ These weren't decided explicitly in the interview. The owner confirmed them when
 - **Status code:** the code behind a fixed message (Appendix A).
 
 ## Appendix C — Sample records (synthetic)
-- **Profile:** Alex Chen (fictional), Build muscle, Moderately regular, 3 days/week. Equipment: Dumbbells, Adjustable bench, Resistance bands, Exercise mat.
+- **Profile:** Alex Chen (fictional), Build muscle, Moderately regular, 3 days/week. Equipment: Dumbbells, Adjustable bench, Resistance bands, Stability ball.
 - **Completed workout:**
   - 2026-10-14, Chest & Triceps, 45 min, rated *Just right*.
   - Dumbbell bench press 3 × 10; Dumbbell shoulder press 3 × 10; Band triceps extension 3 × 12.

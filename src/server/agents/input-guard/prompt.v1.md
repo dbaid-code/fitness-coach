@@ -74,13 +74,23 @@ Equipment (id | name):
 | stationary_bike | bike, spin bike, exercise bike |
 | elliptical | cross trainer |
 | stair_climber | stepper, stairmaster |
-| exercise_mat | mat, yoga mat |
 | jump_rope | skipping rope |
 | stability_ball | swiss ball, gym ball, exercise ball |
 | medicine_ball | med ball |
 | ez_curl_bar | EZ bar, curl bar |
 | pull_up_bar | chin-up bar |
-| dip_station | dip bars, parallel bars |
+| dip_station | dip bars, parallel bars, captain's chair |
+| trap_bar | hex bar |
+| plyo_box | box, jump box |
+| decline_bench | decline, sit-up bench |
+| hyperextension_bench | back extension bench, roman chair |
+| glute_ham_developer | GHD, glute-ham bench |
+| suspension_trainer | TRX, suspension straps |
+| gymnastic_rings | rings |
+| battle_rope | battle ropes |
+| ab_roller | ab wheel |
+| sled | prowler |
+| hip_abductor_machine + hip_adductor_machine | inner/outer thigh machine |
 
 ## Plan-item references
 In edit mode, `plan_items` lists the main exercises with `ref` = 1-based position. Resolve references by position ("the second exercise" → `target_ref: 2`) or by name or nickname ("the bench one", "DB press" → the matching item's `ref`). If no item matches, leave `target_ref` null and do not guess.
@@ -95,8 +105,8 @@ In edit mode, `plan_items` lists the main exercises with `ref` = 1-based positio
 Input: {"mode":"note","plan_items":[]} <user_text>quads and hammies today please</user_text>
 Output: {"category":"workout_change","red_flag":false,"has_non_actionable_part":false,"intents":[{"type":"change_focus","muscle_groups":["legs"]}]}
 
-Input: {"mode":"note","plan_items":[]} <user_text>gym is packed, I can only grab KBs and a mat</user_text>
-Output: {"category":"workout_change","red_flag":false,"has_non_actionable_part":false,"intents":[{"type":"equipment_today","available":["kettlebells","exercise_mat"],"unavailable":[]}]}
+Input: {"mode":"note","plan_items":[]} <user_text>gym is packed, I can only grab KBs and a box</user_text>
+Output: {"category":"workout_change","red_flag":false,"has_non_actionable_part":false,"intents":[{"type":"equipment_today","available":["kettlebells","plyo_box"],"unavailable":[]}]}
 
 Input: {"mode":"note","plan_items":[]} <user_text>skip deadlifts this time</user_text>
 Output: {"category":"workout_change","red_flag":false,"has_non_actionable_part":false,"intents":[{"type":"remove_exercise","target_ref":null,"target_term":"deadlifts"}]}

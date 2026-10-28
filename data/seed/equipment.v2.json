@@ -1,0 +1,446 @@
+{
+  "version": "equipment.v2",
+  "items": [
+    {
+      "id": "dumbbells",
+      "name": "Dumbbells",
+      "sort_order": 1,
+      "visual_hint": "pairs of short hand-held bars with a weight at each end",
+      "is_active": true
+    },
+    {
+      "id": "barbell",
+      "name": "Barbell",
+      "sort_order": 2,
+      "visual_hint": "long straight bar, about 2 m, loaded with round plates at both ends",
+      "is_active": true
+    },
+    {
+      "id": "ez_curl_bar",
+      "name": "EZ curl bar",
+      "sort_order": 3,
+      "visual_hint": "short bar with zig-zag bends in the middle for the hands",
+      "is_active": true
+    },
+    {
+      "id": "trap_bar",
+      "name": "Trap bar",
+      "sort_order": 4,
+      "visual_hint": "hexagon-shaped open bar that the lifter stands inside, with a handle on each side",
+      "is_active": true
+    },
+    {
+      "id": "cambered_bar",
+      "name": "Cambered bar",
+      "sort_order": 5,
+      "visual_hint": "barbell with a deep downward bend in the middle",
+      "is_active": true
+    },
+    {
+      "id": "kettlebells",
+      "name": "Kettlebells",
+      "sort_order": 6,
+      "visual_hint": "round cast-iron weights with a single handle on top",
+      "is_active": true
+    },
+    {
+      "id": "medicine_ball",
+      "name": "Medicine ball",
+      "sort_order": 7,
+      "visual_hint": "heavy rubber or leather ball about the size of a football",
+      "is_active": true
+    },
+    {
+      "id": "lifting_chains",
+      "name": "Lifting chains",
+      "sort_order": 8,
+      "visual_hint": "heavy metal chains hung from a barbell or stacked by the bar",
+      "is_active": true
+    },
+    {
+      "id": "landmine",
+      "name": "Landmine",
+      "sort_order": 9,
+      "visual_hint": "barbell with one end anchored in a floor pivot or sleeve so the other end swings up and around",
+      "is_active": true
+    },
+    {
+      "id": "flat_bench",
+      "name": "Flat bench",
+      "sort_order": 10,
+      "visual_hint": "padded bench with a fixed flat seat",
+      "is_active": true
+    },
+    {
+      "id": "adjustable_bench",
+      "name": "Adjustable bench",
+      "sort_order": 11,
+      "visual_hint": "padded bench whose back rest tilts to different angles",
+      "is_active": true
+    },
+    {
+      "id": "decline_bench",
+      "name": "Decline bench",
+      "sort_order": 12,
+      "visual_hint": "bench angled head-down, with a foot or leg hook at the raised end",
+      "is_active": true
+    },
+    {
+      "id": "preacher_bench",
+      "name": "Preacher bench",
+      "sort_order": 13,
+      "visual_hint": "seat facing a sloped arm pad on which the upper arms rest for curls",
+      "is_active": true
+    },
+    {
+      "id": "hyperextension_bench",
+      "name": "Hyperextension bench",
+      "sort_order": 14,
+      "visual_hint": "angled frame with a hip pad and ankle rollers, used face-down to bend at the hips",
+      "is_active": true
+    },
+    {
+      "id": "glute_ham_developer",
+      "name": "Glute-ham developer",
+      "sort_order": 15,
+      "visual_hint": "horizontal frame with a round thigh pad and a foot plate with ankle rollers behind it",
+      "is_active": true
+    },
+    {
+      "id": "plyo_box",
+      "name": "Plyo box",
+      "sort_order": 16,
+      "visual_hint": "sturdy wooden or foam box, roughly 30 to 75 cm high, to jump or step onto",
+      "is_active": true
+    },
+    {
+      "id": "squat_rack",
+      "name": "Squat / power rack",
+      "sort_order": 17,
+      "visual_hint": "tall steel frame with uprights and hooks or safety bars that hold a barbell",
+      "is_active": true
+    },
+    {
+      "id": "smith_machine",
+      "name": "Smith machine",
+      "sort_order": 18,
+      "visual_hint": "barbell fixed between two vertical rails so it only slides up and down",
+      "is_active": true
+    },
+    {
+      "id": "pull_up_bar",
+      "name": "Pull-up bar",
+      "sort_order": 19,
+      "visual_hint": "horizontal bar fixed high on a wall, door frame or rack",
+      "is_active": true
+    },
+    {
+      "id": "dip_station",
+      "name": "Dip station",
+      "sort_order": 20,
+      "visual_hint": "two parallel waist-high handles that hold the body up on straight arms",
+      "is_active": true
+    },
+    {
+      "id": "gymnastic_rings",
+      "name": "Gymnastic rings",
+      "sort_order": 21,
+      "visual_hint": "pair of wooden or plastic rings hanging from straps",
+      "is_active": true
+    },
+    {
+      "id": "suspension_trainer",
+      "name": "Suspension trainer",
+      "sort_order": 22,
+      "visual_hint": "pair of adjustable nylon straps with handles, anchored overhead at a single point",
+      "is_active": true
+    },
+    {
+      "id": "climbing_rope",
+      "name": "Climbing rope",
+      "sort_order": 23,
+      "visual_hint": "thick rope hanging from the ceiling or a high frame",
+      "is_active": true
+    },
+    {
+      "id": "cable_machine",
+      "name": "Cable machine",
+      "sort_order": 24,
+      "visual_hint": "tall frame with adjustable pulleys, cables, handles and a weight stack",
+      "is_active": true
+    },
+    {
+      "id": "lat_pulldown_machine",
+      "name": "Lat pulldown machine",
+      "sort_order": 25,
+      "visual_hint": "seat with knee pads under a high pulley and a wide overhead bar",
+      "is_active": true
+    },
+    {
+      "id": "seated_row_machine",
+      "name": "Seated row machine",
+      "sort_order": 26,
+      "visual_hint": "low seat and foot plate facing handles that are pulled toward the torso",
+      "is_active": true
+    },
+    {
+      "id": "chest_supported_t_bar_row_machine",
+      "name": "Chest-supported T-bar row",
+      "sort_order": 27,
+      "visual_hint": "angled chest pad with a lever arm and handles below it that are pulled up",
+      "is_active": true
+    },
+    {
+      "id": "chest_press_machine",
+      "name": "Chest press machine",
+      "sort_order": 28,
+      "visual_hint": "upright seat with handles at chest height that are pushed forward",
+      "is_active": true
+    },
+    {
+      "id": "shoulder_press_machine",
+      "name": "Shoulder press machine",
+      "sort_order": 29,
+      "visual_hint": "upright seat with handles at shoulder height that are pushed overhead",
+      "is_active": true
+    },
+    {
+      "id": "pec_deck",
+      "name": "Pec deck",
+      "sort_order": 30,
+      "visual_hint": "upright seat with two padded arms or handles that swing together in front of the chest",
+      "is_active": true
+    },
+    {
+      "id": "dip_machine",
+      "name": "Dip machine",
+      "sort_order": 31,
+      "visual_hint": "seated machine with handles at the sides that are pushed down, with a weight stack",
+      "is_active": true
+    },
+    {
+      "id": "bicep_curl_machine",
+      "name": "Biceps curl machine",
+      "sort_order": 32,
+      "visual_hint": "seat facing an arm pad with handles that curl upward, with a weight stack",
+      "is_active": true
+    },
+    {
+      "id": "triceps_extension_machine",
+      "name": "Triceps extension machine",
+      "sort_order": 33,
+      "visual_hint": "seat with an arm pad and handles that are pushed down or out by straightening the elbows",
+      "is_active": true
+    },
+    {
+      "id": "ab_crunch_machine",
+      "name": "Ab crunch machine",
+      "sort_order": 34,
+      "visual_hint": "seat with chest pads or overhead handles that are pulled down by curling forward",
+      "is_active": true
+    },
+    {
+      "id": "leg_press_machine",
+      "name": "Leg press machine",
+      "sort_order": 35,
+      "visual_hint": "reclined seat facing a large foot platform that is pushed away with the legs",
+      "is_active": true
+    },
+    {
+      "id": "hack_squat_machine",
+      "name": "Hack squat machine",
+      "sort_order": 36,
+      "visual_hint": "angled sled on rails with shoulder pads, over a foot platform, used standing",
+      "is_active": true
+    },
+    {
+      "id": "lying_squat_machine",
+      "name": "Lying squat machine",
+      "sort_order": 37,
+      "visual_hint": "reclined back pad with shoulder pads on a lever arm, over a foot plate",
+      "is_active": true
+    },
+    {
+      "id": "leg_curl_machine",
+      "name": "Leg curl machine",
+      "sort_order": 38,
+      "visual_hint": "bench or seat with a padded roller behind the lower legs",
+      "is_active": true
+    },
+    {
+      "id": "leg_extension_machine",
+      "name": "Leg extension machine",
+      "sort_order": 39,
+      "visual_hint": "seat with a padded roller in front of the shins",
+      "is_active": true
+    },
+    {
+      "id": "hip_abductor_machine",
+      "name": "Hip abductor machine",
+      "sort_order": 40,
+      "visual_hint": "seat with padded arms outside the knees that are pushed apart",
+      "is_active": true
+    },
+    {
+      "id": "hip_adductor_machine",
+      "name": "Hip adductor machine",
+      "sort_order": 41,
+      "visual_hint": "seat with padded arms inside the knees that are squeezed together",
+      "is_active": true
+    },
+    {
+      "id": "reverse_hyperextension_machine",
+      "name": "Reverse hyperextension machine",
+      "sort_order": 42,
+      "visual_hint": "high padded table to lie face-down on, with a swinging leg strap or roller hanging below the end",
+      "is_active": true
+    },
+    {
+      "id": "standing_calf_raise_machine",
+      "name": "Standing calf raise machine",
+      "sort_order": 43,
+      "visual_hint": "shoulder pads over a raised foot block, used standing to rise on the toes",
+      "is_active": true
+    },
+    {
+      "id": "seated_calf_raise_machine",
+      "name": "Seated calf raise machine",
+      "sort_order": 44,
+      "visual_hint": "seat with a knee pad above a foot block, used to raise the heels",
+      "is_active": true
+    },
+    {
+      "id": "donkey_calf_raise_machine",
+      "name": "Donkey calf raise machine",
+      "sort_order": 45,
+      "visual_hint": "hip pad on a lever over a foot block, used bent forward at the hips",
+      "is_active": true
+    },
+    {
+      "id": "calf_press_machine",
+      "name": "Calf press machine",
+      "sort_order": 46,
+      "visual_hint": "seat with a foot plate pushed by the toes only, legs nearly straight",
+      "is_active": true
+    },
+    {
+      "id": "resistance_bands",
+      "name": "Resistance bands",
+      "sort_order": 47,
+      "visual_hint": "elastic bands or tubes, often coloured, sometimes with handles",
+      "is_active": true
+    },
+    {
+      "id": "stability_ball",
+      "name": "Stability ball",
+      "sort_order": 48,
+      "visual_hint": "large inflatable ball, roughly 55 to 75 cm across",
+      "is_active": true
+    },
+    {
+      "id": "bosu_ball",
+      "name": "BOSU ball",
+      "sort_order": 49,
+      "visual_hint": "inflated half-ball dome on a flat round base",
+      "is_active": true
+    },
+    {
+      "id": "ab_roller",
+      "name": "Ab roller",
+      "sort_order": 50,
+      "visual_hint": "small wheel with a handle on each side",
+      "is_active": true
+    },
+    {
+      "id": "wrist_roller",
+      "name": "Wrist roller",
+      "sort_order": 51,
+      "visual_hint": "short handle with a rope hanging from its middle to a small weight",
+      "is_active": true
+    },
+    {
+      "id": "foam_roller",
+      "name": "Foam roller",
+      "sort_order": 52,
+      "visual_hint": "cylinder of dense foam, roughly 30 to 90 cm long",
+      "is_active": true
+    },
+    {
+      "id": "jump_rope",
+      "name": "Jump rope",
+      "sort_order": 53,
+      "visual_hint": "rope with a handle at each end",
+      "is_active": true
+    },
+    {
+      "id": "battle_rope",
+      "name": "Battle rope",
+      "sort_order": 54,
+      "visual_hint": "long, thick heavy rope anchored at its middle, held by both ends",
+      "is_active": true
+    },
+    {
+      "id": "sled",
+      "name": "Sled",
+      "sort_order": 55,
+      "visual_hint": "low weighted metal sled with uprights or straps, pushed or pulled across the floor",
+      "is_active": true
+    },
+    {
+      "id": "tire",
+      "name": "Tire",
+      "sort_order": 56,
+      "visual_hint": "large heavy truck or tractor tire lying on the floor",
+      "is_active": true
+    },
+    {
+      "id": "sledgehammer",
+      "name": "Sledgehammer",
+      "sort_order": 57,
+      "visual_hint": "long-handled hammer with a heavy metal head",
+      "is_active": true
+    },
+    {
+      "id": "treadmill",
+      "name": "Treadmill",
+      "sort_order": 58,
+      "visual_hint": "machine with a moving belt and a front console for walking or running",
+      "is_active": true
+    },
+    {
+      "id": "stationary_bike",
+      "name": "Stationary bike",
+      "sort_order": 59,
+      "visual_hint": "bike frame with pedals and a seat that stays in place",
+      "is_active": true
+    },
+    {
+      "id": "rowing_machine",
+      "name": "Rowing machine",
+      "sort_order": 60,
+      "visual_hint": "long low rail with a sliding seat, foot straps and a pull handle",
+      "is_active": true
+    },
+    {
+      "id": "elliptical",
+      "name": "Elliptical",
+      "sort_order": 61,
+      "visual_hint": "machine with two long foot pedals moving in an oval and moving arm handles",
+      "is_active": true
+    },
+    {
+      "id": "stair_climber",
+      "name": "Stair climber",
+      "sort_order": 62,
+      "visual_hint": "machine with rotating steps or two pedals that move up and down",
+      "is_active": true
+    },
+    {
+      "id": "exercise_mat",
+      "name": "Exercise mat",
+      "sort_order": 63,
+      "visual_hint": "thin padded mat rolled out on the floor",
+      "is_active": false
+    }
+  ]
+}

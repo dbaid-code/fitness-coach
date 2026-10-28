@@ -175,7 +175,7 @@ fakeAgents.calls(agentId): unknown[];      // captured inputs, e.g. to assert th
 ```
 
 **Defaults** (E2E uses these):
-- **AG-1:** `[{dumbbells, 0.92}, {adjustable_bench, 0.81}, {exercise_mat, 0.55}]` (the threshold drops `exercise_mat`).
+- **AG-1:** `[{dumbbells, 0.92}, {adjustable_bench, 0.81}, {stability_ball, 0.55}]` (the threshold drops `stability_ball`).
 - **AG-2 `keywords`:** lower-cased text, first matching rule wins:
 
 | Text contains | Output |

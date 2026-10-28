@@ -37,7 +37,7 @@ describe('F-05 equipment photo scan (API-06)', () => {
     expect(r.status).toBe(200);
     const d = r.json.data;
     expect(d.outcome).toBe('detected');
-    expect(d.detected.map((x: any) => x.equipment_id)).toEqual(['dumbbells', 'adjustable_bench']); // mat 0.55 dropped
+    expect(d.detected.map((x: any) => x.equipment_id)).toEqual(['dumbbells', 'adjustable_bench']); // stability ball 0.55 dropped
     expect(d.status).toEqual({ code: 'PHOTO_PARTIAL', params: { n: 2 } });
     for (const row of before) expect(d.proposed_selection).toContain(row.equipment_id);
     expect(d.photo_scans_remaining_today).toBe(4);

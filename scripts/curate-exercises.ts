@@ -1,8 +1,8 @@
-// Curation (reference-data-seed.md §5): raw import → data/seed/exercises.v1.json.
-// Usage: pnpm seed:curate [--heuristic] [--refresh id,id] [--sample]
+// Curation (reference-data-seed.md §5): raw import → data/seed/exercises.v2.json.
+// Usage: pnpm seed:curate [--heuristic] [--refresh id,id|all] [--sample]
 //   default     LLM-drafted columns (claude-sonnet-5-5, dev key, batches of 20)
 //   --heuristic deterministic rules (scripts/curation/heuristics.ts); used while no dev key exists
-//   --sample    (re)writes data/seed/review-sample.v1.csv for the owner's 10% spot check
+//   --sample    (re)writes data/seed/review-sample.v2.csv for the owner's 10% spot check
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { z } from 'zod';
 import { BODY_AREAS, type MuscleGroup } from '../src/shared/constants';
@@ -27,19 +27,21 @@ import {
   type SeedExercise,
 } from './seed/schemas';
 
-export const DATASET_VERSION = 'exercises.v1';
-const OUT = 'data/seed/exercises.v1.json';
-const SAMPLE = 'data/seed/review-sample.v1.csv';
+export const DATASET_VERSION = 'exercises.v2';
+const OUT = 'data/seed/exercises.v2.json';
+const SAMPLE = 'data/seed/review-sample.v2.csv';
 
 const args = process.argv.slice(2);
 const heuristic = args.includes('--heuristic');
 const refreshArg = args.indexOf('--refresh');
 const refresh = new Set(refreshArg >= 0 ? (args[refreshArg + 1] ?? '').split(',').filter(Boolean) : []);
+const refreshAll = refresh.has('all');
 
 const raw = RawExercisesFile.parse(JSON.parse(readFileSync('data/seed/exercises.raw.v1.json', 'utf8')));
-const equipment = EquipmentFile.parse(JSON.parse(readFileSync('data/seed/equipment.v1.json', 'utf8')));
+const equipment = EquipmentFile.parse(JSON.parse(readFileSync('data/seed/equipment.v2.json', 'utf8')));
 const map = MuscleGroupMapFile.parse(JSON.parse(readFileSync('data/seed/muscle-group-map.v1.json', 'utf8')));
-const equipmentIds = equipment.items.map((i) => i.id);
+const activeEquipment = equipment.items.filter((i) => i.is_active);
+const equipmentIds = activeEquipment.map((i) => i.id);
 
 /** PRD §10.3: category first, else the first primary muscle; null (neck) → inactive; unmapped → error. */
 export function deriveMuscleGroup(e: RawExercise): MuscleGroup | null {
@@ -88,6 +90,7 @@ const LlmRow = z
   .object({
     id: z.string(),
     required_equipment: z.array(z.enum(equipmentIds as [string, ...string[]])),
+    unmappable: z.boolean(),
     body_areas_stressed: z.array(z.enum(BODY_AREAS)),
     easier_version_id: z.string().nullable(),
     harder_version_id: z.string().nullable(),
@@ -109,13 +112,14 @@ async function llmDrafts(rows: RawExercise[]): Promise<Map<string, Drafted>> {
     apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.GC_ANTHROPIC_API_KEY,
     baseURL: process.env.ANTHROPIC_API_BASE_URL || 'https://api.anthropic.com',
   });
-  const system = readFileSync('scripts/curation/prompt.v1.md', 'utf8')
+  const system = readFileSync('scripts/curation/prompt.v2.md', 'utf8')
     .replace('{{BODY_AREAS}}', BODY_AREAS.join(', '))
-    .replace('{{EQUIPMENT_LIST}}', equipment.items.map((i) => `${i.id} | ${i.name}`).join('\n'))
+    .replace('{{EQUIPMENT_LIST}}', activeEquipment.map((i) => `${i.id} | ${i.name} | ${i.visual_hint}`).join('\n'))
     .replace('{{EXERCISE_IDS}}', raw.exercises.map((e) => e.id).join(', '));
   const out = new Map<string, Drafted>();
-  for (let i = 0; i < rows.length; i += 20) {
-    const batch = rows.slice(i, i + 20);
+  const batches = Array.from({ length: Math.ceil(rows.length / 20) }, (_, b) => rows.slice(b * 20, b * 20 + 20));
+  let done = 0;
+  const run = async (batch: RawExercise[], i: number) => {
     const response = await client.messages.parse({
       model: 'claude-sonnet-5-5',
       max_tokens: 16_000,
@@ -124,16 +128,23 @@ async function llmDrafts(rows: RawExercise[]): Promise<Map<string, Drafted>> {
       messages: [{ role: 'user', content: JSON.stringify(batch) }],
     });
     if (response.stop_reason !== 'end_turn' || !response.parsed_output) {
-      throw new Error(`Curation batch ${i / 20 + 1} stopped with ${response.stop_reason}`);
+      throw new Error(`Curation batch ${i + 1} stopped with ${response.stop_reason}`);
     }
     for (const row of response.parsed_output.rows) out.set(row.id, row);
-    console.warn(`curated ${Math.min(i + 20, rows.length)}/${rows.length}`);
+    done += batch.length;
+    console.warn(`curated ${done}/${rows.length}`);
+  };
+  // Six batches in flight keeps a full refresh well inside the API rate limits.
+  for (let b = 0; b < batches.length; b += 6) {
+    await Promise.all(batches.slice(b, b + 6).map((batch, k) => run(batch, b + k)));
   }
   return out;
 }
 
 const existing = existsSync(OUT) ? ExercisesFile.parse(JSON.parse(readFileSync(OUT, 'utf8'))) : null;
-const keep = new Map((existing?.exercises ?? []).filter((e) => !refresh.has(e.id)).map((e) => [e.id, e]));
+const keep = new Map(
+  (existing?.exercises ?? []).filter((e) => !refreshAll && !refresh.has(e.id)).map((e) => [e.id, e]),
+);
 const links = chainLinks();
 const todo = raw.exercises.filter((e) => heuristic || !keep.has(e.id));
 const llm = heuristic ? new Map<string, Drafted>() : await llmDrafts(todo);
@@ -239,7 +250,7 @@ rows.sort((a, b) => a.id.localeCompare(b.id, 'en'));
 const file = ExercisesFile.parse({
   dataset_version: DATASET_VERSION,
   source: { repo: raw.source.repo, commit: raw.source.commit },
-  curation: { method: heuristic ? 'heuristic' : 'llm', prompt_version: heuristic ? null : 'curation.v1' },
+  curation: { method: heuristic ? 'heuristic' : 'llm', prompt_version: heuristic ? null : 'curation.v2' },
   // Batch-drafted links are one-sided and can loop; make them symmetric chains (validate.ts check 4).
   exercises: heuristic ? rows : reconcileVersionLinks(rows),
 });

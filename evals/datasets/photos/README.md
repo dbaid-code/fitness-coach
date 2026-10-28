@@ -40,7 +40,7 @@ would close that gap.
 
 - At least 2 cases must be deliberately unclear (`"unclear": true`, `"items": []`): dark, blurred or no equipment.
 - Mix settings: small gym, large gym, home.
-- `items` uses IDs from `data/seed/equipment.v1.json` and lists **everything** identifiable: anything AG-1
+- `items` uses IDs from `data/seed/equipment.v2.json` and lists **everything** identifiable: anything AG-1
   finds that is not in `items` counts as a wrong detection.
 - No people, including reflections in mirrors and glass.
 - Strip metadata before committing: `exiftool -all= photo-1.jpg`, or re-save through any editor.

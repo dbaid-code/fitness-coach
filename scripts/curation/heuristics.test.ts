@@ -16,6 +16,10 @@ describe('F-02 curation bodyweight guard', () => {
   });
 
   it('an unmappable machine becomes null (inactive), not bodyweight', () => {
-    expect(guardBodyweight(raw('Sled Row', 'other'), [])).toBeNull();
+    expect(guardBodyweight(raw('Ab Crunch Machine', 'machine'), [])).toBeNull();
+  });
+
+  it('D-53: a drafted [] stands when the source says "other" (assumed-available items such as cones)', () => {
+    expect(guardBodyweight(raw('Lateral Cone Hops', 'other'), [])).toEqual([]);
   });
 });
