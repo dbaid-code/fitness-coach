@@ -2,7 +2,7 @@
 
 EV-5 needs **real photos of real equipment, with no people in them** (evaluations.md §2.5). The owner
 approved the coding agent fetching public-domain photos (build notes §6.6), with the owner reviewing the
-truth lists. The 10 cases below were fetched from Wikimedia Commons on 2026-10-27, all CC0 or public
+truth lists (approved 2026-10-28). The 10 cases below were fetched from Wikimedia Commons on 2026-10-27, all CC0 or public
 domain; `SOURCES.md` lists every file, its licence and the crop applied. Photos cannot be synthesised: a
 generated image would test nothing.
 

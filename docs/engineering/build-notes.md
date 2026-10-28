@@ -101,7 +101,7 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 | M2 | Done | Mailpit sign-up E2E, deletion cascade test | Hosted Auth settings (owner) |
 | M3 | Done with fakes | 23 generation integration tests, planner/plan view E2E | Smoke evals on real models (P-3) |
 | M4 | Done | edits, text edits, reset, accept, complete, history: integration + E2E; EV-6 health scan | — |
-| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth-list review (owner) |
+| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth lists approved (owner, 2026-10-28) |
 | M6 | Harness done | metrics views tested; eval runner plumbing verified with fakes (EV-2: 30/30 generations); `eval-gate` blocking | First real run, owner label/judge reviews |
 | M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
 

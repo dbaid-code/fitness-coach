@@ -19,8 +19,8 @@ commit the `latest.json` from its artifact.
 - `users.v1.json`: 5 fictional users covering the three goals, three experience levels and five equipment setups.
 - `ag2-inputs.v1.json`: 20 labelled AG-2 inputs (EV-3); disjoint from the prompt examples (a unit test checks).
 - `health-cases.v1.json`: 10 health notes (EV-4), every body area plus one "slept badly" case.
-- `photos/`: 10 EV-5 cases (CC0 / public-domain photos from Wikimedia Commons, no people); truth lists await
-  the owner's review. See `photos/README.md` and `photos/SOURCES.md`.
+- `photos/`: 10 EV-5 cases (CC0 / public-domain photos from Wikimedia Commons, no people); truth lists approved by
+  the owner on 2026-10-28. See `photos/README.md` and `photos/SOURCES.md`.
 
 Labels were written by the coding agent and need the owner's review (PRD §9.1). EV-2's owner check:
 score 6 judged plans (20%, stratified by user) in `results/owner-review.v1.json`; agreement must be ≥ 80%.

@@ -70,11 +70,11 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 8: M5 Photos (F-05)**
   - [x] 🟩 *(UI)* Photo sheet with on-phone resize and EXIF stripping; API-06; AG-1 prompt and schema; replace-vs-add; scan limit
-  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth-list review pending*
+  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth lists approved by the owner 2026-10-28; threshold tuning with the first full run*
 
 - [ ] 🟨 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
   - [x] 🟩 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
-  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27*
+  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 truth lists 2026-10-28*
   - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *blocked: no dev key in the container*
   - [ ] 🟨 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job added and blocking; no real latest.json yet*
   - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job added; verified locally on Chromium only*
