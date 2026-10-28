@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Implements** | Engineering doc §0.1 rule 4, §12.5, §12.6, §17.3, Appendix B |
-| **Canonical files** | `src/server/config/env.ts`, `src/shared/constants.ts`, `src/server/config/app-config.ts`, `src/server/agents/agent-config.ts`, `src/server/domain/rulebook/rulebook.v1.ts` |
+| **Canonical files** | `src/server/config/env.ts`, `src/shared/constants.ts`, `src/server/config/app-config.ts`, `src/server/agents/agent-config.ts`, `src/server/domain/rulebook/rulebook.v3.ts` |
 | **Related** | `.env.example` (repository root), `domain-time-model-and-rulebook.md` |
 
 Every number used by the app is read from one of the modules below. Changing a value is a config change, not a design change, unless it changes PRD behaviour. No other module may hard-code these values.
@@ -173,14 +173,14 @@ export const PHOTO_CONFIDENCE_THRESHOLD = 0.70;           // initial; tuned on E
 export const SDK_MAX_RETRIES = 2;
 export const REFUSAL_FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 
-export { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v1';
+export { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v3';
 export { DATASET_VERSION } from '@/server/config/dataset-version';  // generated from data/seed header by the seed script
 ```
 
 `src/server/config/dataset-version.ts` is written by `scripts/seed-reference-data.ts --write-version` from the `dataset_version` field of `data/seed/exercises.v1.json` and committed (`export const DATASET_VERSION = 'exercises.v1';`).
 
-## 5. Rulebook constants (`src/server/domain/rulebook/rulebook.v1.ts`)
-Values are in `domain-time-model-and-rulebook.md` §3. Exported names: `RULEBOOK_VERSION = 'rulebook.v1'`, `SETS_REPS_BY_GOAL`, `LEVELS_BY_EXPERIENCE`, `STARTING_HOLD_S`, `REP_STEP = 2`, `HOLD_STEP_S = 10`, `REP_CAP = 15`, `HOLD_CAP_S = 60`, `REP_MIN = 6`, `HOLD_MIN_S = 15`, `CONTINUOUS_CARDIO_S = { min: 300, max: 1800 }`.
+## 5. Rulebook constants (`src/server/domain/rulebook/rulebook.v3.ts`)
+Values are in `domain-time-model-and-rulebook.md` §3. Exported names: `RULEBOOK_VERSION = 'rulebook.v3'`, `SETS_REPS_BY_GOAL`, `LEVELS_BY_EXPERIENCE`, `STARTING_HOLD_S`, `REP_STEP = 2`, `HOLD_STEP_S = 10`, `REP_CAP = 15`, `HOLD_CAP_S = 60`, `REP_MIN = 6`, `HOLD_MIN_S = 15`, `CONTINUOUS_CARDIO_S = { min: 300, max: 1800 }`, `COACH_CARDIO_BY_GOAL` (D-52).
 
 ## 6. Constants that live in SQL
 | Constant | Value | Where |

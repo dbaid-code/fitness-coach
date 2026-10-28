@@ -1,0 +1,379 @@
+{
+  "dataset_version": "exercises.v1",
+  "routines": [
+    {
+      "id": "warmup_upper_push",
+      "name": "Upper-body push warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "chest",
+        "shoulders",
+        "triceps"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jumping_jacks",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Arm_Circles",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Shoulder_Circles",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Dynamic_Chest_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Elbows_Back",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "warmup_upper_pull",
+      "name": "Upper-body pull warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "back",
+        "biceps"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jumping_jacks",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Arm_Circles",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Dynamic_Back_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Cat_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Windmills",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "warmup_lower",
+      "name": "Lower-body warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "legs"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jogging_in_place",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "gc_high_knees",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Worlds_Greatest_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Standing_Hip_Flexors",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Ankle_Circles",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "warmup_core",
+      "name": "Core warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "core"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jogging_in_place",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Cat_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Standing_Lateral_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Windmills",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Spinal_Stretch",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "warmup_cardio",
+      "name": "Cardio warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "cardio"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jogging_in_place",
+          "duration_s": 90
+        },
+        {
+          "exercise_id": "gc_butt_kicks",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "gc_high_knees",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Ankle_Circles",
+          "duration_s": 30
+        },
+        {
+          "exercise_id": "Worlds_Greatest_Stretch",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "warmup_full_body",
+      "name": "Full-body warm-up",
+      "routine_type": "warmup",
+      "focus_groups": [
+        "chest",
+        "back",
+        "shoulders",
+        "biceps",
+        "triceps",
+        "legs",
+        "core",
+        "cardio"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jumping_jacks",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Arm_Circles",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Worlds_Greatest_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "gc_high_knees",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Windmills",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "cooldown_upper",
+      "name": "Upper-body cool-down",
+      "routine_type": "cooldown",
+      "focus_groups": [
+        "chest",
+        "back",
+        "shoulders",
+        "biceps",
+        "triceps"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "Chest_And_Front_Of_Shoulder_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Shoulder_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Triceps_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Upper_Back_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Childs_Pose",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "cooldown_lower",
+      "name": "Lower-body cool-down",
+      "routine_type": "cooldown",
+      "focus_groups": [
+        "legs"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "Hamstring_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Quad_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Kneeling_Hip_Flexor",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Calf_Stretch_Hands_Against_Wall",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Hug_Knees_To_Chest",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "cooldown_core",
+      "name": "Core cool-down",
+      "routine_type": "cooldown",
+      "focus_groups": [
+        "core"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "Childs_Pose",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Cat_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Spinal_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Hug_Knees_To_Chest",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Standing_Lateral_Stretch",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "cooldown_cardio",
+      "name": "Cardio cool-down",
+      "routine_type": "cooldown",
+      "focus_groups": [
+        "cardio",
+        "legs"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "gc_jogging_in_place",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Runners_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Quad_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Calf_Stretch_Hands_Against_Wall",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Hamstring_Stretch",
+          "duration_s": 60
+        }
+      ]
+    },
+    {
+      "id": "cooldown_full_body",
+      "name": "Full-body cool-down",
+      "routine_type": "cooldown",
+      "focus_groups": [
+        "chest",
+        "back",
+        "shoulders",
+        "biceps",
+        "triceps",
+        "legs",
+        "core",
+        "cardio"
+      ],
+      "duration_s": 300,
+      "is_active": true,
+      "moves": [
+        {
+          "exercise_id": "Childs_Pose",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Chest_And_Front_Of_Shoulder_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Hamstring_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Quad_Stretch",
+          "duration_s": 60
+        },
+        {
+          "exercise_id": "Spinal_Stretch",
+          "duration_s": 60
+        }
+      ]
+    }
+  ]
+}

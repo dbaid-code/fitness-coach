@@ -1,0 +1,215 @@
+{
+  "version": "equipment.v1",
+  "items": [
+    {
+      "id": "dumbbells",
+      "name": "Dumbbells",
+      "sort_order": 1,
+      "visual_hint": "pairs of short hand-held bars with a weight at each end",
+      "is_active": true
+    },
+    {
+      "id": "adjustable_bench",
+      "name": "Adjustable bench",
+      "sort_order": 2,
+      "visual_hint": "padded bench whose back rest tilts to different angles",
+      "is_active": true
+    },
+    {
+      "id": "flat_bench",
+      "name": "Flat bench",
+      "sort_order": 3,
+      "visual_hint": "padded bench with a fixed flat seat",
+      "is_active": true
+    },
+    {
+      "id": "barbell",
+      "name": "Barbell",
+      "sort_order": 4,
+      "visual_hint": "long straight bar, about 2 m, loaded with round plates at both ends",
+      "is_active": true
+    },
+    {
+      "id": "ez_curl_bar",
+      "name": "EZ curl bar",
+      "sort_order": 5,
+      "visual_hint": "short bar with zig-zag bends in the middle for the hands",
+      "is_active": true
+    },
+    {
+      "id": "squat_rack",
+      "name": "Squat / power rack",
+      "sort_order": 6,
+      "visual_hint": "tall steel frame with uprights and hooks or safety bars that hold a barbell",
+      "is_active": true
+    },
+    {
+      "id": "smith_machine",
+      "name": "Smith machine",
+      "sort_order": 7,
+      "visual_hint": "barbell fixed between two vertical rails so it only slides up and down",
+      "is_active": true
+    },
+    {
+      "id": "cable_machine",
+      "name": "Cable machine",
+      "sort_order": 8,
+      "visual_hint": "tall frame with adjustable pulleys, cables, handles and a weight stack",
+      "is_active": true
+    },
+    {
+      "id": "lat_pulldown_machine",
+      "name": "Lat pulldown machine",
+      "sort_order": 9,
+      "visual_hint": "seat with knee pads under a high pulley and a wide overhead bar",
+      "is_active": true
+    },
+    {
+      "id": "seated_row_machine",
+      "name": "Seated row machine",
+      "sort_order": 10,
+      "visual_hint": "low seat and foot plate facing handles that are pulled toward the torso",
+      "is_active": true
+    },
+    {
+      "id": "chest_press_machine",
+      "name": "Chest press machine",
+      "sort_order": 11,
+      "visual_hint": "upright seat with handles at chest height that are pushed forward",
+      "is_active": true
+    },
+    {
+      "id": "shoulder_press_machine",
+      "name": "Shoulder press machine",
+      "sort_order": 12,
+      "visual_hint": "upright seat with handles at shoulder height that are pushed overhead",
+      "is_active": true
+    },
+    {
+      "id": "pec_deck",
+      "name": "Pec deck",
+      "sort_order": 13,
+      "visual_hint": "upright seat with two padded arms or handles that swing together in front of the chest",
+      "is_active": true
+    },
+    {
+      "id": "leg_press_machine",
+      "name": "Leg press machine",
+      "sort_order": 14,
+      "visual_hint": "reclined seat facing a large foot platform that is pushed away with the legs",
+      "is_active": true
+    },
+    {
+      "id": "leg_curl_machine",
+      "name": "Leg curl machine",
+      "sort_order": 15,
+      "visual_hint": "bench or seat with a padded roller behind the lower legs",
+      "is_active": true
+    },
+    {
+      "id": "leg_extension_machine",
+      "name": "Leg extension machine",
+      "sort_order": 16,
+      "visual_hint": "seat with a padded roller in front of the shins",
+      "is_active": true
+    },
+    {
+      "id": "pull_up_bar",
+      "name": "Pull-up bar",
+      "sort_order": 17,
+      "visual_hint": "horizontal bar fixed high on a wall, door frame or rack",
+      "is_active": true
+    },
+    {
+      "id": "dip_station",
+      "name": "Dip station",
+      "sort_order": 18,
+      "visual_hint": "two parallel waist-high handles that hold the body up on straight arms",
+      "is_active": true
+    },
+    {
+      "id": "kettlebells",
+      "name": "Kettlebells",
+      "sort_order": 19,
+      "visual_hint": "round cast-iron weights with a single handle on top",
+      "is_active": true
+    },
+    {
+      "id": "resistance_bands",
+      "name": "Resistance bands",
+      "sort_order": 20,
+      "visual_hint": "elastic bands or tubes, often coloured, sometimes with handles",
+      "is_active": true
+    },
+    {
+      "id": "medicine_ball",
+      "name": "Medicine ball",
+      "sort_order": 21,
+      "visual_hint": "heavy rubber or leather ball about the size of a football",
+      "is_active": true
+    },
+    {
+      "id": "stability_ball",
+      "name": "Stability ball",
+      "sort_order": 22,
+      "visual_hint": "large inflatable ball, roughly 55 to 75 cm across",
+      "is_active": true
+    },
+    {
+      "id": "foam_roller",
+      "name": "Foam roller",
+      "sort_order": 23,
+      "visual_hint": "cylinder of dense foam, roughly 30 to 90 cm long",
+      "is_active": true
+    },
+    {
+      "id": "exercise_mat",
+      "name": "Exercise mat",
+      "sort_order": 24,
+      "visual_hint": "thin padded mat rolled out on the floor",
+      "is_active": true
+    },
+    {
+      "id": "jump_rope",
+      "name": "Jump rope",
+      "sort_order": 25,
+      "visual_hint": "rope with a handle at each end",
+      "is_active": true
+    },
+    {
+      "id": "treadmill",
+      "name": "Treadmill",
+      "sort_order": 26,
+      "visual_hint": "machine with a moving belt and a front console for walking or running",
+      "is_active": true
+    },
+    {
+      "id": "stationary_bike",
+      "name": "Stationary bike",
+      "sort_order": 27,
+      "visual_hint": "bike frame with pedals and a seat that stays in place",
+      "is_active": true
+    },
+    {
+      "id": "rowing_machine",
+      "name": "Rowing machine",
+      "sort_order": 28,
+      "visual_hint": "long low rail with a sliding seat, foot straps and a pull handle",
+      "is_active": true
+    },
+    {
+      "id": "elliptical",
+      "name": "Elliptical",
+      "sort_order": 29,
+      "visual_hint": "machine with two long foot pedals moving in an oval and moving arm handles",
+      "is_active": true
+    },
+    {
+      "id": "stair_climber",
+      "name": "Stair climber",
+      "sort_order": 30,
+      "visual_hint": "machine with rotating steps or two pedals that move up and down",
+      "is_active": true
+    }
+  ]
+}

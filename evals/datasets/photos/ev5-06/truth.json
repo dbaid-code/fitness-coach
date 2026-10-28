@@ -1,0 +1,11 @@
+{
+  "ev_id": "EV-5-06",
+  "setting": "small_gym",
+  "items": [
+    "rowing_machine",
+    "cable_machine",
+    "pull_up_bar",
+    "treadmill"
+  ],
+  "unclear": false
+}

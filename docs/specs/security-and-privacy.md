@@ -84,7 +84,7 @@ Fonts are self-hosted by `next/font`, so no external font host is allowed. Pages
 | Disclosure at sign-up | `SIGNUP_NOTICE` (D-27 wording) on `/sign-up` |
 | Health info only for the current session | §5; `trg_plans__clear_context`; EV-6 scan test (fixture health phrases searched in every text and JSONB column of every `app` table except `agent_logs` and `idempotency_keys`) |
 | Red flags stop the plan | Status resolver row 1; EV-3 |
-| Adjustments only remove, swap or lighten | AG-3 rule; candidate filter; V-3; EV-4 rehab denylist |
+| Adjustments only remove, swap or lighten | AG-3 rule; candidate filter; V-3; EV-4 area check |
 | Photos deleted after analysis | Never persisted (D-01) |
 | Account deletion removes everything | API-20 cascade test |
 | Users see only their own data | RLS + tests |

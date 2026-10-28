@@ -31,9 +31,9 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
    |-|-|-|
    | `gc-dev-vercel` | Vercel Preview `ANTHROPIC_API_KEY` (P-2 step 6) | now |
    | `gc-dev-ci` | GitHub secret `ANTHROPIC_API_KEY_EVALS` (P-6 step 1) | now |
-   | `gc-dev-claude` | Claude cloud environment variable `ANTHROPIC_API_KEY` (see below) | now |
+   | `gc-dev-claude` | Claude cloud environment variable `GC_ANTHROPIC_API_KEY` (see below) | now |
 
-   To add `gc-dev-claude`: in the Claude app, open the cloud environment menu in this session's title bar → **Edit** → environment variables. Add `ANTHROPIC_API_KEY=<key>` and save. New sessions pick it up. I use it only for seed curation (about $2–4) and the M3 smoke evals. `api.anthropic.com` is already reachable from the container.
+   To add `gc-dev-claude`: in the Claude app, open the cloud environment menu in this session's title bar → **Edit** → environment variables. Add `GC_ANTHROPIC_API_KEY=<key>` and save. New sessions pick it up. Use that name, not `ANTHROPIC_API_KEY`: the cloud environment doesn't pass `ANTHROPIC_API_KEY` through to the session (it's the name Claude Code uses for its own auth). `pnpm seed:curate` and the evals runner fall back to `GC_ANTHROPIC_API_KEY`; the app itself still reads `ANTHROPIC_API_KEY` on Vercel and in CI. I use it only for seed curation (about $2–4) and the M3 smoke evals. `api.anthropic.com` is already reachable from the container.
 
 **Record:** `gc-dev-vercel`, `gc-dev-ci`, `gc-dev-claude`.
 
@@ -91,7 +91,9 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 5. Settings → **Functions** → region **Mumbai (`bom1`)**. `vercel.json` also pins it.
 6. **Project** → Settings → **Environment Variables**. Not the team-level page of the same name, which holds variables shared across projects. For each row, enter the key and value and tick **only Preview**. For secrets, turn on **Sensitive**: untick Development first, because the switch is disabled while Development is ticked. A sensitive value can't be viewed or edited later; if you mistype one, delete it and add it again.
 
-   | Name | Value |
+   Each password-manager name below stands for **the value stored under it**: paste the URL or key itself, never the entry's name. A name such as `supabase-dev-url` in a Value field breaks the build with `TypeError: Invalid URL`.
+
+   | Name | Value (paste the stored value, not the name) |
    |-|-|
    | `NEXT_PUBLIC_SUPABASE_URL` | `supabase-dev-url` |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `supabase-dev-publishable` |
@@ -113,7 +115,7 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 ## P-6 GitHub secrets and the `production` environment (about 5 min)
 1. Go to github.com/dbaid-code/fitness-coach → Settings → **Secrets and variables → Actions** → New repository secret:
 
-   | Secret | Value |
+   | Secret | Value (paste the stored value, not the name) |
    |-|-|
    | `SUPABASE_DB_URL_DEV` | session-pooler string from P-1 step 7 |
    | `ANTHROPIC_API_KEY_EVALS` | `gc-dev-ci` |

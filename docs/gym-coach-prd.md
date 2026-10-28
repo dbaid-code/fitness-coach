@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -233,7 +233,7 @@ Everything in this section is in MVP scope.
   Cards must not show rest, weight, intensity, speed or incline.
 - **FR-42** Every plan starts with a warm-up card and ends with a cool-down card. Each is a fixed routine taken from the database and matched to the focus (section 10.5).
 - **FR-43** Tapping a card shows how to do it: the instructions and image from the exercise database, or the list of moves for a warm-up or cool-down routine. This text comes from the database and is never written by the LLM.
-- **FR-44 Time.** Code calculates total time (section 8.8). A plan's total must fall between **85% and 100%** of the session length.
+- **FR-44 Time.** Code calculates total time (section 8.8). A plan's total must fall between **85% and 100%** of the session length. Exception (D-50): when the available exercises can't fill the session, the plan may be shorter, must reach 85% of what they allow, and shows `SHORT_SESSION`.
 - **FR-45 Plan header.** Shows the focus and a fixed-format reason (Appendix A): one wording when the user picked the groups, another when the coach picked based on recency, and another for a first workout.
 - **FR-46** The app never shows text written by an agent. All messages come from the fixed catalog in Appendix A.
 
@@ -397,7 +397,7 @@ Loosely based on public strength-training guidance from the ACSM (American Colle
 
 | Rule | Value |
 |-|-|
-| Sets × reps by goal | Build muscle **3–4 × 8–12** · Lose weight **2–3 × 12–15** (cardio allowed) · Stay fit **2–3 × 10–15** |
+| Sets × reps by goal | Build muscle **3–4 × 8–12** · Lose weight **2–3 × 12–15** · Stay fit **2–3 × 10–15** |
 | Exercise level by experience | Newbie: *beginner* only · Moderately regular: *beginner + intermediate* · Experienced: all levels |
 | Volume by experience | Newbies stay at the low end of the sets range |
 | Starting hold time (timed holds) | Newbie 20 s · Moderately regular 30 s · Experienced 45 s |
@@ -406,7 +406,7 @@ Loosely based on public strength-training guidance from the ACSM (American Colle
 | Time window | Plan total between 85% and 100% of the session length |
 | Continuity | When there is a completed workout with an overlapping focus, keep about half of its exercises (checked by the LLM judge, not the validator) |
 | After a Reset | At least half of the main exercises differ from the discarded plan (validator check). *Too long* → aim near the 85% lower bound with fewer exercises · *Too hard* → lighter volume or easier versions · *Too easy* → more volume or harder versions · *Don't like the exercises* → different exercises |
-| Lose-weight goal | When the coach chooses, it may add a short cardio block before the cool-down |
+| Cardio (when the coach chooses the focus) | Any goal may get cardio before the cool-down. Lose weight: a cardio block. Build muscle and Stay fit: at most one cardio exercise, at most 10 minutes (D-52) |
 
 **Time model (code):**
 - Reps card total = `sets × reps × seconds_per_rep + (sets − 1) × rest + setup`
@@ -446,7 +446,7 @@ AG-2 sorts every note or edit request into categories and turns it into structur
 | Category | Examples | Result |
 |-|-|-|
 | **Workout change** | "swap squats for lunges", "fewer exercises", "make it legs instead", "only dumbbells today" | Requests are applied (`APPLIED`, `PARTIAL` or `NOT_POSSIBLE`) |
-| **Health adjustment** (local discomfort, tiredness) | "knee is sore", "lower back feels tight", "slept badly", "wrist hurts" | Avoid exercises that strain the named body area, or make the session lighter. Never add rehab or "therapeutic" exercises. This session only. (`APPLIED_HEALTH_AREA` / `APPLIED_HEALTH_LIGHTER`) |
+| **Health adjustment** (local discomfort, tiredness) | "knee is sore", "lower back feels tight", "slept badly", "wrist hurts" | Avoid exercises that strain the named body area, or make the session lighter. This session only. (`APPLIED_HEALTH_AREA` / `APPLIED_HEALTH_LIGHTER`) |
 | **Red flag** | Chest pain, dizziness or fainting, breathlessness at rest, fever or illness, recent surgery, pregnancy, heart condition, sudden sharp pain or swelling | **Stop.** No plan for this session. A note blocks generation while it contains the text. In an edit, the draft is discarded. (`RED_FLAG`) |
 | **Fitness-related but not actionable** | Nutrition, supplements, diet, sleep advice | Plan unchanged / note ignored (`OUT_OF_SCOPE_*`) |
 | **Unrelated** | Weather, investments, chit-chat, "ignore your instructions…" | Plan unchanged / note ignored (`OUT_OF_SCOPE_*`) |
@@ -499,7 +499,7 @@ A **planning session** starts when a plan is generated. It ends when the workout
 1. Every `exercise_id` is in this request's candidate list. Warm-up and cool-down routine IDs exist.
 2. Every exercise's required equipment is available today: the profile, or the override, plus bodyweight.
 3. No exercise strains a body area being avoided.
-4. Main exercises belong to the focus groups. Cardio is allowed only if Cardio was chosen, or if the coach chose and the goal is Lose weight.
+4. Main exercises belong to the focus groups. Cardio is allowed if Cardio was chosen, or if the coach chose the focus (any goal; Build muscle and Stay fit at most one cardio exercise of at most 10 minutes, D-52).
 5. When the coach chose, the 48-hour rule holds.
 6. Card fields match the card type: reps cards have reps, timed cards have time per set.
 7. Exercises the user has done before use the progression targets, unless a request in this session overrides them.
@@ -536,7 +536,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | Claude API error or timeout | The SDK's standard retries, then `GENERATION_FAILED` (or `NOT_UNDERSTOOD` for AG-2, `PHOTO_NONE` for AG-1) |
 | AG-2 returns output that doesn't match the schema | Treated as `NOT_UNDERSTOOD`; plan unchanged |
 | Spend cap reached | `SPEND_CAP`; no LLM calls; viewing plans and history and completing workouts still work |
-| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Generate the best plan it can. If it's still below 85% after the retry, `GENERATION_FAILED` |
+| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Code checks first. A newbie gets the goal's full sets range if the minimum can't fill it (D-49). If even that can't reach 85%, the plan may be shorter: it must reach 85% of what the candidates allow and shows `SHORT_SESSION` in the outcome area (D-50). A plan below that after the retry → `GENERATION_FAILED`. No main exercise at all → `GENERATION_FAILED` |
 | No history, or too little | Rulebook defaults; first-workout header; never refuse to plan |
 
 ---
@@ -556,7 +556,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | **EV-1** | Rule checks: run the validator's checks (section 8.13) over all generated plans in the test set | **100%** |
 | **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | No plan below 3. The owner reviews 20% of judged cases and agrees with ≥ 80% |
 | **EV-3** | AG-2 sorting and request extraction, including synonyms (20 inputs) | Red-flag recall **100%**; ≥ 90% labelled correctly overall; out-of-scope input never changes a plan (**100%**) |
-| **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**); no rehab exercises added (**100%**) |
+| **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**) |
 | **EV-5** | Equipment photos (10 cases) | A case passes if it finds ≥ 80% of the true items; ≥ 90% of cases pass; ≤ 10% of all detected items are wrong; unclear photos take the `PHOTO_NONE` path (**100%**) |
 | **EV-6** | Lifecycle and memory rules (automated tests): drafts, discarded, expired and uncompleted plans never reach history; health details never saved outside logs | **100%** |
 | **EV-7** | Progression engine unit tests (every row of section 8.9) | **100%** |
@@ -875,6 +875,7 @@ These weren't decided explicitly in the interview. The owner confirmed them when
 | `EXPIRED` | Plan expired | "This workout expired. Plan a new one when you're ready." |
 | `DISCARD_CONFIRM` | Reset on an accepted workout | "Discard your current workout?" |
 | `OVER_TIME_WARNING` | Direct edits push the total over the session length | "This workout now runs about {m} min — longer than your {t} min." |
+| `SHORT_SESSION` | The available exercises can't fill the session (D-50); shown under the outcome banner while the plan is open | "This workout is shorter than your session. Your equipment and focus don't have enough exercises to fill it." |
 | `HEADER_USER` | Plan header, user picked the groups | "{groups} · {t} min" |
 | `HEADER_COACH` | Plan header, coach picked | "Coach picked {groups} — rested at least {n} days" (or "— not trained yet") |
 | `HEADER_FIRST` | Plan header, first workout | "First workout — starting with {groups}" |

@@ -38,7 +38,7 @@ describe('fenceUserText', () => {
 describe('sanitizeTerm', () => {
   it('keeps short words, hyphens, apostrophes and other scripts', () => {
     expect(sanitizeTerm('  DB press ', 40)).toBe('DB press');
-    expect(sanitizeTerm("pull-up", 40)).toBe('pull-up');
+    expect(sanitizeTerm('pull-up', 40)).toBe('pull-up');
     expect(sanitizeTerm("farmer's walk", 40)).toBe("farmer's walk");
     expect(sanitizeTerm('гантели', 40)).toBe('гантели');
   });

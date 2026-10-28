@@ -38,7 +38,7 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 - **P-1** Supabase dev project, **P-2** Vercel project (`bom1`), **P-3** Anthropic dev workspace and key ($25 cap), **P-6** GitHub secrets (`SUPABASE_DB_URL_DEV`, `ANTHROPIC_API_KEY_EVALS`) and the `production` environment (branch rule only). These block M0's preview check, M1 curation and M3 smoke evals.
 - **Machine:** the build runs in a Claude cloud container. Docker runs there. The Supabase images come from Docker Hub because the default `public.ecr.aws` download host is blocked. Node 24 gets installed in the session (the container ships 22). gitleaks and the Supabase CLI get installed too. The container can't reach Supabase or Vercel, so hosted-database work runs in GitHub Actions and I check previews through GitHub. Owner steps: `docs/runbooks/owner-setup-dev.md`.
 - **Security plan:** approved (§6). It is recorded as D-41 to D-48 in the M0 PR.
-- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 photos** (10 cases, no people), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
+- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 truth-list review** (10 photo cases), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
 
 ## 5. Conflicts found (fixed in the PR that touches each one)
 1. `auth.md` §8 `safeNext` lets `/%09/evil.test` through (G-3). Use `safeNextPath` (S-4).
@@ -52,6 +52,26 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 9. The handoff's stepper bounds (reps 1–30, time 10–120 s) are the design's own example; Appendix B governs (1–50 reps, 5–3600 s), as the handoff says.
 10. The CI key export reads `ANON_KEY`/`SERVICE_ROLE_KEY`; newer CLIs also print publishable/secret keys. I'll check when the CI job is set up in M1.
 11. Approved deviations, recorded and not reopened: D-01 (photos never stored), D-28 (no Resend), D-39 ($25 dev), D-26 (AG-2 failure on a note).
+
+Found during the build (2026-10-26); each is resolved in code unless marked **open**:
+
+12. **Idempotency release** is done by setting `expires_at` to the epoch (the key row stays until the purge job), so a retry after a 5xx, `RATE_LIMITED` or `REQUEST_IN_PROGRESS` re-runs. Same behaviour as the spec's delete.
+13. **Timezone check:** `Intl.supportedValuesOf('timeZone')` lacks `Asia/Kolkata` on some ICU builds, so `Timezone` validates by resolving the zone with `Intl.DateTimeFormat` instead.
+14. **Seed curation** ran with `--heuristic` (no P-3 key). `curation.method = "heuristic"` is recorded in `exercises.v1.json`; the LLM pass and the owner's 10% review are still due. No bodyweight biceps exercise exists in free-exercise-db, so a custom `gc_towel_biceps_curl_hold` was added.
+15. **`HEADER_COACH` with 0 rest days** renders `n = max(1, restDays)`; the catalog template has no "0 days" form.
+16. **gitleaks** runs as the pinned release binary with a SHA-256 check, not a third-party action (S-8).
+17. **Extra UI copy keys** not in `messages-and-ui-copy.md`: `toast.rateLimited` (same words as `auth.rateLimited`), `common.close`, `plan.drag` (aria-label for the drag handle). Owner copy review requested.
+18. **Coverage thresholds** are enforced at 100% for `src/server/domain`, `src/shared/time-model` and `src/shared/messages` only, as specified; the rest of `src/server` is covered by integration tests without a threshold.
+19. **AG-1/AG-3 provider spend-limit error:** matched by `billing_error` and a message pattern until the F-16 capture on the dev workspace (needs P-3).
+20. **Fake AG-3** (tests only) raises new exercises inside the rulebook range when short of the time window and applies "lighter" through reps/hold time, so fixtures behave like a sensible planner.
+21. **Client-bundle scan:** `@supabase/supabase-js` ships `k.startsWith("sb_publishable_")||k.startsWith("sb_secret_")` in browser code. Only that exact paired expression is exempt (`scripts/bundle-allowlist.ts`, tested); bare prefixes anywhere else still fail.
+22. **D-01 base64 probe** in `runAgent` threw on a note or edit containing a long unbroken run (500). AG-2 declares `user_text` as free text, which the probe skips; every other log field is still probed.
+23. **FR-62 under true concurrency:** the claim-then-check in-flight guard (api-conventions §6) can make all concurrent Suggests back off with `REQUEST_IN_PROGRESS`. Never more than one active plan; the integration test asserts exactly that.
+24. **Resolved (owner, 2026-10-27, D-49 and D-50).** Newbie 60-minute sessions were infeasible for Stay fit and Lose weight (minimum sets cap 12 cards at ~36 min vs ~41 min needed). Now `fill-capacity.ts` decides before AG-3 runs: a newbie gets the full sets range when the minimum can't fill the session (rulebook v2); if even that can't reach 85%, the plan may be short (floor = 85% of the pool's capacity), is stored with `short_session` (migration 10) and shows the static `SHORT_SESSION` message under the outcome banner. Direct edits keep the flag; AI edits recalculate it.
+25. **EV-1** holds by construction: the generation core only returns plans the production validator accepted. The runner reports generation failures alongside it.
+26. **`deploy.yml`** uses the repository's Supabase CLI (devDependency, lockfile-pinned) instead of `supabase/setup-cli`, and Vercel CLI `63.1.2`; it re-runs `evals:check` before migrating.
+27. **EV-5 photos** (2026-10-27): 10 cases fetched from Wikimedia Commons, CC0 or public domain only, cropped to remove people and phone watermarks, re-encoded without metadata (`evals/datasets/photos/SOURCES.md`). Commons rate-limits this container's IP, so they came down at 960 px through `upload.wikimedia.org` (`thumb.wikimedia.org` isn't allowed). Skipped: public-domain "EFTA" gym images in Category:Gyms, which come from the DOJ Epstein-files release. Gap: no benches, racks or selectorised machines (see the photos README). Truth lists await the owner's review.
+28. **Fake AG-3** (tests only) brings in continuous cardio when strength cards can't reach the window, as a planner would; without it, a newbie with a treadmill failed at 60 min in the fake evals although the pool can fill it.
 
 ## 6. Owner decisions (2026-10-26, defaults accepted)
 1. Security plan S-1 to S-8 approved, recorded as D-41 to D-48. The S-1 per-user LLM ceiling is **$3 per rolling 24 h**.
@@ -70,3 +90,21 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 - **The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews. Each milestone PR carries the preview's `/api/v1/health` link, and the owner confirms `"db":"ok"`. Vercel Authentication stays on for previews.
 - **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are created at M7, not M0.
+- **The Claude cloud environment holds the dev key as `GC_ANTHROPIC_API_KEY`** (2026-10-27). An `ANTHROPIC_API_KEY` set there never reached the session. `scripts/curate-exercises.ts` and `evals/lib/env.ts` fall back to it; `env.ts`, Vercel and CI keep `ANTHROPIC_API_KEY`.
+
+
+## 7. Build status (2026-10-26)
+| M | State | Evidence | Still open |
+|-|-|-|-|
+| M0 | Done in code | lint, typecheck, unit, build, bundle scan, audit, gitleaks config | Preview `/api/v1/health` (owner, no PR yet) |
+| M1 | Done in code | 9 migrations, schema parity, RLS/cron/rate-limit tests, domain 100% | LLM curation + 10% review (P-3) |
+| M2 | Done | Mailpit sign-up E2E, deletion cascade test | Hosted Auth settings (owner) |
+| M3 | Done with fakes | 23 generation integration tests, planner/plan view E2E | Smoke evals on real models (P-3) |
+| M4 | Done | edits, text edits, reset, accept, complete, history: integration + E2E; EV-6 health scan | — |
+| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth-list review (owner) |
+| M6 | Harness done | metrics views tested; eval runner plumbing verified with fakes (EV-2: 30/30 generations); `eval-gate` blocking | First real run, owner label/judge reviews |
+| M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
+
+2026-10-27: D-49 / D-50 implemented (§5.24).
+
+Details: `docs/engineering/validation-report.md`.

@@ -17,12 +17,18 @@ export type SanitizeOptions = {
 };
 
 /** `server_errors.message`: at most maxChars characters (SERVER_ERROR_MESSAGE_MAX, matches ck_server_errors__message_len). */
-export function sanitizeErrorMessage(message: string, { maxChars, ...options }: SanitizeOptions & { maxChars: number }): string {
+export function sanitizeErrorMessage(
+  message: string,
+  { maxChars, ...options }: SanitizeOptions & { maxChars: number },
+): string {
   return truncateChars(scrub(message, options), maxChars);
 }
 
 /** `server_errors.stack`: at most maxBytes UTF-8 bytes (SERVER_ERROR_STACK_MAX_BYTES, matches ck_server_errors__stack_len). */
-export function sanitizeErrorStack(stack: string, { maxBytes, ...options }: SanitizeOptions & { maxBytes: number }): string {
+export function sanitizeErrorStack(
+  stack: string,
+  { maxBytes, ...options }: SanitizeOptions & { maxBytes: number },
+): string {
   return truncateUtf8(scrub(stack, options), maxBytes);
 }
 

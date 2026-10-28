@@ -1,0 +1,80 @@
+name: deploy
+# F-20, deployment-and-environments.md §6 with the approved deviations (build notes §6):
+# - manual only (workflow_dispatch) and only from main: with the owner as the only writer, running it is
+#   the approval (no required reviewers on private repos without Enterprise);
+# - no SUPABASE_ACCESS_TOKEN: every hosted-database step uses SUPABASE_DB_URL_*;
+# - pinned Vercel CLI (G-9) and the repo's own Supabase CLI (devDependency) instead of an extra action.
+# Prepared in M7 and NOT run by the build (no deploy, no tags).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  VERCEL_CLI: vercel@63.1.2
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "deploy runs only from main (got ${GITHUB_REF})" >&2
+          exit 1
+
+  dev:
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm evals:check
+      - run: pnpm exec supabase db push --db-url "$SUPABASE_DB_URL_DEV"
+        env: { SUPABASE_DB_URL_DEV: '${{ secrets.SUPABASE_DB_URL_DEV }}' }
+      - run: pnpm db:seed --env dev
+        env: { SUPABASE_DB_URL_DEV: '${{ secrets.SUPABASE_DB_URL_DEV }}' }
+
+  production:
+    needs: dev
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write # release tag only
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # The migration always runs before the deploy; migrations are expand → contract (§6).
+      - run: pnpm exec supabase db push --db-url "$SUPABASE_DB_URL_PROD"
+        env: { SUPABASE_DB_URL_PROD: '${{ secrets.SUPABASE_DB_URL_PROD }}' }
+      - run: pnpm db:seed --env prod
+        env: { SUPABASE_DB_URL_PROD: '${{ secrets.SUPABASE_DB_URL_PROD }}' }
+      - run: pnpm dlx "$VERCEL_CLI" pull --yes --environment=production --token "$VERCEL_TOKEN"
+      - run: pnpm dlx "$VERCEL_CLI" build --prod --token "$VERCEL_TOKEN"
+      - id: deploy
+        run: echo "url=$(pnpm dlx "$VERCEL_CLI" deploy --prebuilt --prod --token "$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
+      - name: Smoke
+        env: { URL: '${{ steps.deploy.outputs.url }}' }
+        run: |
+          curl -fsS "$URL/api/v1/health" | grep -q '"db":"ok"'
+          curl -fsS -o /dev/null "$URL/log-in"
+      - name: Tag release
+        run: |
+          d=$(date -u +%Y%m%d); n=$(( $(git tag -l "release-$d-*" | wc -l) + 1 ))
+          git tag "release-$d-$n" "$GITHUB_SHA" && git push origin "release-$d-$n"

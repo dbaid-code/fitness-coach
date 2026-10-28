@@ -1,0 +1,262 @@
+{
+  "version": "users.v1",
+  "users": [
+    {
+      "user_ref": "u1_full_gym_builder",
+      "name": "Fictional A",
+      "profile": {
+        "goal": "build_muscle",
+        "experience": "moderately_regular",
+        "days_per_week": 4,
+        "timezone": "Asia/Kolkata"
+      },
+      "equipment_ids": [
+        "dumbbells",
+        "adjustable_bench",
+        "barbell",
+        "squat_rack",
+        "cable_machine",
+        "lat_pulldown_machine",
+        "pull_up_bar"
+      ],
+      "notes": "Rep cap on Bodyweight_Squat twice (harder version expected); chest/triceps 50 h ago.",
+      "history": [
+        {
+          "days_ago": 2,
+          "hours_ago": 50,
+          "focus_groups": [
+            "chest",
+            "triceps"
+          ],
+          "difficulty": "just_right",
+          "session_length_min": 45,
+          "items": [
+            {
+              "exercise_id": "Cable_Chest_Press",
+              "sets": 3,
+              "reps": 10,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Decline_Barbell_Bench_Press",
+              "sets": 3,
+              "reps": 10,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Body_Tricep_Press",
+              "sets": 3,
+              "reps": 10,
+              "time_per_set_s": null
+            }
+          ]
+        },
+        {
+          "days_ago": 5,
+          "hours_ago": 122,
+          "focus_groups": [
+            "legs"
+          ],
+          "difficulty": "just_right",
+          "session_length_min": 45,
+          "items": [
+            {
+              "exercise_id": "Bodyweight_Squat",
+              "sets": 3,
+              "reps": 12,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Barbell_Lunge",
+              "sets": 3,
+              "reps": 10,
+              "time_per_set_s": null
+            }
+          ]
+        },
+        {
+          "days_ago": 9,
+          "hours_ago": 218,
+          "focus_groups": [
+            "legs"
+          ],
+          "difficulty": "easy",
+          "session_length_min": 45,
+          "items": [
+            {
+              "exercise_id": "Bodyweight_Squat",
+              "sets": 3,
+              "reps": 12,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Barbell_Lunge",
+              "sets": 3,
+              "reps": 9,
+              "time_per_set_s": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "user_ref": "u2_home_dumbbells_cut",
+      "name": "Fictional B",
+      "profile": {
+        "goal": "lose_weight",
+        "experience": "experienced",
+        "days_per_week": 3,
+        "timezone": "Asia/Kolkata"
+      },
+      "equipment_ids": [
+        "dumbbells",
+        "adjustable_bench"
+      ],
+      "notes": "Two Hard ratings in a row (step back expected).",
+      "history": [
+        {
+          "days_ago": 1,
+          "hours_ago": 30,
+          "focus_groups": [
+            "biceps",
+            "back"
+          ],
+          "difficulty": "hard",
+          "session_length_min": 60,
+          "items": [
+            {
+              "exercise_id": "Dumbbell_Bicep_Curl",
+              "sets": 3,
+              "reps": 15,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Bent_Over_Two-Dumbbell_Row",
+              "sets": 3,
+              "reps": 15,
+              "time_per_set_s": null
+            }
+          ]
+        },
+        {
+          "days_ago": 3,
+          "hours_ago": 78,
+          "focus_groups": [
+            "biceps",
+            "back"
+          ],
+          "difficulty": "hard",
+          "session_length_min": 60,
+          "items": [
+            {
+              "exercise_id": "Dumbbell_Bicep_Curl",
+              "sets": 3,
+              "reps": 15,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Bent_Over_Two-Dumbbell_Row",
+              "sets": 3,
+              "reps": 14,
+              "time_per_set_s": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "user_ref": "u3_bands_mat_first",
+      "name": "Fictional C",
+      "profile": {
+        "goal": "stay_fit",
+        "experience": "newbie",
+        "days_per_week": 2,
+        "timezone": "Asia/Kolkata"
+      },
+      "equipment_ids": [
+        "resistance_bands",
+        "exercise_mat"
+      ],
+      "notes": "No history: first workout.",
+      "history": []
+    },
+    {
+      "user_ref": "u4_bodyweight_regular",
+      "name": "Fictional D",
+      "profile": {
+        "goal": "stay_fit",
+        "experience": "moderately_regular",
+        "days_per_week": 3,
+        "timezone": "Asia/Kolkata"
+      },
+      "equipment_ids": [],
+      "notes": "Bodyweight only.",
+      "history": [
+        {
+          "days_ago": 4,
+          "hours_ago": 96,
+          "focus_groups": [
+            "core",
+            "legs"
+          ],
+          "difficulty": "just_right",
+          "session_length_min": 30,
+          "items": [
+            {
+              "exercise_id": "3_4_Sit-Up",
+              "sets": 2,
+              "reps": 12,
+              "time_per_set_s": null
+            },
+            {
+              "exercise_id": "Bodyweight_Walking_Lunge",
+              "sets": 2,
+              "reps": 12,
+              "time_per_set_s": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "user_ref": "u5_home_cardio",
+      "name": "Fictional E",
+      "profile": {
+        "goal": "lose_weight",
+        "experience": "newbie",
+        "days_per_week": 5,
+        "timezone": "Asia/Kolkata"
+      },
+      "equipment_ids": [
+        "treadmill",
+        "exercise_mat"
+      ],
+      "notes": "Home cardio setup.",
+      "history": [
+        {
+          "days_ago": 2,
+          "hours_ago": 48,
+          "focus_groups": [
+            "cardio"
+          ],
+          "difficulty": "easy",
+          "session_length_min": 30,
+          "items": [
+            {
+              "exercise_id": "gc_jumping_jacks",
+              "sets": 2,
+              "reps": null,
+              "time_per_set_s": 30
+            },
+            {
+              "exercise_id": "gc_high_knees",
+              "sets": 2,
+              "reps": null,
+              "time_per_set_s": 30
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

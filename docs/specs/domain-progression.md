@@ -37,7 +37,7 @@ For exercise **E** in `pool`:
 ## 3. Rules (evaluated top to bottom; first match wins)
 | # | Condition | Target | Action |
 |-|-|-|-|
-| 1 | `E.timed_kind = 'continuous'` | No entry (AG-3 picks `time_per_set_s` in 300–1800, `sets = 1`) | `not_progressed` (set on the item by the service) |
+| 1 | `E.timed_kind = 'continuous'` | No entry (AG-3 picks `time_per_set_s` in `continuousCardioS`: 300–1800, or 300–600 for a coach-chosen Build muscle or Stay fit plan, D-52; `sets = 1`) | `not_progressed` (set on the item by the service) |
 | 2 | No appearances | No entry (rulebook start) | `start` (set on the item) |
 | 3 | Exactly one appearance | `a1` numbers | `hold` |
 | 4 | `a1`, `a2` both not Hard, **below the cap** (reps card: `a1.reps < 15`; hold: `a1.time < 60`) | reps: `min(a1.reps + 2, 15)`; hold: `min(a1.time + 10, 60)`; `sets = a1.sets` | `step_up` |

@@ -1,0 +1,13 @@
+pnpm-lock.yaml
+.next/
+coverage/
+playwright-report/
+test-results/
+docs/
+supabase/migrations/
+supabase/rls-policies.sql
+data/
+evals/datasets/
+evals/results/
+public/
+*.md

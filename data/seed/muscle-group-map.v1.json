@@ -1,0 +1,25 @@
+{
+  "version": "muscle-group-map.v1",
+  "category_to_group": {
+    "cardio": "cardio"
+  },
+  "primary_muscle_to_group": {
+    "chest": "chest",
+    "lats": "back",
+    "middle back": "back",
+    "lower back": "back",
+    "traps": "back",
+    "shoulders": "shoulders",
+    "biceps": "biceps",
+    "forearms": "biceps",
+    "triceps": "triceps",
+    "quadriceps": "legs",
+    "hamstrings": "legs",
+    "glutes": "legs",
+    "calves": "legs",
+    "abductors": "legs",
+    "adductors": "legs",
+    "abdominals": "core",
+    "neck": "shoulders"
+  }
+}

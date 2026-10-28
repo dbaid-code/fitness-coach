@@ -1,6 +1,28 @@
 node_modules/
 .env
 .env.*
+!.env.example
 .DS_Store
 Thumbs.db
-!.env.example
+
+# Next.js / build
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Evals (detailed run output stays local)
+evals/results/runs/
+
+# Vercel
+.vercel/
