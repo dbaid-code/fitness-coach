@@ -1,5 +1,5 @@
 // Seed validation rules (reference-data-seed.md §8). Pure: returns every failure.
-import { MUSCLE_GROUPS } from '../../src/shared/constants';
+import { MAX_EQUIPMENT_IDS, MUSCLE_GROUPS } from '../../src/shared/constants';
 import type { Seed } from './load';
 
 export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: string[]; warnings: string[] } {
@@ -8,12 +8,17 @@ export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: st
   const { equipment, exercises, routines } = seed;
 
   // 2. Equipment
-  if (equipment.items.length !== 30) errors.push(`equipment: expected 30 items, found ${equipment.items.length}`);
+  // D-53: 62 active items plus the retired exercise_mat (rows are never deleted).
+  if (equipment.items.length !== 63) errors.push(`equipment: expected 63 items, found ${equipment.items.length}`);
   for (const key of ['id', 'name', 'sort_order'] as const) {
     const values = equipment.items.map((i) => i[key]);
     if (new Set(values).size !== values.length) errors.push(`equipment: duplicate ${key}`);
   }
-  const equipmentIds = new Set(equipment.items.map((i) => i.id));
+  const equipmentIds = new Set(equipment.items.filter((i) => i.is_active).map((i) => i.id));
+  // FR-20 preselects every active item, so the API cap must hold the whole list.
+  if (equipmentIds.size > MAX_EQUIPMENT_IDS) {
+    errors.push(`equipment: ${equipmentIds.size} active items exceed MAX_EQUIPMENT_IDS (${MAX_EQUIPMENT_IDS})`);
+  }
 
   // 3. Exercises
   const byId = new Map<string, (typeof exercises.exercises)[number]>();
@@ -22,7 +27,7 @@ export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: st
     byId.set(e.id, e);
     if (e.id.startsWith('gc_') !== (e.source === 'custom')) errors.push(`exercise ${e.id}: gc_ prefix ⇔ source custom`);
     for (const id of e.required_equipment)
-      if (!equipmentIds.has(id)) errors.push(`exercise ${e.id}: unknown equipment ${id}`);
+      if (!equipmentIds.has(id)) errors.push(`exercise ${e.id}: unknown or inactive equipment ${id}`);
     if ((e.card_type === 'timed') !== (e.timed_kind !== null)) errors.push(`exercise ${e.id}: timed ⇔ timed_kind`);
     if (['strongman', 'olympic weightlifting'].includes(e.category)) errors.push(`exercise ${e.id}: excluded category`);
     // 5. Active rows are usable
@@ -86,7 +91,7 @@ export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: st
   // 8. Owner review sample (OD-08 reviews don't block the next milestone: a warning until signed off)
   const active = exercises.exercises.filter((e) => e.is_active).length;
   if (sampleCsv === null) {
-    errors.push('review-sample.v1.csv is missing');
+    errors.push('review-sample.v2.csv is missing');
   } else {
     const rows = sampleCsv.trim().split('\n').slice(1);
     if (rows.length < Math.ceil(active * 0.1))
@@ -96,7 +101,7 @@ export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: st
       warnings.push(`review sample: ${unreviewed} of ${rows.length} rows not yet reviewed by the owner`);
   }
   if (exercises.curation.method === 'heuristic') {
-    warnings.push('exercises.v1.json was curated by rules (--heuristic); re-run LLM curation once the dev key exists');
+    warnings.push('exercises.v2.json was curated by rules (--heuristic); re-run LLM curation once the dev key exists');
   }
   return { errors, warnings };
 }

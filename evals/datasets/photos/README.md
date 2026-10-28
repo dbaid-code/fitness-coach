@@ -30,7 +30,7 @@ photos/
 | ev5-09 | large_gym | 1 | — (`unclear`) | Weight-room photo, heavily blurred and darkened; nothing identifiable |
 | ev5-10 | small_gym | 1 | — (`unclear`) | Hotel gym, camera pointed at the pool window; no equipment in frame |
 
-Coverage: 8 of the 30 master-list IDs appear (`kettlebells`, `dumbbells`, `stationary_bike`, `rowing_machine`,
+Coverage: 8 of the 62 master-list IDs appear (none of the 33 added by D-53 is in any photo) (`kettlebells`, `dumbbells`, `stationary_bike`, `rowing_machine`,
 `cable_machine`, `pull_up_bar`, `treadmill`, `medicine_ball`). Benches,
 racks and selectorised machines are missing: the public-domain photos of them on Commons either had people
 in them or showed machines whose master-list ID would be guesswork. Adding the owner's own gym photos
@@ -40,7 +40,7 @@ would close that gap.
 
 - At least 2 cases must be deliberately unclear (`"unclear": true`, `"items": []`): dark, blurred or no equipment.
 - Mix settings: small gym, large gym, home.
-- `items` uses IDs from `data/seed/equipment.v1.json` and lists **everything** identifiable: anything AG-1
+- `items` uses IDs from `data/seed/equipment.v2.json` and lists **everything** identifiable: anything AG-1
   finds that is not in `items` counts as a wrong detection.
 - No people, including reflections in mirrors and glass.
 - Strip metadata before committing: `exiftool -all= photo-1.jpg`, or re-save through any editor.

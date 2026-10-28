@@ -82,10 +82,16 @@ export type AgentResult<O> =
     };
 
 /**
- * Provider workspace spend-limit errors (F-16). The exact shape is captured once on the dev workspace
- * (limits-and-spend-guard.md §2); until then the documented billing error type is matched.
+ * Provider workspace spend-limit errors (F-16, R-12).
+ * Captured 2026-10-28 on the dev workspace (limit lowered below the month's spend; Haiku and Sonnet alike):
+ * HTTP 400, `invalid_request_error`, "You have reached your specified workspace API usage limits. You will
+ * regain access on <date> at 00:00 UTC." The billing type and the looser pattern stay as fallbacks.
  */
 export const SPEND_LIMIT_ERROR_MATCHERS: Array<(e: { status?: number; type?: string; message?: string }) => boolean> = [
+  (e) =>
+    e.status === 400 &&
+    e.type === 'invalid_request_error' &&
+    /reached your specified workspace API usage limits/i.test(e.message ?? ''),
   (e) => e.type === 'billing_error',
   (e) => e.status === 400 && /spend(ing)? limit|usage limit|credit balance/i.test(e.message ?? ''),
 ];

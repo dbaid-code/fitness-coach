@@ -1,6 +1,6 @@
 // Deterministic curation rules (reference-data-seed.md §5, `--heuristic` mode). Used when no Anthropic key
 // is available; produces the same columns as the LLM path so the owner's 10% review covers both.
-// Rules are deliberately conservative: an exercise whose equipment cannot be mapped to the 30-item
+// Rules are deliberately conservative: an exercise whose equipment cannot be mapped to the original 30-item
 // master list is made inactive rather than guessed.
 import type { BodyArea, MuscleGroup } from '../../src/shared/constants';
 import type { RawExercise, SeedExercise } from '../seed/schemas';
@@ -299,11 +299,14 @@ export const CUSTOM_CARDIO: CustomRow[] = [
 ];
 
 /**
- * The LLM schema has no "unmappable" answer, so for equipment it can't map it sometimes returns [] (bodyweight).
- * When the source says the exercise uses equipment but the draft says none, the deterministic mapping decides:
- * its equipment list, or null (unmappable → inactive).
+ * Backstop for a drafted [] (nothing needed) on an exercise whose source names specific equipment: the
+ * deterministic mapping decides instead, giving its equipment list or null (unmappable → inactive). The source's
+ * "other" is exempt: D-53 assumes cones, hurdles, ankle straps, heavy bags and the like are available, so []
+ * is a legitimate answer there.
  */
 export function guardBodyweight(raw: RawExercise, drafted: string[]): string[] | null {
-  if (drafted.length > 0 || raw.equipment === null || raw.equipment === 'body only') return drafted;
+  if (drafted.length > 0 || raw.equipment === null || raw.equipment === 'body only' || raw.equipment === 'other') {
+    return drafted;
+  }
   return requiredEquipment(raw);
 }

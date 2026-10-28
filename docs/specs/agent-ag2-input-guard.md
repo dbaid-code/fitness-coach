@@ -119,13 +119,23 @@ Placeholders: `{{EQUIPMENT_LIST}}` (`id | name`, sorted by `sort_order`), `{{MUS
 | `stationary_bike` | bike, spin bike, exercise bike |
 | `elliptical` | cross trainer |
 | `stair_climber` | stepper, stairmaster |
-| `exercise_mat` | mat, yoga mat |
 | `jump_rope` | skipping rope |
 | `stability_ball` | swiss ball, gym ball, exercise ball |
 | `medicine_ball` | med ball |
 | `ez_curl_bar` | EZ bar, curl bar |
 | `pull_up_bar` | chin-up bar |
-| `dip_station` | dip bars, parallel bars |
+| `dip_station` | dip bars, parallel bars, captain's chair |
+| `trap_bar` | hex bar |
+| `plyo_box` | box, jump box |
+| `decline_bench` | decline, sit-up bench |
+| `hyperextension_bench` | back extension bench, roman chair |
+| `glute_ham_developer` | GHD, glute-ham bench |
+| `suspension_trainer` | TRX, suspension straps |
+| `gymnastic_rings` | rings |
+| `battle_rope` | battle ropes |
+| `ab_roller` | ab wheel |
+| `sled` | prowler |
+| `hip_abductor_machine` + `hip_adductor_machine` | inner/outer thigh machine |
 
 7. **Plan-item references:** by position ("the second exercise" → `target_ref: 2`), by name or nickname ("the bench one", "DB press" → the matching item's `ref`). If no item matches, leave `target_ref` null and do not guess.
 8. **No made-up values:** "Only use values from the lists. If a needed term cannot be mapped to the app's values, the category is `not_understood`."

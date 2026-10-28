@@ -19,7 +19,7 @@
 const Name = z.string().trim().min(1).max(60);
 const DaysPerWeek = z.number().int().min(1).max(7);
 const Timezone = z.string().min(1).max(64);          // server additionally checks Intl.supportedValuesOf
-const EquipmentIds = z.array(z.string().regex(/^[a-z0-9_]{2,40}$/)).max(30)
+const EquipmentIds = z.array(z.string().regex(/^[a-z0-9_]{2,40}$/)).max(MAX_EQUIPMENT_IDS) // 62 since D-53
   .refine((ids) => new Set(ids).size === ids.length, 'equipment_ids must be unique');
 
 export const OnboardingRequest = z.object({

@@ -12,7 +12,7 @@ The application is built end to end and works with the deterministic fake agents
 
 **It is not release-ready.** Two things stand between this branch and Phase 0:
 1. **No real-model run has happened.** The container had no Anthropic key, so AG-1/AG-2/AG-3 have only run as fakes. The eval gate (D-38) is wired, blocking, and red until `pnpm evals:full` runs on the dev key.
-2. **EV-5 photos are in and approved.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner approved the truth lists on 2026-10-28.
+2. **EV-5 photos are in and approved.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner approved the truth lists on 2026-10-28. D-53 (62 items) did not change them: none of the 33 new items appears in any of the 13 photos (checked 2026-10-28), and the owner decided no relabelling is needed.
 
 ## 2. Test results (re-run on 2026-10-27 after D-49 / D-50)
 | Check | Command | Result |
@@ -58,7 +58,7 @@ The application is built end to end and works with the deterministic fake agents
 | F-13 | Reset | integration + E2E (`after_reset_of` sent) | Done |
 | F-14 | Accept, expiry, complete | integration incl. clock-driven expiry, E2E | Done |
 | F-15 | History | pagination, delete, recency forgets it, E2E | Done |
-| F-16 | Limits and spend guard | rate-limit, spend-guard, abuse test | Done; provider error capture pending (§7.4) |
+| F-16 | Limits and spend guard | rate-limit, spend-guard, abuse test | Done; provider error captured 2026-10-28 (HTTP 400 `invalid_request_error`, "workspace API usage limits") |
 | F-17 | Account deletion | cascade test, E2E | Done |
 | F-18 | Logs, events, metrics | metrics views, purge jobs, runbooks | Done |
 | F-19 | Evals | harness, datasets, gate | Built; not measured (§1) |
@@ -116,7 +116,7 @@ Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-c
 ### 7.2 Blocked on owner setup
 | # | Item | Blocks | How to unblock |
 |-|-|-|-|
-| 1 | Anthropic dev key in the build environment (P-3) | real-model smoke and full evals; LLM curation; F-16 provider-error capture | Add `GC_ANTHROPIC_API_KEY` (dev, $25 cap) to the cloud environment's variables (`ANTHROPIC_API_KEY` doesn't reach the session), or run the `evals` workflow with `ANTHROPIC_API_KEY_EVALS` |
+| 1 | Anthropic dev key in the build environment (P-3) | real-model smoke and full evals; LLM curation (F-16 provider-error capture done 2026-10-28) | Add `GC_ANTHROPIC_API_KEY` (dev, $25 cap) to the cloud environment's variables (`ANTHROPIC_API_KEY` doesn't reach the session), or run the `evals` workflow with `ANTHROPIC_API_KEY_EVALS` |
 | 2 | ~~EV-5 truth-list review~~ | — | **Done:** owner approved the 10 cases on 2026-10-28 |
 | 3 | Label and judge reviews (OD-08) | 20% judged plans, 10% exercise sample (EV-3 labels, EV-4 cases, equipment list, muscle-group map, rulebook v2 and v3 (D-52) approved 2026-10-27) | Owner review |
 | 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | deploy. Dev side done: the preview's `/api/v1/health` returned `"db":"ok"` on 2026-10-28 (owner) | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |

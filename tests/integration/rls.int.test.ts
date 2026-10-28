@@ -140,7 +140,7 @@ describe('FR-5 RLS isolation', () => {
 
   it('reference data is readable by any signed-in request, without a user', async () => {
     const rows = await asUser<{ n: number }>(null, sql`select count(*)::int as n from app.equipment`);
-    expect(rows[0]!.n).toBe(30);
+    expect(rows[0]!.n).toBe(63); // D-53: 62 active + the retired exercise_mat
   });
 
   it('D-21: a query as gc_app outside withUserTx fails with 42501', async () => {
