@@ -125,6 +125,7 @@ Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-c
 - **Concurrent Suggest taps:** the in-flight guard can make every concurrent request back off with `REQUEST_IN_PROGRESS` (none succeeds). Never two active plans. The client refetches after 2 s, so the user taps again. Only reachable by deliberately parallel requests.
 - **EV-1 holds by construction:** the core only returns validator-approved plans. The real quality signals are EV-2's generation-failure count and first-attempt validator failures (logged per call).
 - **Rulebook (v2, still open in v3), deferred to Phase 0 feedback (owner, 2026-10-27):** (1) progression never adds sets, so a user's sets stay where they started (a newbie on Stay fit stays at 2), even after their experience changes; (2) the 15-rep cap applies to every goal, so Build muscle (8–12) progresses to 15 reps before a harder version. Either fix is a new rulebook version and a new full eval run.
+- **Coach-mode cardio before extra newbie sets (owner, 2026-10-28: keep):** since D-52 a coach-chosen Stay-fit or Lose-weight newbie plan at 60 min reaches the floor with one cardio card (≤ 10 min), so the D-49 sets widening rarely triggers in coach mode. The owner chose to keep this.
 - **Extra UI copy:** `toast.rateLimited`, `common.close`, `plan.drag` aren't in the approved copy list (build notes §5.17).
 
 ### 7.4 Deviations recorded
