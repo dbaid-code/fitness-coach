@@ -172,6 +172,25 @@ type CustomRow = Pick<SeedExercise, 'id' | 'name' | 'instructions' | 'body_areas
  * Custom bodyweight biceps row: free-exercise-db has no biceps exercise without equipment, and the
  * coverage rule (§8.6) needs one per group. Flagged for the owner's M1 review.
  */
+/**
+ * Custom bodyweight back row: with LLM curation, Inverted Row correctly needs a bar in a rack and Superman is a
+ * stretching-category source row, so free-exercise-db has no active bodyweight beginner back exercise. The coverage
+ * rule (§8.6) needs one per group. Flagged for the owner's review.
+ */
+export const CUSTOM_BACK: CustomRow[] = [
+  {
+    id: 'gc_floor_back_extension_hold',
+    name: 'Floor Back Extension Hold',
+    body_areas_stressed: ['lower_back'],
+    instructions: [
+      'Lie face down on the floor with your arms by your sides, palms facing down.',
+      'Squeeze your shoulder blades together and lift your chest a few centimetres off the floor.',
+      'Keep your neck long and your eyes on the floor; your legs stay down.',
+      'Hold the position for the set time, breathing steadily, then lower slowly.',
+    ],
+  },
+];
+
 export const CUSTOM_BICEPS: CustomRow[] = [
   {
     id: 'gc_towel_biceps_curl_hold',
@@ -278,3 +297,13 @@ export const CUSTOM_CARDIO: CustomRow[] = [
     ],
   },
 ];
+
+/**
+ * The LLM schema has no "unmappable" answer, so for equipment it can't map it sometimes returns [] (bodyweight).
+ * When the source says the exercise uses equipment but the draft says none, the deterministic mapping decides:
+ * its equipment list, or null (unmappable → inactive).
+ */
+export function guardBodyweight(raw: RawExercise, drafted: string[]): string[] | null {
+  if (drafted.length > 0 || raw.equipment === null || raw.equipment === 'body only') return drafted;
+  return requiredEquipment(raw);
+}

@@ -126,7 +126,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Ab_Roller",
@@ -1248,7 +1248,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Ball_Leg_Curl",
@@ -2754,7 +2754,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Behind_Head_Chest_Stretch",
@@ -3601,7 +3601,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Bicycling_Stationary",
@@ -4111,7 +4111,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Box_Skip",
@@ -4156,7 +4156,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Box_Squat",
@@ -5773,7 +5773,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Calves-SMR",
@@ -8208,7 +8208,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 45,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Dip_Machine",
@@ -8249,7 +8249,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Dips_-_Chest_Version",
@@ -8373,7 +8373,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Double_Kettlebell_Alternating_Hang_Clean",
@@ -8768,7 +8768,7 @@
       "seconds_per_rep": 2,
       "rest_s": 90,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Dumbbell_Alternate_Bicep_Curl",
@@ -11466,7 +11466,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Front_Cable_Raise",
@@ -11550,7 +11550,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": 45,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Front_Dumbbell_Raise",
@@ -11698,7 +11698,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Front_Raise_And_Pullover",
@@ -11983,6 +11983,41 @@
       "harder_version_id": null,
       "card_type": "timed",
       "timed_kind": "continuous",
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
+      "id": "gc_floor_back_extension_hold",
+      "name": "Floor Back Extension Hold",
+      "source": "custom",
+      "force": null,
+      "level": "beginner",
+      "mechanic": "isolation",
+      "category": "strength",
+      "primary_muscles": [
+        "lower back"
+      ],
+      "secondary_muscles": [
+        "middle back"
+      ],
+      "instructions": [
+        "Lie face down on the floor with your arms by your sides, palms facing down.",
+        "Squeeze your shoulder blades together and lift your chest a few centimetres off the floor.",
+        "Keep your neck long and your eyes on the floor; your legs stay down.",
+        "Hold the position for the set time, breathing steadily, then lower slowly."
+      ],
+      "image_paths": [],
+      "muscle_group": "back",
+      "required_equipment": [],
+      "body_areas_stressed": [
+        "lower_back"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "timed",
+      "timed_kind": "hold",
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
@@ -12311,7 +12346,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Glute_Kickback",
@@ -12655,7 +12690,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Hammer_Curls",
@@ -13035,7 +13070,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "High_Cable_Curls",
@@ -13366,7 +13401,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Hyperextensions_Back_Extensions",
@@ -13408,7 +13443,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Hyperextensions_With_No_Hyperextension_Bench",
@@ -16491,7 +16526,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lateral_Cone_Hops",
@@ -16535,7 +16570,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lateral_Raise_-_With_Bands",
@@ -16931,7 +16966,7 @@
       "seconds_per_rep": null,
       "rest_s": 90,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Decline_Chest_Press",
@@ -17181,7 +17216,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Linear_3-Part_Start_Technique",
@@ -17306,7 +17341,7 @@
       "seconds_per_rep": 2,
       "rest_s": 90,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "London_Bridges",
@@ -18287,7 +18322,7 @@
       "seconds_per_rep": null,
       "rest_s": 90,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lying_One-Arm_Lateral_Raise",
@@ -18489,7 +18524,7 @@
       "seconds_per_rep": null,
       "rest_s": 90,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lying_Triceps_Press",
@@ -18614,7 +18649,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Machine_Preacher_Curls",
@@ -18652,7 +18687,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Machine_Shoulder_Military_Press",
@@ -18730,7 +18765,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Medicine_Ball_Chest_Pass",
@@ -22022,7 +22057,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Plate_Twist",
@@ -22589,7 +22624,7 @@
       "seconds_per_rep": null,
       "rest_s": 90,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Pull_Through",
@@ -23124,7 +23159,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Rack_Pull_with_Bands",
@@ -23971,7 +24006,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Reverse_Machine_Flyes",
@@ -24050,7 +24085,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Reverse_Triceps_Bench_Press",
@@ -24399,7 +24434,7 @@
       "seconds_per_rep": null,
       "rest_s": 120,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Rope_Crunch",
@@ -25271,7 +25306,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Seated_Calf_Stretch",
@@ -26655,7 +26690,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Side_Jackknife",
@@ -26961,7 +26996,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Side_To_Side_Chins",
@@ -27417,7 +27452,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Single-Leg_High_Box_Squat",
@@ -27457,7 +27492,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Single-Leg_Hop_Progression",
@@ -27500,7 +27535,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Single-Leg_Lateral_Hop",
@@ -27543,7 +27578,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Single-Leg_Leg_Extension",
@@ -27623,7 +27658,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sit_Squats",
@@ -27744,7 +27779,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sled_Overhead_Backward_Walk",
@@ -27785,7 +27820,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sled_Overhead_Triceps_Extension",
@@ -27822,7 +27857,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sled_Reverse_Flye",
@@ -27859,7 +27894,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sled_Row",
@@ -27900,7 +27935,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sledgehammer_Swings",
@@ -27945,7 +27980,7 @@
       "seconds_per_rep": 2,
       "rest_s": null,
       "setup_s": 60,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Smith_Incline_Shoulder_Raise",
@@ -30071,7 +30106,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Standing_Concentration_Curl",
@@ -30919,7 +30954,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Standing_One-Arm_Cable_Curl",
@@ -31953,7 +31988,7 @@
       "seconds_per_rep": 1,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Sumo_Deadlift",
@@ -32314,7 +32349,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Suspended_Push-Up",
@@ -32355,7 +32390,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Suspended_Reverse_Crunch",
@@ -32393,7 +32428,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Suspended_Row",
@@ -32433,7 +32468,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Suspended_Split_Squat",
@@ -32477,7 +32512,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Svend_Press",
@@ -32519,7 +32554,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "T-Bar_Row_with_Handle",
@@ -32686,7 +32721,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Thigh_Adductor",
@@ -32726,7 +32761,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Toe_Touchers",
@@ -32886,7 +32921,7 @@
       "seconds_per_rep": null,
       "rest_s": 90,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Tricep_Dumbbell_Kickback",
@@ -34836,7 +34871,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Wrist_Rotations_with_Straight_Bar",

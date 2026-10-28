@@ -10,7 +10,6 @@ test('D-50: a session the equipment and focus cannot fill shows SHORT_SESSION un
   await logIn(page, user);
   await page.waitForURL('**/plan');
   await page.getByRole('radio', { name: /60 min/ }).click();
-  await page.getByRole('button', { name: 'Shoulders', exact: true }).click();
   await page.getByRole('button', { name: 'Triceps', exact: true }).click();
   await page.getByLabel('Anything for today?').fill('my knee is sore');
   await page.getByRole('button', { name: 'Suggest Workout' }).click();
