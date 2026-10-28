@@ -90,7 +90,7 @@ Evaluated in this order:
 | Condition | `outcome` |
 |-|-|
 | Aborted by the deadline signal | `timeout` |
-| Error identified as the provider's workspace spend limit (shape captured during F-16 on the dev workspace; matched by HTTP status + error `type`/message pattern stored in `SPEND_LIMIT_ERROR_MATCHERS`) | `spend_cap` |
+| Error identified as the provider's workspace spend limit (captured 2026-10-28 during F-16 on the dev workspace: HTTP 400, `invalid_request_error`, "…reached your specified workspace API usage limits…"; matched in `SPEND_LIMIT_ERROR_MATCHERS`) | `spend_cap` |
 | Any other SDK `APIError` (incl. 429 after retries, 5xx, connection errors) | `api_error` (with `httpStatus`, `request_id`) |
 | `stop_reason === 'refusal'` | `refusal` |
 | `stop_reason === 'max_tokens'` | `max_tokens` |

@@ -38,7 +38,7 @@ Then `validation-report.md` (traceability, DoD, results, security, design screen
 - **P-1** Supabase dev project, **P-2** Vercel project (`bom1`), **P-3** Anthropic dev workspace and key ($25 cap), **P-6** GitHub secrets (`SUPABASE_DB_URL_DEV`, `ANTHROPIC_API_KEY_EVALS`) and the `production` environment (branch rule only). These block M0's preview check, M1 curation and M3 smoke evals.
 - **Machine:** the build runs in a Claude cloud container. Docker runs there. The Supabase images come from Docker Hub because the default `public.ecr.aws` download host is blocked. Node 24 gets installed in the session (the container ships 22). gitleaks and the Supabase CLI get installed too. The container can't reach Supabase or Vercel, so hosted-database work runs in GitHub Actions and I check previews through GitHub. Owner steps: `docs/runbooks/owner-setup-dev.md`.
 - **Security plan:** approved (§6). It is recorded as D-41 to D-48 in the M0 PR.
-- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 truth-list review** (10 photo cases), the **F-16 provider spend-limit capture** (lower the dev limit once), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
+- **Icon export** (D-36), **OD-08 reviews** (M1, M3, M5, M6), **EV-5 truth-list review** (10 photo cases), the **F-16 provider spend-limit capture** (done 2026-10-28), and a **preview test account** for the walkthrough. Later: P-3 (prod), P-4, P-5. OD-06 is not needed until Phase 1.
 
 ## 5. Conflicts found (fixed in the PR that touches each one)
 1. `auth.md` §8 `safeNext` lets `/%09/evil.test` through (G-3). Use `safeNextPath` (S-4).
@@ -62,7 +62,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 16. **gitleaks** runs as the pinned release binary with a SHA-256 check, not a third-party action (S-8).
 17. **Extra UI copy keys** not in `messages-and-ui-copy.md`: `toast.rateLimited` (same words as `auth.rateLimited`), `common.close`, `plan.drag` (aria-label for the drag handle). Owner copy review requested.
 18. **Coverage thresholds** are enforced at 100% for `src/server/domain`, `src/shared/time-model` and `src/shared/messages` only, as specified; the rest of `src/server` is covered by integration tests without a threshold.
-19. **AG-1/AG-3 provider spend-limit error:** matched by `billing_error` and a message pattern until the F-16 capture on the dev workspace (needs P-3).
+19. **AG-1/AG-3 provider spend-limit error:** captured 2026-10-28 on the dev workspace: HTTP 400, `invalid_request_error`, "You have reached your specified workspace API usage limits. You will regain access on <date> at 00:00 UTC." It is the first entry in `SPEND_LIMIT_ERROR_MATCHERS`; `billing_error` and the looser message pattern stay as fallbacks. Note the type is `invalid_request_error`, not `billing_error`.
 20. **Fake AG-3** (tests only) raises new exercises inside the rulebook range when short of the time window and applies "lighter" through reps/hold time, so fixtures behave like a sensible planner.
 21. **Client-bundle scan:** `@supabase/supabase-js` ships `k.startsWith("sb_publishable_")||k.startsWith("sb_secret_")` in browser code. Only that exact paired expression is exempt (`scripts/bundle-allowlist.ts`, tested); bare prefixes anywhere else still fail.
 22. **D-01 base64 probe** in `runAgent` threw on a note or edit containing a long unbroken run (500). AG-2 declares `user_text` as free text, which the probe skips; every other log field is still probed.

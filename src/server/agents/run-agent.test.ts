@@ -97,6 +97,36 @@ describe('AG-runtime runAgent outcomes (agent-runtime.md §4)', () => {
     });
   });
 
+  it('F-16: the captured workspace usage-limit error (2026-10-28) maps to spend_cap', async () => {
+    // Body recorded from the dev workspace, request req_011CgUfAHjh5ZVF1rNpSY5cV.
+    const captured = {
+      type: 'error',
+      error: {
+        type: 'invalid_request_error',
+        message:
+          'You have reached your specified workspace API usage limits. You will regain access on 2026-11-01 at 00:00 UTC.',
+      },
+    };
+    setTransport(async () => {
+      throw Anthropic.APIError.generate(400, captured, captured.error.message, new Headers());
+    });
+    const r = await runAgent(def, { text: 'x' }, ctx(sink()));
+    expect(r.outcome).toBe('spend_cap');
+    expect(r.outcome === 'ok' ? null : r.error).toMatchObject({ class: 'spend_limit', httpStatus: 400 });
+  });
+
+  it('F-16: an ordinary invalid_request_error stays api_error', async () => {
+    setTransport(async () => {
+      throw Anthropic.APIError.generate(
+        400,
+        { type: 'error', error: { type: 'invalid_request_error', message: 'max_tokens: must be positive' } },
+        'bad',
+        new Headers(),
+      );
+    });
+    expect((await runAgent(def, { text: 'x' }, ctx(sink()))).outcome).toBe('api_error');
+  });
+
   it('D-10: no call when less than the minimum budget remains → timeout', async () => {
     const t = vi.fn(async () => raw());
     setTransport(t);

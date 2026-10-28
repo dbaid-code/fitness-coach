@@ -1813,7 +1813,7 @@ All models have a 1M-token context window, so context size is never the constrai
   - dev: **24**, below $25 (D-39).
 
   At or above the budget → `SPEND_CAP` and no call is made.
-- **Provider-side cap:** spend limits on two separate Anthropic workspaces (prod $60, dev $25), set in the Anthropic Console by the owner. If the API refuses a call because the limit is reached, `runAgent()` maps that error to `SPEND_CAP`. The exact error shape is confirmed during F-16 by setting a tiny limit on the dev workspace.
+- **Provider-side cap:** spend limits on two separate Anthropic workspaces (prod $60, dev $25), set in the Anthropic Console by the owner. If the API refuses a call because the limit is reached, `runAgent()` maps that error to `SPEND_CAP`. The error shape was captured during F-16 (2026-10-28, dev workspace): HTTP 400, `invalid_request_error`, message "You have reached your specified workspace API usage limits…" (`SPEND_LIMIT_ERROR_MATCHERS` in `run-agent.ts`).
 - **What still works under `SPEND_CAP`:** viewing plans and history, direct edits, accepting, resetting and completing (PRD §8.15).
 
 #### 8.9.4 Cost estimate
@@ -3366,7 +3366,7 @@ There is no paging for the pilot. Passive signals:
 | R-09 | iOS Safari quirks: HEIC, viewport height, focus zoom | Medium / Low | §5.5 and §5.7 rules; WebKit E2E |
 | R-10 | The built-in sender delivers only to Supabase organisation members, at about 2 emails an hour, so friends can't verify their email or reset passwords in Phase 1 | **Certain without action** / High | Settle OD-06 before Phase 1. Phase 0 (owner only) is unaffected. |
 | R-11 | The free dev Supabase project pauses and breaks previews | Medium / Low | Resume on demand; production is on Pro |
-| R-12 | A provider spend-limit error isn't recognised and shows as `GENERATION_FAILED` instead of `SPEND_CAP` | Low / Low | The app-side guard triggers first at $58; the error shape is captured during F-16 |
+| R-12 | A provider spend-limit error isn't recognised and shows as `GENERATION_FAILED` instead of `SPEND_CAP` | Low / Low | The app-side guard triggers first at $58; the error shape was captured during F-16 (2026-10-28) and has a test |
 | R-13 | Users don't find the icon-only Reset in the plan status row (D-32) | Medium / Low | Watch it in Phase 0 and Phase 1 (weekly review, reset rate). Fallback from the handoff: a "Reset" text label next to the icon in the same row. |
 | R-14 | Prompt or agent problems surface late, because the first full real-model eval run is in M6 (D-38) | Medium / Medium | Smoke subset during development; the owner reviews the EV-3 labels in M3 and the photo truth lists in M5; plan time in M6 for fix-and-re-run rounds within the $25 dev limit |
 | R-15 | Production data is lost during Phase 0, which runs on the free tier with no guaranteed backups (D-40) | Low / Low | Only the owner's own data is at risk; reference data rebuilds from `data/seed/`; Pro and daily backups start before Phase 1 |
