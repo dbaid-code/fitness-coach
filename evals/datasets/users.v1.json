@@ -174,8 +174,7 @@
         "timezone": "Asia/Kolkata"
       },
       "equipment_ids": [
-        "resistance_bands",
-        "exercise_mat"
+        "resistance_bands"
       ],
       "notes": "No history: first workout.",
       "history": []
@@ -228,8 +227,7 @@
         "timezone": "Asia/Kolkata"
       },
       "equipment_ids": [
-        "treadmill",
-        "exercise_mat"
+        "treadmill"
       ],
       "notes": "Home cardio setup.",
       "history": [

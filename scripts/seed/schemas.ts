@@ -6,7 +6,7 @@ export const EQUIPMENT_ID = /^[a-z0-9_]{2,40}$/;
 
 export const EquipmentFile = z
   .object({
-    version: z.literal('equipment.v1'),
+    version: z.literal('equipment.v2'),
     items: z.array(
       z
         .object({

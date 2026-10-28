@@ -27,7 +27,7 @@ const version = seed.exercises.dataset_version;
 if (args.includes('--write-version')) {
   writeFileSync(
     'src/server/config/dataset-version.ts',
-    `// Written by scripts/seed-reference-data.ts --write-version from data/seed/exercises.v1.json.\nexport const DATASET_VERSION = '${version}';\n`,
+    `// Written by scripts/seed-reference-data.ts --write-version from data/seed/exercises.v2.json.\nexport const DATASET_VERSION = '${version}';\n`,
   );
 }
 

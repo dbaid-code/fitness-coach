@@ -93,7 +93,7 @@ describe('F-04 onboarding, profile and equipment', () => {
     expect((await callRoute(getProfile, { user: u })).json.data.profile.name).toBe('Asha K');
   });
 
-  it('API-04 replaces the selection, in sort order; API-05 lists 30 items with a reference cache header', async () => {
+  it('API-04 replaces the selection, in sort order; API-05 lists the 62 active items with a reference cache header', async () => {
     await callRoute(onboarding, { method: 'POST', user: u, body: body() });
     const r = await callRoute(putEquipment, {
       method: 'PUT',
@@ -102,7 +102,7 @@ describe('F-04 onboarding, profile and equipment', () => {
     });
     expect(r.json.data.equipment_ids).toEqual(['barbell', 'stair_climber']);
     const list = await callRoute(getEquipment, { user: u });
-    expect(list.json.data.items).toHaveLength(30);
+    expect(list.json.data.items).toHaveLength(62); // D-53
     expect(list.json.data.items[0]).toEqual({ id: 'dumbbells', name: 'Dumbbells' });
     expect(list.headers.get('cache-control')).toBe('private, max-age=86400');
   });

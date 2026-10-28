@@ -12,7 +12,7 @@ The application is built end to end and works with the deterministic fake agents
 
 **It is not release-ready.** Two things stand between this branch and Phase 0:
 1. **No real-model run has happened.** The container had no Anthropic key, so AG-1/AG-2/AG-3 have only run as fakes. The eval gate (D-38) is wired, blocking, and red until `pnpm evals:full` runs on the dev key.
-2. **EV-5 photos are in and approved.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner approved the truth lists on 2026-10-28.
+2. **EV-5 photos are in and approved.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner approved the truth lists on 2026-10-28. D-53 (62 items) did not change them: none of the 33 new items appears in any of the 13 photos (checked 2026-10-28), and the owner decided no relabelling is needed.
 
 ## 2. Test results (re-run on 2026-10-27 after D-49 / D-50)
 | Check | Command | Result |

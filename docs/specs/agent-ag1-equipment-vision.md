@@ -77,5 +77,5 @@ Output: a JSON object {"detections": [{"equipment_id": "<id>", "confidence": <0.
 ~2 352 visual tokens per 1568 × 1176 photo (`⌈w/28⌉ × ⌈h/28⌉`) + ~1k text ⇒ ~12–13k input for 5 photos; output cap 8 192. Estimated cost ~$0.04 per 5-photo scan (Appendix C).
 
 ## 8. Tests
-- `equipment-vision.test.ts` (mocked SDK): user content has images before the instruction, labelled `Photo n:`; schema rejects an unknown ID; the rendered system prompt lists all 30 active items in `sort_order`.
+- `equipment-vision.test.ts` (mocked SDK): user content has images before the instruction, labelled `Photo n:`; schema rejects an unknown ID; the rendered system prompt lists every active item (62 since D-53) in `sort_order`.
 - EV-5 (M6): ≥ 80% of true items found per case; ≥ 90% of cases pass; ≤ 10% of detected items wrong; unclear photos → `PHOTO_NONE` (100%).

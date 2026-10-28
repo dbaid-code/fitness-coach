@@ -19,9 +19,9 @@ describe('F-02 seed validation', () => {
     expect(errors).toEqual(
       expect.arrayContaining([
         'exercise Pushups: harder_version_id Plank is not symmetric',
-        'exercise Pushups: unknown equipment spaceship',
+        'exercise Pushups: unknown or inactive equipment spaceship',
         expect.stringMatching(/moves sum to 270/),
-        'review-sample.v1.csv is missing',
+        'review-sample.v2.csv is missing',
       ]),
     );
   });
