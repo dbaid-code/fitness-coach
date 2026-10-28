@@ -85,7 +85,7 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
    **Licence check:** the free Hobby plan is for non-commercial use only under Vercel's terms (from memory; check their fair-use page). That's fine for a private prototype. You'll need Pro ($20/user/month) before any commercial or Phase 1 use.
 2. Note your **team slug**. It's in the URL `vercel.com/<slug>` and the suffix of preview hosts (`*-<slug>.vercel.app`). Go back to P-1 step 6 and add the redirect URL.
 3. Go to **Add New → Project** → Import Git Repository. Grant the Vercel GitHub app access to **only** `dbaid-code/fitness-coach` → Import.
-   - Framework preset: Next.js. Leave the build settings at their defaults.
+   - Framework preset: Next.js. Leave the build settings at their defaults. If `main` has no app yet, Vercel detects "Other" and saves it; every preview then builds but returns Vercel's `404 NOT_FOUND`. Set it to Next.js in Settings → Build and Deployment (the "differs from the current Production deployment" warning that follows is expected) and redeploy.
    - The first production build of `main` will fail, because there's no app on `main` yet. Ignore it. M0 adds `vercel.json` with `git.deploymentEnabled.main = false`, so `main` never auto-deploys to production.
 4. Open the **`fitness-coach` project** (not the team's settings) → **Settings** (left sidebar) → **Build and Deployment** → Node.js Version → **24.x**. Optional: new projects already default to the latest LTS release, and M0 sets `"engines": { "node": "24.x" }` in `package.json`, which overrides the dashboard ([Vercel docs](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions)).
 5. Settings → **Functions** → region **Mumbai (`bom1`)**. `vercel.json` also pins it.

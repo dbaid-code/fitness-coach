@@ -119,7 +119,7 @@ Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-c
 | 1 | Anthropic dev key in the build environment (P-3) | real-model smoke and full evals; LLM curation; F-16 provider-error capture | Add `GC_ANTHROPIC_API_KEY` (dev, $25 cap) to the cloud environment's variables (`ANTHROPIC_API_KEY` doesn't reach the session), or run the `evals` workflow with `ANTHROPIC_API_KEY_EVALS` |
 | 2 | ~~EV-5 truth-list review~~ | — | **Done:** owner approved the 10 cases on 2026-10-28 |
 | 3 | Label and judge reviews (OD-08) | 20% judged plans, 10% exercise sample (EV-3 labels, EV-4 cases, equipment list, muscle-group map, rulebook v2 and v3 (D-52) approved 2026-10-27) | Owner review |
-| 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | preview health check, deploy | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |
+| 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | deploy. Dev side done: the preview's `/api/v1/health` returned `"db":"ok"` on 2026-10-28 (owner) | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |
 
 ### 7.3 Behaviour worth knowing (not defects)
 - **Concurrent Suggest taps:** the in-flight guard can make every concurrent request back off with `REQUEST_IN_PROGRESS` (none succeeds). Never two active plans. The client refetches after 2 s, so the user taps again. Only reachable by deliberately parallel requests.

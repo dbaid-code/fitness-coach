@@ -38,7 +38,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
   - [x] 🟩 Local toolchain on the Windows machine: Node 24, pnpm, Docker Desktop (WSL2), Supabase CLI local stack with Mailpit — *built in the Claude cloud container instead (build notes §4)*
   - [x] 🟩 Scaffold: Next.js 16, TypeScript strict, Tailwind v4, shadcn/ui, ESLint, Prettier, Vitest, Playwright, `env.ts` validated with Zod; `src/app/globals.css` from `docs/design/handoff/globals.css`, with the Barlow fonts through `next/font`
   - [x] 🟩 `ci.yml` with lint, typecheck, unit, build, audit and gitleaks (integration, E2E and eval-gate jobs join in later milestones)
-  - [ ] 🟥 Vercel preview per PR; `GET /api/v1/health` returns `ok` on the preview — *owner check (no PR opened yet)*
+  - [x] 🟩 Vercel preview per PR; `GET /api/v1/health` returns `ok` on the preview — *owner confirmed `"db":"ok"` 2026-10-28*
 
 - [ ] 🟨 **Step 4: M1 Data and engines (F-02, F-07, F-16)**
   - [x] 🟩 Migrations for all §7 tables, enums, constraints, RLS, grants, the `gc_app` role, triggers, `pg_cron` jobs and `SECURITY DEFINER` functions
