@@ -1,5 +1,5 @@
 // Seed validation rules (reference-data-seed.md §8). Pure: returns every failure.
-import { MUSCLE_GROUPS } from '../../src/shared/constants';
+import { MAX_EQUIPMENT_IDS, MUSCLE_GROUPS } from '../../src/shared/constants';
 import type { Seed } from './load';
 
 export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: string[]; warnings: string[] } {
@@ -15,6 +15,10 @@ export function validateSeed(seed: Seed, sampleCsv: string | null): { errors: st
     if (new Set(values).size !== values.length) errors.push(`equipment: duplicate ${key}`);
   }
   const equipmentIds = new Set(equipment.items.filter((i) => i.is_active).map((i) => i.id));
+  // FR-20 preselects every active item, so the API cap must hold the whole list.
+  if (equipmentIds.size > MAX_EQUIPMENT_IDS) {
+    errors.push(`equipment: ${equipmentIds.size} active items exceed MAX_EQUIPMENT_IDS (${MAX_EQUIPMENT_IDS})`);
+  }
 
   // 3. Exercises
   const byId = new Map<string, (typeof exercises.exercises)[number]>();

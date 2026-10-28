@@ -2007,7 +2007,7 @@ type HistoryEntryDto = {
 - **Validation:**
   - `name` trimmed to 1–60 characters;
   - `days_per_week` an integer 1–7;
-  - `equipment_ids` unique, ≤ 30, every ID active in `app.equipment`, empty allowed (FR-25);
+  - `equipment_ids` unique, ≤ `MAX_EQUIPMENT_IDS` (62, D-53), every ID active in `app.equipment`, empty allowed (FR-25);
   - `timezone` in `Intl.supportedValuesOf('timeZone')`;
   - no profile exists yet.
 - **Response:** `201 { data: { profile: ProfileDto } }`.
@@ -2031,7 +2031,7 @@ type HistoryEntryDto = {
 - **Purpose:** save a confirmed equipment selection (FR-20, FR-21).
 - **Auth:** profile.
 - **Request:** `{ equipment_ids: string[] }`.
-- **Validation:** unique, ≤ 30, active IDs; empty allowed.
+- **Validation:** unique, ≤ `MAX_EQUIPMENT_IDS` (62, D-53), active IDs; empty allowed.
 - **Response:** `200 { data: { equipment_ids: string[] } }`.
 - **Errors:** 400, 403, 422 `INVALID_REFERENCE`.
 

@@ -16,7 +16,7 @@ export const MAX_TEXT_EDITS_PER_PLAN = 5;
 export const MAX_PLAN_GENERATIONS_PER_DAY = 10;
 export const MAX_PHOTO_SCANS_PER_DAY = 5;
 export const MAX_PHOTOS_PER_SCAN = 5;
-export const MAX_EQUIPMENT_IDS = 30;
+export const MAX_EQUIPMENT_IDS = 62; // D-53: the active master list; seed:validate fails if the list outgrows it
 export const MAX_MAIN_ITEMS = 12;
 
 export const PLAN_EXPIRY_HOURS = 12;
