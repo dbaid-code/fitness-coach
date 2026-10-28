@@ -16781,7 +16781,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Deadlift",
@@ -16822,7 +16822,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Decline_Chest_Press",
@@ -16863,7 +16863,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_High_Row",
@@ -16905,7 +16905,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Incline_Chest_Press",
@@ -16946,7 +16946,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Iso_Row",
@@ -16988,7 +16988,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Shoulder_Press",
@@ -17028,7 +17028,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Leverage_Shrug",
@@ -17071,7 +17071,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Linear_3-Part_Start_Technique",

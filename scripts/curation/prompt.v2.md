@@ -8,13 +8,11 @@ return one object with these columns, using only the allowed values:
     ankle straps and a heavy bag.
   - Leave out items implied by a listed item: plates for a barbell, the weight stack and attachments
     (handles, ropes, bars) of a cable machine, the ropes or handles of a sled.
-  - Plate-loaded "leverage" machines are not on the list. Map them: leverage incline or decline chest press
-    → `chest_press_machine`; leverage high row or iso row → `seated_row_machine`; leverage deadlift or
-    leverage shrug → `trap_bar`. A recumbent bike is a `stationary_bike`; a captain's chair or knee-raise
+  - A recumbent bike is a `stationary_bike`; a captain's chair or knee-raise
     tower is a `dip_station`; a military press bench is an `adjustable_bench`; a standing leg curl is a
     `leg_curl_machine`; an aerobics step to jump onto is a `plyo_box`.
-  - If the exercise needs any other item that is not on the list (for example a balance board, a press
-    board, a bicycle, roller skates, a neck harness), set `unmappable: true` and return the items that are
+  - If the exercise needs any other item that is not on the list (for example a plate-loaded "leverage"
+    machine, a balance board, a press board, a bicycle, roller skates, a neck harness), set `unmappable: true` and return the items that are
     on the list. Never substitute a different item.
 - `unmappable`: true only as described above, else false.
 - `body_areas_stressed`: joints and areas the exercise loads noticeably, from: {{BODY_AREAS}}.

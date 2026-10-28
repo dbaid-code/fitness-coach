@@ -25,7 +25,7 @@
 ```
 - **How the list was built (D-53):** an open-vocabulary pass over every exercise listed the equipment each one needs, without a fixed list. The owner chose which items to add. The original 30 items were kept; 33 were added.
 - **Assumed available everywhere** (never rows, never in `required_equipment`): the floor, a wall, a door or door frame, a chair, a step or stair, a towel, an exercise mat, weight plates, collars, chalk, straps, belts, cones, mini hurdles, ankle straps, a heavy bag. Attachments implied by a listed item (cable handles and ropes, sled straps) are never listed separately.
-- **Not on the list:** plate-loaded leverage machines (their exercises use `chest_press_machine`, `seated_row_machine` or `trap_bar`); balance board, press board, bicycle, roller skates, neck harness, stretching pole (their exercises stay inactive).
+- **Not on the list:** plate-loaded leverage machines, balance board, press board, bicycle, roller skates, neck harness, stretching pole. Their exercises stay inactive; the 8 `Leverage_*` exercises are deactivated by a code rule in `curate-exercises.ts`, the rest by the model's `unmappable` answer.
 - Order: free weights, benches and boxes, racks and stations, machines, accessories, cardio. The retired `exercise_mat` sorts last.
 - Deactivating an item sets `is_active = false`; rows are never deleted (user selections and exercises reference them).
 
@@ -67,7 +67,7 @@ Rule (`deriveMuscleGroup`): if `category` is in `category_to_group`, use it; oth
   - `muscle_group` from §3.
   - `source = 'free_exercise_db'`; `level` and `mechanic` copied when present.
   - `image_paths` = `<id>/<n>.jpg` for each dataset image (set by the upload script, §7).
-  - `is_active = false` when: the group maps to `null` (neck); `instructions` is empty; or `category = 'stretching'` (stretches are used only as warm-up and cool-down moves, never as main exercises).
+  - `is_active = false` when: the group maps to `null` (neck); `instructions` is empty; `category = 'stretching'` (stretches are used only as warm-up and cool-down moves, never as main exercises); the name starts with `Leverage ` (D-53); or the drafted equipment is unmappable.
 - LLM-drafted columns (Claude `claude-sonnet-5-5`, structured output, batches of 20 rows, prompt `scripts/curation/prompt.v2.md`, `curation.v2`): `required_equipment` (active equipment IDs from §2 for the minimal typical setup, all needed together; `[]` = nothing beyond the assumed-available items), `unmappable` (true when the exercise needs an item not on the list → inactive), `body_areas_stressed` (PRD §10.4 values), `easier_version_id`, `harder_version_id` (IDs from the same file), `card_type` (`reps` | `timed`), `timed_kind` (`hold` | `continuous` for timed), `seconds_per_rep`, `rest_s`, `setup_s` (null unless different from 3/60/30), missing `level` and `mechanic`.
   Output schema per row:
   ```ts

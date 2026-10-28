@@ -159,7 +159,11 @@ const rows: SeedExercise[] = raw.exercises.map((e) => {
     group === null ||
     e.instructions.length === 0 ||
     e.category === 'stretching' ||
-    ('unmappable' in d && !!d.unmappable) ||
+    // D-53: plate-loaded leverage machines are not on the equipment list, so their exercises stay inactive.
+    e.name.startsWith('Leverage ') ||
+    // Kept rows don't carry the draft's `unmappable` flag, so an inactive kept row stays inactive (--refresh it to
+    // re-decide); otherwise a plain re-run would reactivate exercises whose equipment is not on the list.
+    ('unmappable' in d ? !!d.unmappable : 'is_active' in d && !d.is_active) ||
     equipment === null;
   return {
     id: e.id,

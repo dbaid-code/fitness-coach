@@ -621,7 +621,7 @@ Each item has an `id`, a display name and an `active` flag. The list was built b
 
 **Assumed available everywhere** (never listed, never required by an exercise): the floor, a wall, a door or door frame, a chair, a step or stair, a towel, an exercise mat, weight plates, collars, chalk, lifting straps and belts, cones, mini hurdles, ankle straps and a heavy bag. Attachments that come with a listed item (cable handles and ropes, sled straps) are implied by it.
 
-Exercise mat was on the original 30-item list. It is retired (inactive), because nothing requires it. Plate-loaded "leverage" machines are not separate items: their exercises use the nearest listed item (chest press, seated row, trap bar). Exercises that need anything else not on the list (balance board, press board, bicycle, roller skates, neck harness) stay inactive.
+Exercise mat was on the original 30-item list. It is retired (inactive), because nothing requires it. Exercises that need an item not on the list stay inactive: plate-loaded "leverage" machines, balance board, press board, bicycle, roller skates and neck harness.
 
 ### 10.3 User-facing muscle groups
 
