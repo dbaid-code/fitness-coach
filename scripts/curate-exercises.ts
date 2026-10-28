@@ -15,6 +15,7 @@ import {
   mechanicFor,
   requiredEquipment,
 } from './curation/heuristics';
+import { reconcileVersionLinks } from './curation/links';
 import {
   EquipmentFile,
   ExercisesFile,
@@ -215,7 +216,8 @@ const file = ExercisesFile.parse({
   dataset_version: DATASET_VERSION,
   source: { repo: raw.source.repo, commit: raw.source.commit },
   curation: { method: heuristic ? 'heuristic' : 'llm', prompt_version: heuristic ? null : 'curation.v1' },
-  exercises: rows,
+  // Batch-drafted links are one-sided and can loop; make them symmetric chains (validate.ts check 4).
+  exercises: heuristic ? rows : reconcileVersionLinks(rows),
 });
 writeFileSync(OUT, `${JSON.stringify(file, null, 2)}\n`);
 console.warn(`Wrote ${rows.length} exercises (${rows.filter((r) => r.is_active).length} active) to ${OUT}.`);

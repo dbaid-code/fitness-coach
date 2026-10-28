@@ -158,7 +158,7 @@ Exits non-zero with a list of every failure:
 1. Every file parses against its Zod schema; enums match the DB enums.
 2. Equipment: 30 rows, unique IDs matching the slug pattern, unique names, unique `sort_order`.
 3. Exercises: unique IDs; `gc_` prefix ⇔ `source = 'custom'`; every `required_equipment` ID exists in `equipment.v1.json`; `(card_type = 'timed') ⇔ timed_kind != null`; overrides within DB bounds.
-4. Chains: every `easier_version_id`/`harder_version_id` exists; symmetric (`A.harder = B ⇒ B.easier = A`); no cycles (walking `harder_version_id` never revisits an ID); no self-reference.
+4. Chains: every `easier_version_id`/`harder_version_id` exists (the curation script reconciles the batch-drafted links first, `scripts/curation/links.ts`); symmetric (`A.harder = B ⇒ B.easier = A`); no cycles (walking `harder_version_id` never revisits an ID); no self-reference.
 5. Every active row has `level`, `mechanic`, `muscle_group`, ≥ 1 instruction and ≥ 1 primary muscle.
 6. Coverage: each of the 8 muscle groups has ≥ 8 active `beginner` exercises, of which ≥ 1 has `required_equipment = []`.
 7. Routines: unique IDs; each move's `exercise_id` exists; moves sum to `duration_s` (300); each muscle group is in `focus_groups` of ≥ 1 active warm-up and ≥ 1 active cool-down.
