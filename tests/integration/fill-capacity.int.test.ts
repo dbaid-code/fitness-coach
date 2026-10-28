@@ -24,12 +24,11 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
   });
   afterAll(truncateUserData);
 
-  // Every strength group but no Cardio: since D-52 a coach-chosen focus may fill with a cardio finisher instead.
-  const STRENGTH = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
-
+  // Scenarios picked against the LLM-curated seed (2026-10-28): its larger pool fills most sessions at the newbie
+  // minimum, and since D-52 a coach-chosen focus may add a cardio finisher. A single user-picked group still can't.
   it('D-49: a Stay-fit newbie gets a full 60-minute plan using the full sets range', async () => {
     const u = await createUser({ onboard: true, goal: 'stay_fit', experience: 'newbie' });
-    const r = await go(u, { session_length_min: 60, focus: { mode: 'user', groups: STRENGTH } });
+    const r = await go(u, { session_length_min: 60, focus: { mode: 'user', groups: ['chest'] } });
     expect(r.json.data.outcome).toBe('plan_ready');
     const plan = r.json.data.plan;
     expect(plan.short_session).toBe(false);
@@ -51,9 +50,9 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
     for (const c of cardio) if (c.card_type === 'timed') expect(c.time_per_set_s).toBeLessThanOrEqual(600);
   });
 
-  it('D-50: bodyweight shoulders + triceps at 60 min → short plan, flagged, event carries short_session', async () => {
+  it('D-50: bodyweight triceps at 60 min → short plan, flagged, event carries short_session', async () => {
     const u = await createUser({ onboard: true, equipment: [] });
-    const r = await go(u, { session_length_min: 60, focus: { mode: 'user', groups: ['shoulders', 'triceps'] } });
+    const r = await go(u, { session_length_min: 60, focus: { mode: 'user', groups: ['triceps'] } });
     expect(r.json.data.outcome).toBe('plan_ready');
     const plan = r.json.data.plan;
     expect(plan.short_session).toBe(true);
@@ -69,8 +68,7 @@ describe('D-49 / D-50 sessions the candidates cannot fill', () => {
 
   it('D-50 / owner Q4: direct edits keep the flag; an AI edit recalculates it', async () => {
     const u = await createUser({ onboard: true, equipment: [] });
-    const plan = (await go(u, { session_length_min: 60, focus: { mode: 'user', groups: ['shoulders', 'triceps'] } }))
-      .json.data.plan;
+    const plan = (await go(u, { session_length_min: 60, focus: { mode: 'user', groups: ['triceps'] } })).json.data.plan;
     expect(plan.short_session).toBe(true);
     // Direct edit: the user drops a set. Still flagged, because the limits didn't change.
     const items = mains(plan).map((i: any) => ({

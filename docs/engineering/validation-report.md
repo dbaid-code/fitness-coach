@@ -12,7 +12,7 @@ The application is built end to end and works with the deterministic fake agents
 
 **It is not release-ready.** Two things stand between this branch and Phase 0:
 1. **No real-model run has happened.** The container had no Anthropic key, so AG-1/AG-2/AG-3 have only run as fakes. The eval gate (D-38) is wired, blocking, and red until `pnpm evals:full` runs on the dev key.
-2. **EV-5 photos are in, but unreviewed.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner still has to review the truth lists.
+2. **EV-5 photos are in and approved.** 10 cases from Wikimedia Commons (CC0 / public domain) were added on 2026-10-27; the owner approved the truth lists on 2026-10-28.
 
 ## 2. Test results (re-run on 2026-10-27 after D-49 / D-50)
 | Check | Command | Result |
@@ -117,14 +117,15 @@ Evidence: `fill-capacity.test.ts` (7, 100% coverage), new V-7/V-8 cases, `fill-c
 | # | Item | Blocks | How to unblock |
 |-|-|-|-|
 | 1 | Anthropic dev key in the build environment (P-3) | real-model smoke and full evals; LLM curation; F-16 provider-error capture | Add `GC_ANTHROPIC_API_KEY` (dev, $25 cap) to the cloud environment's variables (`ANTHROPIC_API_KEY` doesn't reach the session), or run the `evals` workflow with `ANTHROPIC_API_KEY_EVALS` |
-| 2 | EV-5 truth-list review | EV-5 sign-off | Owner reviews the 10 cases in `evals/datasets/photos/README.md` |
+| 2 | ~~EV-5 truth-list review~~ | — | **Done:** owner approved the 10 cases on 2026-10-28 |
 | 3 | Label and judge reviews (OD-08) | 20% judged plans, 10% exercise sample (EV-3 labels, EV-4 cases, equipment list, muscle-group map, rulebook v2 and v3 (D-52) approved 2026-10-27) | Owner review |
-| 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | preview health check, deploy | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |
+| 4 | Hosted projects (P-1, P-2, P-5), GitHub secrets (P-6), prod workspace (P-3 prod), owner prod account (P-4) | deploy. Dev side done: the preview's `/api/v1/health` returned `"db":"ok"` on 2026-10-28 (owner) | `docs/runbooks/owner-setup-dev.md`, `docs/runbooks/owner-setup-prod.md` |
 
 ### 7.3 Behaviour worth knowing (not defects)
 - **Concurrent Suggest taps:** the in-flight guard can make every concurrent request back off with `REQUEST_IN_PROGRESS` (none succeeds). Never two active plans. The client refetches after 2 s, so the user taps again. Only reachable by deliberately parallel requests.
 - **EV-1 holds by construction:** the core only returns validator-approved plans. The real quality signals are EV-2's generation-failure count and first-attempt validator failures (logged per call).
 - **Rulebook (v2, still open in v3), deferred to Phase 0 feedback (owner, 2026-10-27):** (1) progression never adds sets, so a user's sets stay where they started (a newbie on Stay fit stays at 2), even after their experience changes; (2) the 15-rep cap applies to every goal, so Build muscle (8–12) progresses to 15 reps before a harder version. Either fix is a new rulebook version and a new full eval run.
+- **Coach-mode cardio before extra newbie sets (owner, 2026-10-28: keep):** since D-52 a coach-chosen Stay-fit or Lose-weight newbie plan at 60 min reaches the floor with one cardio card (≤ 10 min), so the D-49 sets widening rarely triggers in coach mode. The owner chose to keep this.
 - **Extra UI copy:** `toast.rateLimited`, `common.close`, `plan.drag` aren't in the approved copy list (build notes §5.17).
 
 ### 7.4 Deviations recorded

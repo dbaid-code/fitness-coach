@@ -7,14 +7,17 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { z } from 'zod';
 import { BODY_AREAS, type MuscleGroup } from '../src/shared/constants';
 import {
+  CUSTOM_BACK,
   CUSTOM_BICEPS,
   CUSTOM_CARDIO,
   bodyAreasStressed,
   cardShape,
   chainLinks,
+  guardBodyweight,
   mechanicFor,
   requiredEquipment,
 } from './curation/heuristics';
+import { reconcileVersionLinks } from './curation/links';
 import {
   EquipmentFile,
   ExercisesFile,
@@ -136,11 +139,17 @@ const todo = raw.exercises.filter((e) => heuristic || !keep.has(e.id));
 const llm = heuristic ? new Map<string, Drafted>() : await llmDrafts(todo);
 
 const rows: SeedExercise[] = raw.exercises.map((e) => {
-  if (!heuristic && keep.has(e.id)) return keep.get(e.id)!;
   const group = deriveMuscleGroup(e);
-  const d = heuristic ? heuristicDraft(e, group, links) : llm.get(e.id);
+  // Kept rows are earlier LLM drafts; they go through the same guard and activity rules as fresh ones.
+  const d = heuristic ? heuristicDraft(e, group, links) : (llm.get(e.id) ?? keep.get(e.id));
   if (!d) throw new Error(`No curated row for ${e.id}`);
-  const inactive = group === null || e.instructions.length === 0 || e.category === 'stretching' || !!d.unmappable;
+  const equipment = heuristic ? d.required_equipment : guardBodyweight(e, d.required_equipment);
+  const inactive =
+    group === null ||
+    e.instructions.length === 0 ||
+    e.category === 'stretching' ||
+    ('unmappable' in d && !!d.unmappable) ||
+    equipment === null;
   return {
     id: e.id,
     name: e.name,
@@ -155,7 +164,7 @@ const rows: SeedExercise[] = raw.exercises.map((e) => {
     image_paths: e.images,
     // Neck exercises have no group; they stay inactive and are filed under shoulders to satisfy the column.
     muscle_group: group ?? 'shoulders',
-    required_equipment: d.required_equipment,
+    required_equipment: equipment ?? [],
     body_areas_stressed: d.body_areas_stressed,
     easier_version_id: d.easier_version_id,
     harder_version_id: d.harder_version_id,
@@ -210,12 +219,29 @@ for (const c of CUSTOM_BICEPS) {
   });
 }
 
+for (const c of CUSTOM_BACK) {
+  rows.push({
+    ...rows.find((r) => r.id === CUSTOM_CARDIO[0]!.id)!,
+    id: c.id,
+    name: c.name,
+    category: 'strength',
+    mechanic: 'isolation',
+    primary_muscles: ['lower back'],
+    secondary_muscles: ['middle back'],
+    instructions: c.instructions,
+    muscle_group: 'back',
+    body_areas_stressed: c.body_areas_stressed,
+    timed_kind: 'hold',
+  });
+}
+
 rows.sort((a, b) => a.id.localeCompare(b.id, 'en'));
 const file = ExercisesFile.parse({
   dataset_version: DATASET_VERSION,
   source: { repo: raw.source.repo, commit: raw.source.commit },
   curation: { method: heuristic ? 'heuristic' : 'llm', prompt_version: heuristic ? null : 'curation.v1' },
-  exercises: rows,
+  // Batch-drafted links are one-sided and can loop; make them symmetric chains (validate.ts check 4).
+  exercises: heuristic ? rows : reconcileVersionLinks(rows),
 });
 writeFileSync(OUT, `${JSON.stringify(file, null, 2)}\n`);
 console.warn(`Wrote ${rows.length} exercises (${rows.filter((r) => r.is_active).length} active) to ${OUT}.`);

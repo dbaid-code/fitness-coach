@@ -57,7 +57,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 
 12. **Idempotency release** is done by setting `expires_at` to the epoch (the key row stays until the purge job), so a retry after a 5xx, `RATE_LIMITED` or `REQUEST_IN_PROGRESS` re-runs. Same behaviour as the spec's delete.
 13. **Timezone check:** `Intl.supportedValuesOf('timeZone')` lacks `Asia/Kolkata` on some ICU builds, so `Timezone` validates by resolving the zone with `Intl.DateTimeFormat` instead.
-14. **Seed curation** ran with `--heuristic` (no P-3 key). `curation.method = "heuristic"` is recorded in `exercises.v1.json`; the LLM pass and the owner's 10% review are still due. No bodyweight biceps exercise exists in free-exercise-db, so a custom `gc_towel_biceps_curl_hold` was added.
+14. **Seed curation** first ran with `--heuristic` (no P-3 key). The LLM pass ran on 2026-10-28 (`curation.method = "llm"`, prompt `curation.v1`, all 820 rows; 641 active, up from 606). Two code guards sit on top of the drafts: (a) batches of 20 drafted one-sided and looping version links (445 validator errors), so `scripts/curation/links.ts` reconciles them into symmetric, acyclic chains (links both ends agree on first, then one-sided links into free slots, in id order; 229 kept); (b) the draft schema has no "unmappable" answer, so the model returned `[]` (bodyweight) for 62 machine/other rows (Dip Machine, Sled Row …); `guardBodyweight` sends those back to the deterministic mapping, which deactivates what it can't map. With Inverted Row now correctly needing a bar and rack, Back had no bodyweight beginner exercise, so a custom `gc_floor_back_extension_hold` was added (like the biceps row; owner review). The owner's 10% review (74 rows, regenerated) is still due. No bodyweight biceps exercise exists in free-exercise-db, so a custom `gc_towel_biceps_curl_hold` was added.
 15. **`HEADER_COACH` with 0 rest days** renders `n = max(1, restDays)`; the catalog template has no "0 days" form.
 16. **gitleaks** runs as the pinned release binary with a SHA-256 check, not a third-party action (S-8).
 17. **Extra UI copy keys** not in `messages-and-ui-copy.md`: `toast.rateLimited` (same words as `auth.rateLimited`), `common.close`, `plan.drag` (aria-label for the drag handle). Owner copy review requested.
@@ -101,7 +101,7 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 | M2 | Done | Mailpit sign-up E2E, deletion cascade test | Hosted Auth settings (owner) |
 | M3 | Done with fakes | 23 generation integration tests, planner/plan view E2E | Smoke evals on real models (P-3) |
 | M4 | Done | edits, text edits, reset, accept, complete, history: integration + E2E; EV-6 health scan | — |
-| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth-list review (owner) |
+| M5 | Done with fakes | photo scan integration + privacy test + E2E; EV-5 photo set (10 cases) | Truth lists approved (owner, 2026-10-28) |
 | M6 | Harness done | metrics views tested; eval runner plumbing verified with fakes (EV-2: 30/30 generations); `eval-gate` blocking | First real run, owner label/judge reviews |
 | M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
 
