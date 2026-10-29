@@ -135,7 +135,7 @@ Why: the preview's sign-up link failed and onboarding showed no equipment becaus
    - **Emails → SMTP Settings**: enable custom SMTP. Host `smtp.resend.com`, port `465`, username `resend`, password = `resend-dev-key`, sender email `no-reply@mail.<yourdomain>`, sender name `Gym Coach`. The sender must be on the exact domain the Resend key is restricted to (the subdomain, not the root); otherwise sign-up fails with "Something went wrong" and the Auth log shows `550 This API key is not authorized to send emails from <domain>` (2026-10-29).
    - **Emails → Templates**: for *Confirm signup* and *Reset password*, paste the subject and HTML from `supabase/templates/confirmation.html` and `recovery.html` (subjects are in `supabase/config.toml`).
    - **URL Configuration**: Site URL = any stable dev address (for example your latest preview's branch URL; it's only the fallback). Redirect URLs: `https://*-<vercel-team-slug>.vercel.app` and `http://localhost:3000` (remove the old `/auth/confirm` entries).
-3. **Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation → Add secret.** Copy the generated value.
+3. **Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation → Add secret.** Copy the generated value. Then **Settings → Git**: switch on **`deployment_status` events**, which start `e2e-hosted` when a preview is ready (it never ran while they were off; 2026-10-29). Commit and `repository_dispatch` events can stay off.
 4. **GitHub → Settings → Secrets and variables → Actions → New repository secret**, three secrets:
 
    | Secret | Value |
