@@ -16,7 +16,7 @@
       "generation_failed": 0,
       "plans_failing": 0,
       "min_score": 3,
-      "owner_agreement": null
+      "owner_agreement": 1.0
     },
     "EV-3": {
       "passed": true,
