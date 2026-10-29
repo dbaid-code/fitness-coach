@@ -40,7 +40,9 @@ export const JUDGE_CONFIG = {
 } as const;
 export const JUDGE_FALLBACK_MODEL = 'claude-opus-5-5'; // if owner agreement < 80% (PRD §9.3)
 
-export const PHOTO_CONFIDENCE_THRESHOLD = 0.7; // initial; tuned on EV-5 in M6
+// Tuned on EV-5, 2026-10-29: highest value where every clear case passes (EV-5-06's pull-up bar scores 0.55–0.6);
+// 0 wrong items and PHOTO_NONE on both unclear cases at every value from 0.5 to 0.9. Users confirm before saving.
+export const PHOTO_CONFIDENCE_THRESHOLD = 0.55;
 export const SDK_MAX_RETRIES = 2;
 export const REFUSAL_FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 /** runAgent does not start a call with less than this left on the deadline. */

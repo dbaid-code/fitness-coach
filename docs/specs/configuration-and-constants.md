@@ -169,7 +169,7 @@ export const AGENT_CONFIG = {
 export const JUDGE_CONFIG = { model: 'claude-sonnet-5-5', effort: 'high', maxTokens: 8_192, promptVersion: 'judge.v1' } as const;
 export const JUDGE_FALLBACK_MODEL = 'claude-opus-5-5';   // if owner agreement < 80% (PRD §9.3)
 
-export const PHOTO_CONFIDENCE_THRESHOLD = 0.70;           // initial; tuned on EV-5 in M6
+export const PHOTO_CONFIDENCE_THRESHOLD = 0.55;           // tuned on EV-5, 2026-10-29 (was 0.70)
 export const SDK_MAX_RETRIES = 2;
 export const REFUSAL_FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 

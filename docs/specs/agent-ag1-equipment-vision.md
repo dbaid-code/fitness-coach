@@ -66,7 +66,7 @@ Output: a JSON object {"detections": [{"equipment_id": "<id>", "confidence": <0.
 
 ## 5. Post-processing (code, `equipment-scan.service`)
 1. Drop any `equipment_id` not in the active list (belt and braces, FR-22).
-2. Clamp confidence to [0, 1]; keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (0.70 initial; tuned on EV-5 in M6 and recorded with the date in `agent-config.ts`).
+2. Clamp confidence to [0, 1]; keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (0.70 initial; 0.55 after tuning on EV-5, 2026-10-29, recorded in `agent-config.ts`).
 3. One entry per ID with the maximum confidence.
 4. 0 items → `PHOTO_NONE`; ≥ 1 → `PHOTO_PARTIAL {n}`.
 
