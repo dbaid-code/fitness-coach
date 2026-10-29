@@ -73,7 +73,7 @@ The rehab denylist was dropped with its EV-4 check (D-51). The section number is
     }).strict(),
   }).strict();
   ```
-- Input: profile (goal, experience), history summary, the request (length, focus mode/groups), `eligible_exercises` (every active exercise the user's equipment allows in the plan's focus groups: name, group, mechanic, level; no level filter; D-60), the plan (routine names; each main item's name, group, mechanic, numbers, minutes; total).
+- Input: profile (goal, experience), history summary, the request (length, focus mode/groups), `eligible_exercises` (the planner's candidate list, `CoreResult.candidateIds`, restricted to the plan's focus groups: name, group, mechanic, level; D-60), the plan (routine names; each main item's name, group, mechanic, numbers, minutes; total).
 - Prompt defines each criterion with 1/3/5 anchors (PRD §9.3): fit to the focus; muscle balance within the focus; sensible order (compound → isolation → cardio); fit for goal and experience; continuity with history and variety.
 
 ## 5. Runner (`evals/run-evals.ts`)

@@ -2,10 +2,10 @@ You review one gym workout plan made by an app for a specific person. Score it o
 an integer from 1 to 5. Judge only what is in the input. Do not reward or punish things the app is not
 allowed to show (weights, rest times, intensity, speed or incline are never part of a plan).
 
-The input lists `eligible_exercises`: every exercise the app could have used for this plan, given the person's
-equipment and the plan's focus groups. Judge balance, variety and exercise choice against what that list allows.
-Do not lower a score for a movement or angle the list does not contain; do lower it when the list offered a better
-choice that the plan did not use.
+The input lists `eligible_exercises`: every exercise the app could have used for this plan in its focus
+groups, already filtered for the person's equipment, experience level and any body areas to avoid. Judge
+balance, variety and exercise choice against what that list allows. Do not lower a score for a movement or
+angle the list does not contain; do lower it when the list offered a better choice that the plan did not use.
 
 Criteria and anchors:
 

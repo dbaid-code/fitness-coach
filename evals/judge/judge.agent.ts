@@ -14,7 +14,7 @@ export type JudgeInput = {
   profile: { goal: string; experience: string };
   history_summary: unknown;
   request: { session_length_min: number; focus: unknown };
-  /** D-60: active exercises the user's equipment allows in the plan's focus groups (no level filter). */
+  /** D-60: the planner's candidate exercises in the plan's focus groups (equipment, level, avoided areas applied). */
   eligible_exercises: Array<{ name: string; group: string; mechanic: string; level: string }>;
   plan: {
     warmup: string;

@@ -570,7 +570,7 @@ The judge scores each plan from 1 to 5 on:
 4. fit for the goal and experience level
 5. continuity with history and variety
 
-It also receives the exercises the person's equipment allows in the plan's focus groups and judges against them (D-60). It returns scores in a structured format. The default judge model is Claude Sonnet 5.5, with a separate judging prompt. If the owner agrees with fewer than 80% of its scores, switch the judge to Claude Opus 5.5.
+It also receives the exercises the planner could choose from in the plan's focus groups and judges against them (D-60). It returns scores in a structured format. The default judge model is Claude Sonnet 5.5, with a separate judging prompt. If the owner agrees with fewer than 80% of its scores, switch the judge to Claude Opus 5.5.
 
 ### 9.4 When tests run
 - **The full suite runs** on every change to a prompt, model, rulebook or exercise database. It must pass before release.

@@ -1,6 +1,6 @@
 // EV-2 plan quality (evaluations.md §3): 5 users × {30, 45, 60} × {user-picked focus, coach} = 30, judged.
-// D-60: the user-picked focus comes from ev2-focus.v1.json; the judge sees the eligible exercises (the user's
-// equipment × the plan's focus groups); a plan passes with ≥ 3 on at least 4 of the 5 criteria.
+// D-60: the user-picked focus comes from ev2-focus.v1.json; the judge sees the eligible exercises (the planner's
+// candidates in the plan's focus groups); a plan passes with ≥ 3 on at least 4 of the 5 criteria.
 import { SESSION_LENGTHS_MIN, type MuscleGroup } from '@/shared/constants';
 import { historySummary } from '@/server/domain/recency/recency';
 import type { CoreResult } from '@/server/services/generation-core';
@@ -34,16 +34,18 @@ export async function runEv2(deps: GenDeps, fake: boolean, opts: { limit?: numbe
     const ev_id = `EV-2-${c.u.user_ref}-${c.len}-${c.focus.mode}`;
     const core = await generate(deps, c.u, { sessionLengthMin: c.len, focus: c.focus, note: null, requestId: ev_id });
     let scores: JudgeOutput['scores'] | null = null;
+    let eligibleCount: number | null = null;
     if (core.plan) {
       const p = core.plan;
       const name = (id: string) => deps.ref.exercises.get(id)?.name ?? id;
-      // D-60: what the plan could have used: the user's equipment and the plan's focus groups (no level filter).
-      const equipment = new Set(c.u.equipment_ids);
+      // D-60: what the plan could have used: the planner's own candidates in the plan's focus groups.
       const focusGroups = new Set(p.focusGroups);
-      const eligible = [...deps.ref.exercises.values()]
-        .filter((e) => focusGroups.has(e.muscleGroup) && e.requiredEquipment.every((id) => equipment.has(id)))
+      const eligible = (core.candidateIds ?? [])
+        .map((id) => deps.ref.exercises.get(id)!)
+        .filter((e) => focusGroups.has(e.muscleGroup))
         .map((e) => ({ name: e.name, group: e.muscleGroup, mechanic: e.mechanic, level: e.level }))
         .sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
+      eligibleCount = eligible.length;
       const r = await judge(
         {
           profile: { goal: c.u.profile.goal, experience: c.u.profile.experience },
@@ -79,7 +81,16 @@ export async function runEv2(deps: GenDeps, fake: boolean, opts: { limit?: numbe
       deps.meter.add(r.costUsd);
       scores = r.output.scores;
     }
-    return { ev_id, user_ref: c.u.user_ref, length: c.len, focus: c.focus, outcome: core.outcome, scores, core };
+    return {
+      ev_id,
+      user_ref: c.u.user_ref,
+      length: c.len,
+      focus: c.focus,
+      outcome: core.outcome,
+      eligible_count: eligibleCount,
+      scores,
+      core,
+    };
   });
   const scored = records.filter((r) => r.scores);
   const minScore = scored.length ? Math.min(...scored.flatMap((r) => CRITERIA.map((k) => r.scores![k]))) : 0;
