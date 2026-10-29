@@ -1,0 +1,51 @@
+{
+  "manifest_hash": "d41657a56a6baa51836de73d6190528e3ec7bf6f2cd129c9fc6349c560afe3ce",
+  "run_id": "2026-10-29T19-45-14Z",
+  "ran_at": "2026-10-29T19:49:01.104Z",
+  "fake": false,
+  "models": {
+    "ag1": "claude-sonnet-5-5",
+    "ag2": "claude-haiku-5-5",
+    "ag3": "claude-sonnet-5-5",
+    "judge": "claude-sonnet-5-5"
+  },
+  "suites": {
+    "EV-2": {
+      "passed": true,
+      "cases": 30,
+      "generation_failed": 0,
+      "plans_failing": 0,
+      "min_score": 3,
+      "owner_agreement": null
+    },
+    "EV-3": {
+      "passed": true,
+      "cases": 20,
+      "red_flag_recall": 1,
+      "accuracy": 1,
+      "out_of_scope_unchanged": 1
+    },
+    "EV-4": {
+      "passed": true,
+      "cases": 11,
+      "area_safe": 1,
+      "status_ok": 1
+    },
+    "EV-1": {
+      "passed": true,
+      "metric": 1,
+      "bar": 1,
+      "plans": 40,
+      "generation_failed": 1
+    },
+    "EV-5": {
+      "passed": true,
+      "cases": 10,
+      "case_pass_rate": 1,
+      "wrong_item_rate": 0,
+      "unclear_none": 1,
+      "threshold": 0.55
+    }
+  },
+  "cost_usd": 2.68
+}
