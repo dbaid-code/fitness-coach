@@ -18,10 +18,13 @@ if (!url) {
 const sql = postgres(url, { max: 1, onnotice: () => {} });
 try {
   // Kept on purpose: auth.users (accounts survive, their app data does not), the gc_app role and its
-  // password (migration 1 only creates it when missing), the pg_cron extension and the storage bucket.
+  // password (migration 1 only creates it when missing) and the storage bucket.
   await sql.begin(async (tx) => {
-    await tx`select cron.unschedule(jobname) from cron.job where jobname like 'gc\\_%'`;
     await tx`drop schema if exists metrics, app_private, app cascade`;
+    // pg_cron goes too (its jobs with it), like scripts/check-schema-parity.ts: re-creating it over the
+    // existing extension fires Supabase's pg_cron event trigger, whose REVOKE fails on the hosted project
+    // with "dependent privileges exist" (first dev-rebuild run, 2026-10-29). Migration 1 creates it afresh.
+    await tx`drop extension if exists pg_cron cascade`;
     await tx`create schema if not exists supabase_migrations`;
     await tx`create table if not exists supabase_migrations.schema_migrations (version text primary key)`;
     await tx`delete from supabase_migrations.schema_migrations`;
