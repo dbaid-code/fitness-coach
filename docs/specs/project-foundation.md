@@ -204,8 +204,8 @@ Local development uses `http://127.0.0.1:54321` for Supabase; add `{ protocol: '
 
 ## 11. API-21 `GET /api/v1/health`
 - File: `src/app/api/v1/health/route.ts`. No auth. `Cache-Control: no-store`. Not wrapped by the auth part of `apiHandler`.
-- Runs `select 1` through the DB client inside `withUserTx({ role: 'authenticated' }, …)` with a 2 s timeout.
-- Response `200 { "data": { "ok": true, "version": "<VERCEL_GIT_COMMIT_SHA or 'local'>", "db": "ok" | "error" } }`. Status stays 200 when `db` is `error` (liveness, not readiness); the deploy smoke test fails on `db !== 'ok'`.
+- Runs `select 1` through the DB client inside `withUserTx({ role: 'authenticated' }, …)` with a 2 s timeout, then `app_private.readiness()` (migration 11, D-54): newest applied migration, stored seed hash, active equipment count. `src/server/domain/readiness/readiness.ts` turns that into `not_ready`.
+- Response `200 { "data": { "ok": true, "version": "<VERCEL_GIT_COMMIT_SHA or 'local'>", "db": "ok" | "error", "ready": true | false, "not_ready": [] } }`. `not_ready` lists `db`, `migrations`, `seed` or `equipment` (names only). Status stays 200 either way; the deploy smoke and `e2e-hosted.yml` wait for `"ready":true`.
 - Returns no user data and logs one request line like every other route.
 
 ## 12. CI at M0

@@ -15,16 +15,17 @@ Ground rules from the dev runbook apply: never paste a secret into the chat; one
 4. The app's own budget sits just under the provider limit: `LLM_MONTHLY_BUDGET_USD=58` (D-39), so users see `SPEND_CAP` before the provider refuses calls.
 
 ## P-5 Supabase production project (about 30 min)
-Same steps as P-1 in the dev runbook, with these differences:
+Same steps as P-1 in the dev runbook, with these differences. **Don't paste the schema** (P-1 step 3): the `deploy` workflow builds prod from the migrations, so no hosted database is changed by hand (D-56).
 1. Name `gym-coach-prod`, region **`ap-south-1`**, free plan for Phase 0 (no guaranteed backups, D-40). Upgrade to **Pro just before Phase 1**.
 2. Data API: **off** (S-6). Exposed schemas: none.
-3. Auth settings and templates exactly as `docs/specs/auth.md` §2 (site URL = the production domain, redirect URL `https://<prod domain>/auth/confirm`, email confirmation on, minimum password length 8). Built-in email sender (D-28): it only delivers to organisation members until OD-06 is settled.
-4. Set the `gc_app` password (SQL editor: `alter role gc_app with password '<new>';`). Record it.
+3. Auth settings and templates exactly as `docs/specs/auth.md` §2 (site URL = the production domain, redirect URL `https://<prod domain>`, email confirmation on, minimum password length 8). **Custom SMTP through Resend** (D-55): the same settings as dev, with a separate sending-only key `supabase-prod` (`resend-prod-key`).
+4. Create the `gc_app` login before the first deploy, so the app can connect as soon as it's live (migration 1 keeps an existing role and only grants it `authenticated`). SQL editor: `create role gc_app with login noinherit password '<new>';`. Record the password.
 5. GitHub → Settings → Environments → `production` → secret `SUPABASE_DB_URL_PROD` = session pooler URL (:5432, role `postgres`). Restrict the environment to the `main` branch.
-6. Schema, seed and images are applied by the first `deploy` run (migrations, `db:seed --env prod`). Upload exercise images once from a machine that can reach Supabase: `pnpm seed:images --env prod`.
+6. More `production` environment secrets: `SUPABASE_URL_PROD` (Project URL) and `SUPABASE_SECRET_KEY_PROD` (a secret key named `github-actions`) for the image upload; `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD` for the smoke account (P-4). Environment **variable** (not secret) `PROD_SITE_URL` = `https://<prod domain>`.
+7. Schema, seed and images are applied by every `deploy` run (migrations, `db:seed --env prod`, `seed:images --env prod`).
 
 ## P-4 Owner production account
-After the first deploy, sign up in production with the Supabase organisation login email (the built-in sender only delivers to org members). Confirm the verification email arrives.
+After the first deploy, sign up in production with your own address and confirm the verification email arrives (Resend, D-55). Then create the smoke-test account (D-58): sign up with a second address you control (for example a `+smoke` alias), verify it, finish onboarding with all equipment, and store its email and password as `PROD_SMOKE_EMAIL` / `PROD_SMOKE_PASSWORD` (step P-5.6). Each deploy's smoke test makes one real plan on it and resets it.
 
 ## Vercel production
 1. Project → Settings → Environment Variables → **Production**: `NEXT_PUBLIC_SITE_URL=https://<prod domain>`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `DATABASE_URL` (prod transaction pooler, user `gc_app`), `ANTHROPIC_API_KEY` (prod), `LLM_MONTHLY_BUDGET_USD=58`, `APP_ENV=production`, `AGENTS_MODE=real`. `env.ts` refuses to start with `AGENTS_MODE=fake` in production.
@@ -34,7 +35,7 @@ After the first deploy, sign up in production with the Supabase organisation log
 ## Release (each time)
 1. Merge the PR to `main`; CI must be green, **including `eval-gate`** (a real `pnpm evals:full` for this commit's prompts, config, rulebook and seed data; `evals/results/latest.json` committed).
 2. GitHub → Actions → **deploy** → Run workflow on `main`. Running it is the approval (build notes §6: no required reviewers on this plan).
-3. The workflow: re-checks the eval gate → migrates and seeds **dev** → migrates and seeds **prod** → builds and deploys to Vercel production with the pinned CLI → smoke (`/api/v1/health` has `"db":"ok"`, `/log-in` loads) → tags `release-YYYYMMDD-N`.
+3. The workflow: re-checks the eval gate → migrates, seeds and uploads images for **prod** (dev is handled by `deploy-dev` on every push to `main`, D-56) → builds and deploys to Vercel production with the pinned CLI → waits for `/api/v1/health` to report `"ready":true` → smoke test with the smoke account, including one real plan (D-58) → tags `release-YYYYMMDD-N`.
 4. If the smoke step fails, roll back the app (below) before investigating.
 
 ## Rollback
@@ -53,4 +54,4 @@ After the first deploy, sign up in production with the Supabase organisation log
 | 6 | E2E smoke on production with a test account, then deleted via API-20 | After the first deploy |
 | 7 | Runbooks exist; `weekly-review.sql` runs on prod | Runbooks done; SQL run after deploy |
 | 8 | `eval-gate` green on the release commit | **Blocked**: needs a real eval run (dev key) and the owner's EV-5 truth-list review |
-| 9 | Before Phase 1: Supabase Pro; OD-06; DPDP and Anthropic retention terms | Later |
+| 9 | Before Phase 1: Supabase Pro; Resend SMTP live in prod (D-55, resolves OD-06); DPDP and Anthropic retention terms | Later |

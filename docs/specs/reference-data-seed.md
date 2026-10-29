@@ -146,16 +146,18 @@ Exits non-zero with a list of every failure:
 - The owner fills `reviewer_ok` (`yes` | `fixed`) and `reviewer_note`; corrections are made in `exercises.v2.json` and committed.
 
 ## 10. Loading (`scripts/seed-reference-data.ts`)
-- Usage: `pnpm db:seed --env local|dev|prod [--force] [--write-version]`.
+- Usage: `pnpm db:seed --env local|dev|prod`. Run automatically on dev by `deploy-dev.yml` (every push to `main`) and on prod by `deploy.yml` (D-56).
 - Connection (role `postgres`, bypasses RLS): `local` → `postgresql://postgres:postgres@127.0.0.1:54322/postgres`; `dev` → `SUPABASE_DB_URL_DEV`; `prod` → `SUPABASE_DB_URL_PROD`.
-- Skips (exit 0, message "dataset already at exercises.v2") when `select max(dataset_version) from app.exercises` equals the file version, unless `--force`.
+- Always runs (D-57). It used to skip when the database's `dataset_version` equalled the file's, so seed edits without a version bump never reached a hosted database.
 - One transaction:
   1. Upsert equipment by `id` (`name`, `visual_hint`, `sort_order`, `is_active`).
   2. Upsert exercises by `id` (all columns). The chain FKs are deferred, so order does not matter.
   3. Rows in the DB but not in the file: `is_active = false` (never deleted; plan items reference them).
   4. Upsert routines by `id`; delete and re-insert `routine_moves` for every routine in the file.
-- `--write-version` rewrites `src/server/config/dataset-version.ts`.
-- Idempotent: a second run with `--force` changes nothing. Each upsert's `do update` has a `where row(<seeded columns of excluded>) is distinct from row(<same columns of the table>)` clause, so `updated_at` moves only for rows whose seeded values changed.
+  5. Equipment in the DB but not in the file: `is_active = false` (`user_equipment` references it).
+  6. Upsert the one row of `app_private.seed_state`: the seed hash (`scripts/seed/hash.ts`, SHA-256 of the parsed equipment, muscle-group map, exercises and routines files) and the dataset version.
+- `pnpm seed:version` rewrites `src/server/config/dataset-version.ts` (`DATASET_VERSION` and `SEED_HASH`) without a database; `scripts/seed/hash.test.ts` fails when it is stale. `/api/v1/health` reports `seed` in `not_ready` while the database holds another hash (D-54).
+- Idempotent: a second run changes nothing. Each upsert's `do update` has a `where row(<seeded columns of excluded>) is distinct from row(<same columns of the table>)` clause, so `updated_at` moves only for rows whose seeded values changed.
 
 ## 11. Acceptance criteria
 1. `pnpm seed:validate` passes on the committed files.

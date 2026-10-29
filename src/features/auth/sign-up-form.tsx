@@ -32,7 +32,7 @@ export function SignUpForm() {
     const { error: err } = await supabaseBrowser().auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
+      options: { emailRedirectTo: siteUrl() },
     });
     setBusy(false);
     if (err) return setError(uiText(authErrorCopy(err.code)));

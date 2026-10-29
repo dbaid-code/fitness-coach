@@ -29,7 +29,7 @@ export function VerifyEmailNotice() {
     const { error } = await supabaseBrowser().auth.resend({
       type: 'signup',
       email,
-      options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
+      options: { emailRedirectTo: siteUrl() },
     });
     setBusy(false);
     toast(error ? uiText(authErrorCopy(error.code)) : uiText('verifyEmail.sentToast'));

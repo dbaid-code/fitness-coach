@@ -1,10 +1,11 @@
 // Test users via the local Supabase Admin API (testing-strategy.md §3).
 import { createClient } from '@supabase/supabase-js';
 import { adminSql } from './db';
+import { testEmail } from './emails';
 
 export type TestUser = { id: string; email: string; password: string };
 
-const admin = () =>
+export const admin = () =>
   createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -19,7 +20,7 @@ export async function createUser(
     equipment?: string[];
   } = {},
 ): Promise<TestUser> {
-  const email = `u-${crypto.randomUUID()}@test.local`;
+  const email = testEmail('u');
   const password = `pw-${crypto.randomUUID()}`;
   const { data, error } = await admin().auth.admin.createUser({ email, password, email_confirm: true });
   if (error || !data.user) throw error ?? new Error('createUser failed');

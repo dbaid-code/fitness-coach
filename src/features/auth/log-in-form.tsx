@@ -46,7 +46,7 @@ export function LogInForm() {
     const { error: err } = await supabaseBrowser().auth.resend({
       type: 'signup',
       email,
-      options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
+      options: { emailRedirectTo: siteUrl() },
     });
     toast(err ? uiText(authErrorCopy(err.code)) : uiText('verifyEmail.sentToast'));
   }

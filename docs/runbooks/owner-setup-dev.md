@@ -47,7 +47,7 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
    - Plan: Free
 
    Wait until the project status shows healthy.
-3. **Apply the schema once** (spec §2.1, "before the migrations exist"). Open **SQL Editor** → New query → paste the whole of `docs/specs/supabase-schema.sql` from the repo → **Run**. The script is one transaction, so it either fully applies or leaves nothing. If it fails, send me the error message, not a screenshot of keys.
+3. **Apply the schema once** (spec §2.1, "before the migrations exist"). *Superseded by D-56: the dev database is now rebuilt from the migrations by the `dev-rebuild` workflow (see "Email, hosted tests and the dev rebuild" below); on a new dev project skip this step and run that workflow instead.* Open **SQL Editor** → New query → paste the whole of `docs/specs/supabase-schema.sql` from the repo → **Run**. The script is one transaction, so it either fully applies or leaves nothing. If it fails, send me the error message, not a screenshot of keys.
    Three things in it can only be checked on a real project: `create extension pg_cron`, `grant authenticated to gc_app` and the `storage.buckets` insert. A failure there is exactly what I need to know.
 4. **Set the `gc_app` password.** Generate a random password of 32+ characters in your password manager (letters and digits only, so it needs no URL escaping), and record it as `supabase-dev-gc-app-password`. Then run in the SQL editor:
    ```sql
@@ -108,7 +108,7 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
    Don't set `NEXT_PUBLIC_SITE_URL`; Preview derives it from `VERCEL_URL`.
    *Deviation from spec §3, which says `AGENTS_MODE=real` on Preview:* the agents don't exist until M3, so `fake` keeps M0–M2 previews from making any Anthropic calls.
 7. **System environment variables: nothing to do.** "Automatically expose System Environment Variables" is on by default for new projects ([Vercel docs](https://vercel.com/docs/environment-variables/system-environment-variables)). If a preview's health check shows `version: "local"` instead of a commit ID, it's off, and I'll ask you to tick it.
-8. **Deployment Protection: leave it at the default.** Hobby's Standard Protection keeps previews behind a Vercel login ([Vercel docs](https://vercel.com/docs/deployments/deployment-protection)). **Don't turn it off.** Previews hold real Supabase and Anthropic keys, so an open preview would let anyone sign up and spend the budget. *Protection Bypass for Automation* is Enterprise-only, or Pro with a paid add-on ([Vercel docs](https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection)), so CI can't call previews. Instead, at each milestone I post the preview's `/api/v1/health` link on the PR, and you open it while signed in to Vercel and check for `"db":"ok"`.
+8. **Deployment Protection: leave it at the default.** Hobby's Standard Protection keeps previews behind a Vercel login ([Vercel docs](https://vercel.com/docs/deployments/deployment-protection)). **Don't turn it off.** Previews hold real Supabase and Anthropic keys, so an open preview would let anyone sign up and spend the budget. *Correction (2026-10-29):* this used to say Protection Bypass for Automation was Enterprise-only. Vercel's docs now list it as included on all plans, Hobby too ([Vercel docs](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation)). The hosted e2e run (D-54) uses it; protection stays on for everyone else.
 9. **Project and Team IDs: nothing to do yet.** They're needed only for the production deploy at M7.
 10. **No `VERCEL_TOKEN` yet.** It's created at M7, for the production deploy only.
 
@@ -123,6 +123,28 @@ Order: **P-3 → P-1 → P-2 → P-6.** Allow about 60–90 minutes in total.
 2. Settings → **Environments** → New environment named `production`. Under **Deployment branches and tags**, choose "Selected branches and tags" and add the rule `main`. Add no secrets until M7. If Environments isn't offered on your plan, skip this step; nothing uses it before M7.
    **No required reviewer:** GitHub offers required reviewers on environments only for public repositories, or private ones on Enterprise ([GitHub docs](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)). Instead, the production deploy workflow (M7) runs only when someone clicks **Run workflow** (`workflow_dispatch`), and only people with write access can click it. With you as the only collaborator, that click is the approval. If you ever add a collaborator with write access, this gate needs revisiting.
 3. Settings → Actions → General → Workflow permissions: **Read repository contents** (the default for new repos). This matches S-8.
+
+## Email, hosted tests and the dev rebuild (D-54 – D-56, 2026-10-29; about 45 min)
+Why: the preview's sign-up link failed and onboarding showed no equipment because the dev project was never set up by the pipeline (no migrations 9–10, no seed) and still used Supabase's default email. These steps make the hosted project match the code and let CI test every preview.
+
+1. **Resend** (resend.com, free tier).
+   - Sign up, then **Domains → Add domain** and enter a subdomain of your domain, for example `mail.<yourdomain>`. A subdomain keeps your Google Workspace mail untouched: Resend's records go on the subdomain, never on the root MX.
+   - Add the DNS records Resend shows (DKIM TXT, plus the SPF TXT and MX for its bounce subdomain) at your DNS host. Wait for **Verified**.
+   - **API Keys → Create**, permission **Sending access**, domain = that subdomain, named `supabase-dev`. Record it as `resend-dev-key`. Create a second one, `supabase-prod`, only when you set up prod.
+2. **Supabase dev → Authentication.**
+   - **Emails → SMTP Settings**: enable custom SMTP. Host `smtp.resend.com`, port `465`, username `resend`, password = `resend-dev-key`, sender email `no-reply@mail.<yourdomain>`, sender name `Gym Coach`.
+   - **Emails → Templates**: for *Confirm signup* and *Reset password*, paste the subject and HTML from `supabase/templates/confirmation.html` and `recovery.html` (subjects are in `supabase/config.toml`).
+   - **URL Configuration**: Site URL = any stable dev address (for example your latest preview's branch URL; it's only the fallback). Redirect URLs: `https://*-<vercel-team-slug>.vercel.app` and `http://localhost:3000` (remove the old `/auth/confirm` entries).
+3. **Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation → Add secret.** Copy the generated value.
+4. **GitHub → Settings → Secrets and variables → Actions → New repository secret**, three secrets:
+
+   | Secret | Value |
+   |-|-|
+   | `VERCEL_AUTOMATION_BYPASS_SECRET` | the value from step 3 |
+   | `SUPABASE_URL_DEV` | `supabase-dev-url` |
+   | `SUPABASE_SECRET_KEY_DEV` | `supabase-dev-secret` (or a new secret key named `github-actions`) |
+5. **Rebuild dev once** (after the PR with these workflows is merged). GitHub → Actions → **dev-rebuild** → Run workflow on `main`, type `wipe-dev`. It drops the app schemas and cron jobs, then applies every migration, the seed and the images. Accounts in Supabase Auth survive; their profiles and plans don't. From then on **deploy-dev** runs on every push to `main`.
+6. **Check:** open a preview's `/api/v1/health` while signed in to Vercel: `"ready":true` and `"not_ready":[]`. Then sign up on the preview with a real address that isn't your Supabase login: the email should arrive from `no-reply@mail.<yourdomain>`, the link should open the same preview and log-in should lead to onboarding with 62 items.
 
 ## When you're done
 Send me a message saying which steps are done, with no values. I'll then:

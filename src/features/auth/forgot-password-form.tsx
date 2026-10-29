@@ -22,7 +22,7 @@ export function ForgotPasswordForm() {
     if (!EMAIL_RE.test(email) || busy) return;
     setBusy(true);
     const { error: err } = await supabaseBrowser().auth.resetPasswordForEmail(email, {
-      redirectTo: `${siteUrl()}/auth/confirm?next=/update-password`,
+      redirectTo: siteUrl(),
     });
     setBusy(false);
     if (err && authErrorCopy(err.code) === 'auth.rateLimited') return setError(uiText('auth.rateLimited'));
