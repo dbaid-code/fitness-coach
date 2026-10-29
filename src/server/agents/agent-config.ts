@@ -24,7 +24,7 @@ export const AGENT_CONFIG = {
     model: 'claude-sonnet-5-5',
     effort: 'high',
     maxTokens: 16_000,
-    promptVersion: 'ag3.v1',
+    promptVersion: 'ag3.v2',
     refusalFallback: true,
   },
 } as const satisfies Record<
@@ -36,7 +36,7 @@ export const JUDGE_CONFIG = {
   model: 'claude-sonnet-5-5',
   effort: 'high',
   maxTokens: 8_192,
-  promptVersion: 'judge.v1',
+  promptVersion: 'judge.v2',
 } as const;
 export const JUDGE_FALLBACK_MODEL = 'claude-opus-5-5'; // if owner agreement < 80% (PRD §9.3)
 

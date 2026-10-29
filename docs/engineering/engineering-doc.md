@@ -2526,7 +2526,8 @@ fitness-coach/
 │       └── key-rotation.md
 ├── evals/
 │   ├── datasets/
-│   │   ├── users.v1.json             # 5 fictional users with completed histories
+│   │   ├── users.v2.json             # 5 fictional users with completed histories (v2: home and condo gyms, D-60)
+│   │   ├── ev2-focus.v1.json         # EV-2 user-picked focus per user and length (D-60)
 │   │   ├── ag2-inputs.v1.json        # 20 labelled inputs (EV-3)
 │   │   ├── health-cases.v1.json      # 10 cases (EV-4)
 │   │   └── photos/                   # 10 cases, each a folder of 1–5 images + truth.json (EV-5)
@@ -2871,7 +2872,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | ID | Implementation | Data | Pass bar (PRD) |
 |-|-|-|-|
 | EV-1 | `evals/suites/ev1-rule-checks.ts`: runs the **production validator** over every plan generated in EV-2 and EV-4 | Generated plans | **100%** |
-| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt) scores 5 criteria from 1 to 5 | `users.v1.json` | No plan below 3; the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
+| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt, sees the eligible exercises) scores 5 criteria from 1 to 5 | `users.v2.json`, `ev2-focus.v1.json` | Every plan ≥ 3 on at least 4 of 5 criteria (D-60); the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
 | EV-3 | `ev3-input-guard.ts`: 20 labelled inputs → AG-2 → compare category, red flag and intents | `ag2-inputs.v1.json` | Red-flag recall **100%**; ≥ 90% correct; out-of-scope never changes a plan (**100%**), checked by running out-of-scope edits through API-11 with real agents and comparing the plans |
 | EV-4 | `ev4-health.ts`: 10 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v1.json` | No exercise straining the named area (**100%**) |
 | EV-5 | `ev5-photos.ts`: 10 cases → AG-1 → threshold | `photos/*` | A case passes if ≥ 80% of the true items are found; ≥ 90% of cases pass; ≤ 10% of detected items are wrong; unclear photos give `PHOTO_NONE` (**100%**) |
@@ -3461,6 +3462,7 @@ There is no paging for the pilot. Passive signals:
 | D-57 | `db:seed` always upserts (unchanged rows are not rewritten) and records a hash of the loaded seed files in `app_private.seed_state`; readiness compares it with `SEED_HASH` in `src/server/config/dataset-version.ts` (`pnpm seed:version`, kept in sync by a unit test). Exercises and equipment missing from the files are deactivated, never deleted | **Approved** (owner) | 2026-10-29 | `reference-data-seed.md` |
 | D-58 | After each production deploy: wait for readiness, then a smoke test with a dedicated account that logs in, sees its equipment, gets one real plan (a few cents) and resets it, and opens History (`tests/e2e/prod-smoke.spec.ts`) | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md` |
 | D-59 | EV-5's case pass bar is **≥ 80% of clear cases** (was 90%); the other EV-5 bars are unchanged (≥ 80% of true items per case, ≤ 10% wrong items, `PHOTO_NONE` on 100% of unclear photos). With 8 clear cases, 90% allowed no miss, and one borderline item (EV-5-06's pull-up bar, confidence 0.50–0.60 across runs) decided the suite. `PHOTO_CONFIDENCE_THRESHOLD` tuned to 0.55 on the same day | **Approved** (owner) | 2026-10-29 | PRD v1.4 §9, `evaluations.md` §3 |
+| D-60 | EV-2 changes: (1) a plan passes with **≥ 3 on at least 4 of the 5 criteria** (was: no criterion below 3); (2) the judge also receives `eligible_exercises`, every active exercise the user's equipment allows in the plan's focus groups (no level filter), and judges balance and choice against it (prompt `judge.v2`); (3) the user-picked focus comes from a fixed table (`ev2-focus.v1.json`) that rotates logical group pairs, adds cardio to 4 of 15 and avoids groups trained in the last 2 days, instead of each user's least-recent pair (which was chest + shoulders for most); (4) fixture users u3, u4 and u5 train in a home or condominium gym (`users.v2.json`). The first full run had 16 of 30 plans fail on balance, mostly for limited-equipment users | **Approved** (owner) | 2026-10-29 | PRD v1.5 §9, `evaluations.md` §2.1, §3, §4 |
 
 ## Appendix B. Configuration constants
 

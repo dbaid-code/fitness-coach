@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Implements** | AG-3; FR-40, FR-42, FR-44, FR-53, FR-56, FR-57; PRD §8.4, §8.5, §8.8 – §8.11; engineering doc §8.3 (AG-3), §8.4.3, §8.5, §8.7 (retry) |
-| **Model** | `claude-sonnet-5-5`, effort `high`, `max_tokens` 16 000 (includes thinking), refusal fallback on (D-08), prompt `ag3.v1` |
+| **Model** | `claude-sonnet-5-5`, effort `high`, `max_tokens` 16 000 (includes thinking), refusal fallback on (D-08), prompt `ag3.v2` (v2, 2026-10-29: coach cardio for every goal within `max_cardio_items` and `continuous_cardio_s`, as D-52 and the rulebook already said; v1 still limited it to Lose weight) |
 | **Files** | `src/server/agents/workout-planner/workout-planner.agent.ts`, `workout-planner.schema.ts`, `render-context.ts`, `prompt.v1.md` |
 | **Called by** | `plan-generation.service` (mode `generate`), `plan-edit.service` (mode `edit`) |
 | **Evaluated by** | EV-1, EV-2, EV-4 |

@@ -14,9 +14,9 @@
 - Every case carries `ev_id` and the source requirement.
 
 ## 2. Datasets (`evals/datasets/`)
-### 2.1 `users.v1.json` — 5 fictional users
+### 2.1 `users.v2.json` — 5 fictional users
 ```json
-{ "version": "users.v1",
+{ "version": "users.v2",
   "users": [
     { "user_ref": "u1_full_gym_builder", "name": "Fictional A",
       "profile": { "goal": "build_muscle", "experience": "moderately_regular", "days_per_week": 4, "timezone": "Asia/Kolkata" },
@@ -24,7 +24,7 @@
       "history": [ { "days_ago": 2, "hours_ago": 50, "focus_groups": ["chest", "triceps"], "difficulty": "just_right", "session_length_min": 45,
                      "items": [ { "exercise_id": "Dumbbell_Bench_Press", "sets": 3, "reps": 10, "time_per_set_s": null } ] } ] } ] }
 ```
-Coverage across the 5: all three goals; all three experience levels; setups **full gym**, **home dumbbells + adjustable bench**, **bands + mat only**, **bodyweight only**, **home cardio (treadmill + mat)**; one user with no history (first workout); one with exercises at the rep cap (exercises harder versions); one with two Hard ratings (step back).
+Coverage across the 5: all three goals; all three experience levels; setups **full gym**, **home dumbbells + adjustable bench**, **home gym** (bands, dumbbells, adjustable bench, kettlebells, stability ball, bike), **condominium gym** (dumbbells, flat bench, pull-up bar, cable, lat pulldown, leg press, treadmill) and **condominium cardio gym** (treadmill, elliptical, bike, dumbbells, adjustable bench, chest press, seated row, leg press) (v2, D-60; the `user_ref` names keep their v1 setups); one user with no history (first workout); one with exercises at the rep cap (exercises harder versions); one with two Hard ratings (step back).
 
 ### 2.2 `ag2-inputs.v1.json` — 20 labelled inputs (EV-3)
 ```json
@@ -51,7 +51,7 @@ The rehab denylist was dropped with its EV-4 check (D-51). The section number is
 | ID | File | Procedure | Pass bar |
 |-|-|-|-|
 | **EV-1** | `ev1-rule-checks.ts` | Run the production validator (`validatePlan`) over **every plan generated in EV-2 and EV-4**, with each plan's own context | **100%** of plans pass all of V-1 – V-11 |
-| **EV-2** | `ev2-plan-quality.ts` | 5 users × {30, 45, 60} × {user-picked focus (the user's least-recent group pair), coach} = **30** generations through `runGenerationCore`; each plan scored by the judge (§4) | No plan has any criterion below 3. The owner reviews 6 judged plans (20%, stratified by user) in `evals/results/owner-review.v1.json` and agrees with ≥ 80% of scores (agreement = owner score within ±1 of the judge). Below 80% → switch the judge to `claude-opus-5-5` and re-run. |
+| **EV-2** | `ev2-plan-quality.ts` | 5 users × {30, 45, 60} × {user-picked focus (fixed per user and length in `ev2-focus.v1.json`, D-60), coach} = **30** generations through `runGenerationCore`; each plan scored by the judge (§4) | Every plan scores ≥ 3 on at least 4 of the 5 criteria (D-60). The owner reviews 6 judged plans (20%, stratified by user) in `evals/results/owner-review.v1.json` and agrees with ≥ 80% of scores (agreement = owner score within ±1 of the judge). Below 80% → switch the judge to `claude-opus-5-5` and re-run. |
 | **EV-3** | `ev3-input-guard.ts` | Each of the 20 inputs → AG-2 (+ post-processing) → compare (§2.2). Plus: every `out_of_scope_fitness`/`unrelated` input is sent as a text edit through `plan-edit` core with real agents against a fixed fixture draft; the resulting items must equal the input items exactly. | Red-flag recall **100%**; ≥ **90%** correct (≥ 18/20); out-of-scope never changes a plan (**100%**) |
 | **EV-4** | `ev4-health.ts` | Each case → full generation with the note | No main exercise's `body_areas_stressed` overlaps `expected_avoided_areas` (**100%**); status is `APPLIED_HEALTH_AREA`/`APPLIED_HEALTH_LIGHTER`/`PARTIAL` |
 | **EV-5** | `ev5-photos.ts` | Each case → AG-1 → post-processing at `PHOTO_CONFIDENCE_THRESHOLD` | A case passes if ≥ 80% of `truth.items` are found; ≥ 80% of clear cases pass (D-59; was 90%); ≤ 10% of all detected items are wrong (not in `truth.items`); unclear cases give `PHOTO_NONE` (**100%**). The runner also prints precision/recall at thresholds 0.5–0.9 (step 0.05) for tuning; the chosen value is recorded in `agent-config.ts` with the date. |
@@ -60,7 +60,7 @@ The rehab denylist was dropped with its EV-4 check (D-51). The section number is
 | **EV-8** | Vitest unit + integration | Limits and fixed messages (`limits-and-spend-guard.md`, `messages-and-ui-copy.md`) | **100%** |
 
 ## 4. Judge (`evals/judge/`)
-- Model `claude-sonnet-5-5`, effort `high`, `max_tokens` 8 192, prompt `judge.v1` (separate from AG-3's prompt). Never used in production.
+- Model `claude-sonnet-5-5`, effort `high`, `max_tokens` 8 192, prompt `judge.v2` (separate from AG-3's prompt; v2 adds `eligible_exercises`, D-60). Never used in production.
 - Schema:
   ```ts
   export const JudgeOutput = z.object({
@@ -73,7 +73,7 @@ The rehab denylist was dropped with its EV-4 check (D-51). The section number is
     }).strict(),
   }).strict();
   ```
-- Input: profile (goal, experience), history summary, the request (length, focus mode/groups), the plan (routine names; each main item's name, group, mechanic, numbers, minutes; total).
+- Input: profile (goal, experience), history summary, the request (length, focus mode/groups), `eligible_exercises` (every active exercise the user's equipment allows in the plan's focus groups: name, group, mechanic, level; no level filter; D-60), the plan (routine names; each main item's name, group, mechanic, numbers, minutes; total).
 - Prompt defines each criterion with 1/3/5 anchors (PRD §9.3): fit to the focus; muscle balance within the focus; sensible order (compound → isolation → cardio); fit for goal and experience; continuity with history and variety.
 
 ## 5. Runner (`evals/run-evals.ts`)

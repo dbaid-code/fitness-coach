@@ -7,13 +7,15 @@ import { costUsd } from '@/server/agents/pricing';
 import { JudgeOutput } from './judge.schema';
 
 export const JUDGE_MODEL = process.env.EVAL_JUDGE_MODEL ?? 'claude-sonnet-5-5';
-export const JUDGE_PROMPT_VERSION = 'judge.v1';
-const system = readFileSync(path.join(process.cwd(), 'evals/judge/prompt.v1.md'), 'utf8');
+export const JUDGE_PROMPT_VERSION = 'judge.v2'; // D-60: judges against the eligible exercises
+const system = readFileSync(path.join(process.cwd(), 'evals/judge/prompt.v2.md'), 'utf8');
 
 export type JudgeInput = {
   profile: { goal: string; experience: string };
   history_summary: unknown;
   request: { session_length_min: number; focus: unknown };
+  /** D-60: active exercises the user's equipment allows in the plan's focus groups (no level filter). */
+  eligible_exercises: Array<{ name: string; group: string; mechanic: string; level: string }>;
   plan: {
     warmup: string;
     cooldown: string;

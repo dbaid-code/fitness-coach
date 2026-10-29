@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.4 (2026-10-29) — the EV-5 case pass bar is 80% of clear cases, not 90% (D-59). 1.3 (2026-10-28) — equipment master list grows to 62 items found by analysing every exercise, with a list of items assumed available everywhere (D-53). 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.5 (2026-10-29) — EV-2 passes a plan with ≥ 3 on at least 4 of 5 criteria; the judge sees the eligible exercises (D-60). 1.4 (2026-10-29) — the EV-5 case pass bar is 80% of clear cases, not 90% (D-59). 1.3 (2026-10-28) — equipment master list grows to 62 items found by analysing every exercise, with a list of items assumed available everywhere (D-53). 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -554,7 +554,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | ID | Suite | Pass bar |
 |-|-|-|
 | **EV-1** | Rule checks: run the validator's checks (section 8.13) over all generated plans in the test set | **100%** |
-| **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | No plan below 3. The owner reviews 20% of judged cases and agrees with ≥ 80% |
+| **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | Every plan scores ≥ 3 on at least 4 of the 5 criteria (D-60). The owner reviews 20% of judged cases and agrees with ≥ 80% |
 | **EV-3** | AG-2 sorting and request extraction, including synonyms (20 inputs) | Red-flag recall **100%**; ≥ 90% labelled correctly overall; out-of-scope input never changes a plan (**100%**) |
 | **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**) |
 | **EV-5** | Equipment photos (10 cases) | A case passes if it finds ≥ 80% of the true items; ≥ 80% of cases pass; ≤ 10% of all detected items are wrong; unclear photos take the `PHOTO_NONE` path (**100%**) (D-59) |
@@ -570,7 +570,7 @@ The judge scores each plan from 1 to 5 on:
 4. fit for the goal and experience level
 5. continuity with history and variety
 
-It returns scores in a structured format. The default judge model is Claude Sonnet 5.5, with a separate judging prompt. If the owner agrees with fewer than 80% of its scores, switch the judge to Claude Opus 5.5.
+It also receives the exercises the person's equipment allows in the plan's focus groups and judges against them (D-60). It returns scores in a structured format. The default judge model is Claude Sonnet 5.5, with a separate judging prompt. If the owner agrees with fewer than 80% of its scores, switch the judge to Claude Opus 5.5.
 
 ### 9.4 When tests run
 - **The full suite runs** on every change to a prompt, model, rulebook or exercise database. It must pass before release.

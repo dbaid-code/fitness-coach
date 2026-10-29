@@ -163,10 +163,10 @@ export type Effort = 'low' | 'medium' | 'high';
 export const AGENT_CONFIG = {
   ag1_equipment_vision: { model: 'claude-sonnet-5-5', effort: 'high',   maxTokens: 8_192,  promptVersion: 'ag1.v1', refusalFallback: true },
   ag2_input_guard:      { model: 'claude-haiku-5-5',  effort: 'medium', maxTokens: 8_192,  promptVersion: 'ag2.v2', refusalFallback: false },
-  ag3_workout_planner:  { model: 'claude-sonnet-5-5', effort: 'high',   maxTokens: 16_000, promptVersion: 'ag3.v1', refusalFallback: true },
+  ag3_workout_planner:  { model: 'claude-sonnet-5-5', effort: 'high',   maxTokens: 16_000, promptVersion: 'ag3.v2', refusalFallback: true },
 } as const;
 
-export const JUDGE_CONFIG = { model: 'claude-sonnet-5-5', effort: 'high', maxTokens: 8_192, promptVersion: 'judge.v1' } as const;
+export const JUDGE_CONFIG = { model: 'claude-sonnet-5-5', effort: 'high', maxTokens: 8_192, promptVersion: 'judge.v2' } as const;
 export const JUDGE_FALLBACK_MODEL = 'claude-opus-5-5';   // if owner agreement < 80% (PRD §9.3)
 
 export const PHOTO_CONFIDENCE_THRESHOLD = 0.55;           // tuned on EV-5, 2026-10-29 (was 0.70)
