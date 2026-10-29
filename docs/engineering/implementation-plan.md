@@ -21,7 +21,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 ## Next (2026-10-29)
 Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands between the code and production:
-1. **Dev:** owner's runbook step 6 check; find why `e2e-hosted` never runs; fix the WebKit E2E failures on `main` (Step 9).
+1. **Dev:** owner's runbook step 6 check; find why `e2e-hosted` never runs (the owner runs it once by hand with a preview URL: GitHub returns 403 to the build's dispatch); confirm the WebKit fix on `main` (Step 9).
 2. **Before the evals:** the eval manifest hashes prompts, `agent-config.ts`, the rulebook and `data/seed/`. Any later change to them needs a new full run (Step 9). The owner kept the rulebook items and thin bodyweight pools deferred to Phase 0 (2026-10-29), so they will cost one more run when picked up.
 3. **Evals:** smoke → EV-5 alone to pick the photo threshold → full run, fix and re-run → owner scores 6 judged plans → commit `latest.json` (eval-gate green).
 4. **Prod setup (owner):** choose the production URL; P-3 prod, P-5, GitHub `production` environment, Vercel production variables (`owner-setup-prod.md`).
@@ -65,7 +65,7 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
 
 - [ ] 🟨 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
   - [x] 🟩 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
-  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); smoke run not yet done (nothing blocks it: the dev key is in the container)*
+  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); first real-model smoke run 2026-10-29 ($0.33): EV-1, EV-2 and EV-4 pass; EV-3 4/5, missing EV-3-01 ("keep it short on time" became a lighter-volume intent instead of a non-actionable part); prompt to be fixed before the full run*
   - [x] 🟩 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
   - [x] 🟩 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
   - [x] 🟩 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet — *plumbing verified with fakes only*
@@ -86,7 +86,7 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
   - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 truth lists 2026-10-28*
   - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *not started; not blocked (the dev key is in the container). Order: smoke run → `--suite ev5` to pick `PHOTO_CONFIDENCE_THRESHOLD` (it lives in hashed `agent-config.ts`, and only a full run writes `latest.json`) → full run. Owner: check the dev workspace's remaining monthly spend first ($25 cap; a full run aborts at $8)*
   - [ ] 🟨 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job added and blocking; no real latest.json yet*
-  - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job runs on `main` and is red on WebKit: 2 failed (FR-3 password reset, FR-83 spend-cap banner) and 3 flaky ([run 40832805755](https://github.com/dbaid-code/fitness-coach/actions/runs/40832805755)); in one failure the Log in button stays disabled after filling the form. Not yet diagnosed*
+  - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job runs on `main` and is red on WebKit: 2 failed (FR-3 password reset, FR-83 spend-cap banner) and 3 flaky ([run 40832805755](https://github.com/dbaid-code/fitness-coach/actions/runs/40832805755)); cause found 2026-10-29: text filled before hydration stayed out of the controlled state, so Log in stayed disabled (a real slow-phone/autofill bug, reproduced in Chromium with delayed scripts). `TextField` now adopts pre-hydration values; new E2E `FR-1: fields filled before the page hydrates…`; the FR-3 test leaves the app before clearing cookies. Chromium suite green locally (17/17); WebKit can't be downloaded in the container, so it is confirmed on `main` after merge*
 
 - [ ] 🟨 **Step 10: M7 Release readiness (F-20)**
   - [ ] 🟥 Owner: P-5 Supabase prod project (`ap-south-1`, free tier until Phase 1), P-3 Anthropic prod workspace ($60 cap), P-4 sign up with the Supabase organisation email
