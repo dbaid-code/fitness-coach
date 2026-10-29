@@ -1,5 +1,5 @@
 {
-  "version": "users.v1",
+  "version": "users.v2",
   "users": [
     {
       "user_ref": "u1_full_gym_builder",
@@ -174,9 +174,14 @@
         "timezone": "Asia/Kolkata"
       },
       "equipment_ids": [
-        "resistance_bands"
+        "resistance_bands",
+        "dumbbells",
+        "adjustable_bench",
+        "kettlebells",
+        "stability_ball",
+        "stationary_bike"
       ],
-      "notes": "No history: first workout.",
+      "notes": "Home gym (owner, 2026-10-29): bands plus dumbbells, an adjustable bench, kettlebells, a stability ball and a bike. No history: first workout.",
       "history": []
     },
     {
@@ -188,8 +193,16 @@
         "days_per_week": 3,
         "timezone": "Asia/Kolkata"
       },
-      "equipment_ids": [],
-      "notes": "Bodyweight only.",
+      "equipment_ids": [
+        "dumbbells",
+        "flat_bench",
+        "pull_up_bar",
+        "cable_machine",
+        "lat_pulldown_machine",
+        "leg_press_machine",
+        "treadmill"
+      ],
+      "notes": "Condominium gym (owner, 2026-10-29): dumbbells, flat bench, pull-up bar, cable and lat pulldown machines, leg press, treadmill. Bodyweight only.",
       "history": [
         {
           "days_ago": 4,
@@ -227,9 +240,16 @@
         "timezone": "Asia/Kolkata"
       },
       "equipment_ids": [
-        "treadmill"
+        "treadmill",
+        "elliptical",
+        "stationary_bike",
+        "dumbbells",
+        "adjustable_bench",
+        "chest_press_machine",
+        "seated_row_machine",
+        "leg_press_machine"
       ],
-      "notes": "Home cardio setup.",
+      "notes": "Condominium gym (owner, 2026-10-29): treadmill, elliptical and bike, dumbbells, adjustable bench, chest press, seated row and leg press machines. Home cardio setup.",
       "history": [
         {
           "days_ago": 2,

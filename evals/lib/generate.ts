@@ -1,6 +1,4 @@
 // One generation through the production core (evaluations.md §1), DB-free.
-import { MUSCLE_GROUPS, type MuscleGroup } from '@/shared/constants';
-import { daysSinceTrained } from '@/server/domain/recency/recency';
 import type { Focus } from '@/server/domain/types';
 import { createDeadline } from '@/server/http/deadline';
 import { GENERATION_DEADLINE_MS } from '@/server/config/app-config';
@@ -44,20 +42,6 @@ export async function generate(
   } finally {
     deadline.dispose();
   }
-}
-
-/** EV-2's user-picked focus: the two least-recently trained groups the user's equipment can fill. */
-export function leastRecentPair(deps: GenDeps, u: FixtureUser): MuscleGroup[] {
-  const recency = daysSinceTrained(historyOf(u, deps.now, deps.ref), deps.now, u.profile.timezone);
-  const eq = new Set(u.equipment_ids);
-  const usable = MUSCLE_GROUPS.filter(
-    (g) =>
-      (g !== 'cardio' || u.profile.goal === 'lose_weight') &&
-      [...deps.ref.exercises.values()].filter((e) => e.muscleGroup === g && e.requiredEquipment.every((r) => eq.has(r)))
-        .length >= 3,
-  );
-  const days = (g: MuscleGroup) => recency[g] ?? Infinity; // never trained = most rested
-  return [...usable].sort((a, b) => days(b) - days(a)).slice(0, 2);
 }
 
 export async function pool<T, R>(items: T[], concurrency: number, fn: (t: T) => Promise<R>): Promise<R[]> {

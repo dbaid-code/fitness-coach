@@ -126,6 +126,9 @@ export type CoreResult = {
   outcome: 'plan_ready' | 'red_flag' | 'generation_failed' | 'updated' | 'unchanged' | 'discarded';
   /** Session intents after this request: earlier ones plus this request's with `applied` flags. */
   sessionIntents: PlanningContextIntent[];
+  /** The exercise IDs AG-3 could choose from (after the candidate filter and version switches); unset when the
+   *  planner was never reached. Read by EV-2's judge (D-60), not by the services. */
+  candidateIds?: string[];
 };
 
 const editIndexOf = (intents: PlanningContextIntent[]) =>
@@ -208,12 +211,13 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
   const short = guardShortCircuit(suggest ? 'suggest' : 'edit', guard);
   const editIndex = suggest ? 0 : editIndexOf(input.sessionIntents) + 1;
 
+  const reached: { candidateIds?: string[] } = {}; // set once the candidate list exists
   const done = async (r: Omit<CoreResult, 'guard' | 'shortCircuit' | 'guardClassified'>): Promise<CoreResult> => {
     if (guardLog) {
       guardLog.set({ statusCode: r.status?.code ?? null });
       await guardLog.write();
     }
-    return { guard, shortCircuit: short, guardClassified: classified, ...r };
+    return { guard, shortCircuit: short, guardClassified: classified, ...reached, ...r };
   };
 
   if (short === 'stop_red_flag') {
@@ -296,6 +300,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     if (hold) targets.push(hold);
   }
   const candidates = switched.candidates;
+  reached.candidateIds = candidates.map((e) => e.id);
   const targetMap = new Map<string, ProgressionTarget>(targets.map((t) => [t.exercise_id, t]));
   const historyIds = new Map<string, number | null>();
   for (const w of [...input.history].sort((a, b) => a.completedAt.getTime() - b.completedAt.getTime())) {

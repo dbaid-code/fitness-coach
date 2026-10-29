@@ -11848,6 +11848,77 @@
       "is_active": true
     },
     {
+      "id": "gc_band_bent_over_row",
+      "name": "Band Bent-Over Row",
+      "source": "custom",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "compound",
+      "category": "strength",
+      "primary_muscles": [
+        "middle back"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Stand on the middle of a band with your feet hip-width apart and hold one end in each hand.",
+        "Bend at your hips with a slight knee bend until your back is at about 45 degrees, back flat.",
+        "Pull your hands towards your lower ribs, elbows close to your body.",
+        "Lower your hands slowly until your arms are straight."
+      ],
+      "image_paths": [],
+      "muscle_group": "back",
+      "required_equipment": [
+        "resistance_bands"
+      ],
+      "body_areas_stressed": [
+        "lower_back",
+        "elbows"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
+      "id": "gc_band_biceps_curl",
+      "name": "Band Biceps Curl",
+      "source": "custom",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "isolation",
+      "category": "strength",
+      "primary_muscles": [
+        "biceps"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Stand on the middle of a band with your feet hip-width apart and hold one end in each hand, palms forward.",
+        "Keep your elbows by your sides.",
+        "Curl your hands up towards your shoulders.",
+        "Lower slowly until your arms are straight."
+      ],
+      "image_paths": [],
+      "muscle_group": "biceps",
+      "required_equipment": [
+        "resistance_bands"
+      ],
+      "body_areas_stressed": [
+        "elbows"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
       "id": "gc_burpees",
       "name": "Burpees",
       "source": "custom",
@@ -11920,6 +11991,40 @@
       "is_active": true
     },
     {
+      "id": "gc_door_frame_towel_row",
+      "name": "Door Frame Towel Row",
+      "source": "custom",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "compound",
+      "category": "strength",
+      "primary_muscles": [
+        "middle back"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Loop a towel around a sturdy door frame or post and hold one end in each hand.",
+        "Walk your feet towards the frame and lean back until your arms are straight and your body is in a line.",
+        "Pull your chest towards your hands, squeezing your shoulder blades together.",
+        "Lower yourself back slowly until your arms are straight. Stand more upright to make it easier."
+      ],
+      "image_paths": [],
+      "muscle_group": "back",
+      "required_equipment": [],
+      "body_areas_stressed": [
+        "shoulders",
+        "elbows"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
       "id": "gc_floor_back_extension_hold",
       "name": "Floor Back Extension Hold",
       "source": "custom",
@@ -11949,6 +12054,74 @@
       "harder_version_id": null,
       "card_type": "timed",
       "timed_kind": "hold",
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
+      "id": "gc_floor_w_pull",
+      "name": "Floor W Pull",
+      "source": "custom",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "isolation",
+      "category": "strength",
+      "primary_muscles": [
+        "middle back"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Lie face down with your arms stretched overhead, a little off the floor.",
+        "Pull your elbows down towards your ribs so your arms make a W, squeezing your shoulder blades.",
+        "Keep your chest slightly lifted and your eyes on the floor.",
+        "Reach your arms back overhead slowly and repeat."
+      ],
+      "image_paths": [],
+      "muscle_group": "back",
+      "required_equipment": [],
+      "body_areas_stressed": [
+        "upper_back",
+        "lower_back"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
+      "id": "gc_floor_y_raise",
+      "name": "Floor Y Raise",
+      "source": "custom",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "isolation",
+      "category": "strength",
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Lie face down with your arms stretched overhead in a Y shape, thumbs pointing up.",
+        "Keep your forehead resting on the floor or just above it.",
+        "Squeeze your shoulder blades and lift both arms a few centimetres off the floor.",
+        "Pause for a second at the top, then lower your arms slowly."
+      ],
+      "image_paths": [],
+      "muscle_group": "shoulders",
+      "required_equipment": [],
+      "body_areas_stressed": [
+        "shoulders",
+        "upper_back"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
@@ -12087,6 +12260,41 @@
       "harder_version_id": null,
       "card_type": "timed",
       "timed_kind": "continuous",
+      "seconds_per_rep": null,
+      "rest_s": null,
+      "setup_s": null,
+      "is_active": true
+    },
+    {
+      "id": "gc_pike_push_up",
+      "name": "Pike Push-Up",
+      "source": "custom",
+      "force": "push",
+      "level": "intermediate",
+      "mechanic": "compound",
+      "category": "strength",
+      "primary_muscles": [
+        "shoulders"
+      ],
+      "secondary_muscles": [],
+      "instructions": [
+        "Start in a push-up position, then walk your feet in and lift your hips so your body makes an upside-down V.",
+        "Keep your arms straight, hands shoulder-width apart, head between your arms.",
+        "Bend your elbows to lower the top of your head towards the floor between your hands.",
+        "Press back up to straight arms, keeping your hips high throughout."
+      ],
+      "image_paths": [],
+      "muscle_group": "shoulders",
+      "required_equipment": [],
+      "body_areas_stressed": [
+        "shoulders",
+        "wrists",
+        "elbows"
+      ],
+      "easier_version_id": null,
+      "harder_version_id": null,
+      "card_type": "reps",
+      "timed_kind": null,
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
@@ -14554,7 +14762,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Isometric_Neck_Exercise_-_Sides",
@@ -14591,7 +14799,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Isometric_Wipers",
@@ -17933,7 +18141,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lying_Face_Up_Plate_Neck_Resistance",
@@ -17972,7 +18180,7 @@
       "seconds_per_rep": null,
       "rest_s": null,
       "setup_s": null,
-      "is_active": true
+      "is_active": false
     },
     {
       "id": "Lying_Glute",

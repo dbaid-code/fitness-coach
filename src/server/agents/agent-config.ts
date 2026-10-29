@@ -17,14 +17,14 @@ export const AGENT_CONFIG = {
     model: 'claude-haiku-5-5',
     effort: 'medium',
     maxTokens: 8_192,
-    promptVersion: 'ag2.v1',
+    promptVersion: 'ag2.v2',
     refusalFallback: false,
   },
   ag3_workout_planner: {
     model: 'claude-sonnet-5-5',
     effort: 'high',
     maxTokens: 16_000,
-    promptVersion: 'ag3.v1',
+    promptVersion: 'ag3.v2',
     refusalFallback: true,
   },
 } as const satisfies Record<
@@ -36,11 +36,13 @@ export const JUDGE_CONFIG = {
   model: 'claude-sonnet-5-5',
   effort: 'high',
   maxTokens: 8_192,
-  promptVersion: 'judge.v1',
+  promptVersion: 'judge.v2',
 } as const;
 export const JUDGE_FALLBACK_MODEL = 'claude-opus-5-5'; // if owner agreement < 80% (PRD §9.3)
 
-export const PHOTO_CONFIDENCE_THRESHOLD = 0.7; // initial; tuned on EV-5 in M6
+// Tuned on EV-5, 2026-10-29: highest value where every clear case passes (EV-5-06's pull-up bar scores 0.55–0.6);
+// 0 wrong items and PHOTO_NONE on both unclear cases at every value from 0.5 to 0.9. Users confirm before saving.
+export const PHOTO_CONFIDENCE_THRESHOLD = 0.55;
 export const SDK_MAX_RETRIES = 2;
 export const REFUSAL_FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 /** runAgent does not start a call with less than this left on the deadline. */

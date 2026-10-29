@@ -288,6 +288,32 @@ describe('EV-1 plan validator', () => {
     expect(v7(900, 'lose_weight')).toMatchObject({ passed: true });
   });
 
+  it('V-7: a lighter whole-plan request leaves continuous cardio on the cardio range (EV-4-10)', () => {
+    const lighter = {
+      intent_id: 1,
+      intent: {
+        type: 'adjust_volume' as const,
+        direction: 'lighter' as const,
+        scope: 'whole_plan' as const,
+        target_ref: null,
+        reason: 'health' as const,
+      },
+    };
+    const c = ctx({
+      effectiveFocus: { mode: 'user', groups: ['chest', 'triceps', 'cardio'] },
+      currentIntents: [lighter],
+    });
+    const mk = (t: number) =>
+      plan({
+        applied_intents: [1],
+        focus_groups: ['chest', 'triceps', 'cardio'],
+        items: [...MAIN.slice(0, 6).map((id) => item(id, 2, 7)), item('bike', 1, null, t)],
+      });
+    const v7 = (t: number) => validatePlan(mk(t), c).results.find((x) => x.check === 'V-7')!;
+    expect(v7(600)).toMatchObject({ passed: true });
+    expect(v7(200)).toMatchObject({ passed: false, detail_code: 'cardio_out_of_range' });
+  });
+
   it('V-7: request override direction (whole plan and item), new exercise baseline', () => {
     const lighter = {
       intent_id: 1,

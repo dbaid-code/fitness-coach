@@ -1,6 +1,6 @@
 # Gym Coach Implementation Plan
 
-**Overall Progress:** `14%`
+**Overall Progress:** `69%` (36 of 52 subtasks, 2026-10-29; the subtasks are not equal in size, and Phase 0 and Phase 1 are six weeks of piloting)
 
 ## TLDR
 Build and ship the Gym Coach MVP as specified in `docs/engineering/engineering-doc.md` (v1.0, approved), which implements `docs/gym-coach-prd.md` (v1.1). The visual design is the Claude Design handoff in `docs/design/handoff/`, built from `docs/design/design-brief.md` (v0.2). The work runs in this order: approvals → design (done apart from exporting the icon files) → milestones M0–M7 (features F-01 to F-20) → production in Mumbai → Phase 0 (owner only, 2 weeks) → Phase 1 (up to 20 friends, 4 weeks). The pilot's outcome is a decision on the next build.
@@ -19,11 +19,20 @@ Key architectural/implementation choices, from the engineering doc and the owner
 - Email: Supabase's built-in sender for M7 and Phase 0 (D-28); OD-06 must be settled before Phase 1.
 - **LLM budget (owner, 2026-10-25):** the dev Anthropic cap rises from $15 to $25 (app guard 24) and stays there through Phase 1. That covers the one-time seed curation (M1), the final eval runs (M6) and fix-and-re-run rounds during the pilot. Prod stays at $60 (guard 58). In Phase 1 the limits total up to $110 a month ($60 + $25 + $25 for Supabase Pro). The owner accepts this deviation from the PRD's $100 (PRD §12.4). Recorded as D-39.
 
+## Next (2026-10-29)
+Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands between the code and production:
+1. **Dev:** owner's runbook step 6 check; find why `e2e-hosted` never runs (the owner runs it once by hand with a preview URL: GitHub returns 403 to the build's dispatch); confirm the WebKit fix on `main` (Step 9).
+2. **Before the evals:** the eval manifest hashes prompts, `agent-config.ts`, the rulebook and `data/seed/`. Any later change to them needs a new full run (Step 9). The owner kept the rulebook items and thin bodyweight pools deferred to Phase 0 (2026-10-29), so they will cost one more run when picked up.
+3. **Evals:** smoke → EV-5 alone to pick the photo threshold → full run, fix and re-run → owner scores 6 judged plans → commit `latest.json` (eval-gate green).
+4. **Prod setup (owner):** choose the production URL; P-3 prod, P-5, GitHub `production` environment, Vercel production variables (`owner-setup-prod.md`).
+5. **Before the first deploy:** `prod-smoke.spec.ts` and the Vercel steps of `deploy.yml` have never run. Rehearse the smoke spec on a dev preview with real agents.
+6. **Go live:** the first `deploy` run is expected to stop at the smoke step (the smoke account only exists after the first deploy, P-4); create the accounts, run `deploy` again, then the Phase 0 entry checklist.
+
 ## Tasks:
 
 - [ ] 🟨 **Step 1: Approvals and owner setup**
   - [x] 🟩 Owner approved the engineering doc; bumped to v1.0 with the other 2026-10-25 decisions recorded (D-38 full evals at the end of development, D-39 $25 dev cap with Phase 1 limits up to $110, D-40 Supabase Pro just before Phase 1)
-  - [ ] 🟥 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment — *open: no Anthropic key reached the build container (2026-10-26)*
+  - [x] 🟩 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment — *the dev key has been in the build container since 2026-10-27 as `GC_ANTHROPIC_API_KEY` (build notes §6; an `ANTHROPIC_API_KEY` set there never arrived); it ran the LLM seed curation and the F-16 spend-limit capture on 2026-10-28. Dev secrets for `deploy-dev` and `dev-rebuild` are set. `ANTHROPIC_API_KEY_EVALS` and `VERCEL_AUTOMATION_BYPASS_SECRET` are set (owner, 2026-10-29)*
 
 - [x] 🟩 **Step 2: Design in Claude Design (runs alongside Steps 3–4)**
   - [x] 🟩 Design brief v0.2 used as the input to Claude Design (now superseded by the handoff)
@@ -42,10 +51,10 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 4: M1 Data and engines (F-02, F-07, F-16)**
   - [x] 🟩 Migrations for all §7 tables, enums, constraints, RLS, grants, the `gc_app` role, triggers, `pg_cron` jobs and `SECURITY DEFINER` functions
-  - [ ] 🟨 Seed pipeline: free-exercise-db import (pinned commit), LLM-assisted curation, `validate-seed.ts` in CI, images to Storage, idempotent seed script — *LLM curation done 2026-10-28 (build notes §5.14)*
+  - [x] 🟩 Seed pipeline: free-exercise-db import (pinned commit), LLM-assisted curation, `validate-seed.ts` in CI, images to Storage, idempotent seed script — *LLM curation done 2026-10-28 (build notes §5.14); hosted dev seeded and all 1,356 images uploaded by `deploy-dev` on 2026-10-29 (`seed:images` now retries transient Storage errors)*
   - [x] Owner reviews: 10% exercise sample, equipment list, muscle-group map, rulebook v1 (OD-08) — *equipment list, muscle-group map and rulebook v2 (D-49) approved 2026-10-27; rulebook v3 (D-52, coach cardio for every goal) approved with the change; 10% sample (81 rows, `review-sample.v2.csv`, after D-53 re-curation) approved 2026-10-28*
   - [x] 🟩 Domain engines at 100% branch coverage: recency, candidate filter, progression, time model, validator V-1 to V-11, plan diff, status resolver, header, state machine, limits policy
-  - [ ] 🟨 Limits and spend guard: usage counters in the user's local day, spend ledger, app guard; capture the provider spend-cap error once on the dev workspace — *provider spend-cap error capture pending P-3*
+  - [x] 🟩 Limits and spend guard: usage counters in the user's local day, spend ledger, app guard; capture the provider spend-cap error once on the dev workspace — *captured 2026-10-28 (build notes §5.19)*
   - [x] 🟩 Integration job in CI (Supabase local): cross-user RLS tests, cron SQL, one-active-plan index; EV-7 and EV-8 pass
 
 - [x] 🟩 **Step 5: M2 Accounts and profile (F-03, F-04, F-17)**
@@ -56,7 +65,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
   - [x] 🟩 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
-  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); smoke run pending*
+  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); first real-model smoke run 2026-10-29 ($0.33): EV-1, EV-2 and EV-4 pass; EV-3 4/5, missing EV-3-01 ("keep it short on time" became a lighter-volume intent instead of a non-actionable part); prompt to be fixed before the full run*
   - [x] 🟩 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
   - [x] 🟩 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
   - [x] 🟩 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet — *plumbing verified with fakes only*
@@ -70,17 +79,18 @@ Key architectural/implementation choices, from the engineering doc and the owner
 
 - [ ] 🟨 **Step 8: M5 Photos (F-05)**
   - [x] 🟩 *(UI)* Photo sheet with on-phone resize and EXIF stripping; API-06; AG-1 prompt and schema; replace-vs-add; scan limit
-  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth lists approved by the owner 2026-10-28; threshold tuning with the first full run*
+  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth lists approved by the owner 2026-10-28; threshold tuning in Step 9 (EV-5 alone, before the full run)*
 
 - [ ] 🟨 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
   - [x] 🟩 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
   - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 truth lists 2026-10-28*
-  - [ ] 🟥 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *blocked: no dev key in the container*
+  - [ ] 🟨 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *first full run 2026-10-29 ($1.92): EV-1 and EV-3 pass; EV-2 16/30 below 3 (balance, limited-equipment users), EV-4 9/10 (V-7 cardio bug), EV-5 7/8. Since then: AG-2 v2, photo threshold 0.55, V-7 fix (§5.29), seed option A (§5.30), D-59 (EV-5 80%), D-60 (EV-2: 4 of 5 criteria, judge sees eligible exercises, focus table, users.v2), AG-3 v2 (D-52 coach cardio). Re-run waits for the owner's go*
   - [ ] 🟨 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job added and blocking; no real latest.json yet*
-  - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job added; verified locally on Chromium only*
+  - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job runs on `main` and is red on WebKit: 2 failed (FR-3 password reset, FR-83 spend-cap banner) and 3 flaky ([run 40832805755](https://github.com/dbaid-code/fitness-coach/actions/runs/40832805755)); cause found 2026-10-29: text filled before hydration stayed out of the controlled state, so Log in stayed disabled (a real slow-phone/autofill bug, reproduced in Chromium with delayed scripts). `TextField` now adopts pre-hydration values; new E2E `FR-1: fields filled before the page hydrates…`; the FR-3 test leaves the app before clearing cookies. Chromium suite green locally (17/17); WebKit can't be downloaded in the container, so it is confirmed on `main` after merge*
 
 - [ ] 🟨 **Step 10: M7 Release readiness (F-20)**
   - [ ] 🟥 Owner: P-5 Supabase prod project (`ap-south-1`, free tier until Phase 1), P-3 Anthropic prod workspace ($60 cap), P-4 sign up with the Supabase organisation email
+  - [ ] 🟨 Hosted dev built and tested by the pipeline (D-54 – D-58): `dev-rebuild` once, then `deploy-dev` on every push to `main`; Resend SMTP; `e2e-hosted` on every preview — *dev rebuilt from the migrations and seeded 2026-10-29 (second `dev-rebuild` run; images finished by `deploy-dev`); sign-up email through Resend works after the SMTP sender was moved onto the key's verified subdomain (2026-10-29). Open: owner's runbook step 6 check (link back to the same preview, onboarding lists 62 items, `"ready":true`); `e2e-hosted` never starts on its own (0 automatic runs: Vercel's `deployment_status` events were off; the owner switched them on 2026-10-29). The owner's manual run on 2026-10-29 worked end to end (bypass, readiness, Resend test inbox, cleanup): 15 passed, 1 flaky, 1 failed, both on the 30 s limit, now 90 s for hosted runs*
   - [x] 🟩 `deploy.yml`: migrate prod → seed if the dataset changed → `vercel deploy --prod` behind owner approval → smoke check; Vercel's automatic production deploys turned off — *prepared, not run*
   - [ ] 🟨 Production config: env vars (`LLM_MONTHLY_BUDGET_USD = 58`), Auth settings and templates, exercise images in Storage, security headers and CSP — *documented in `docs/runbooks/owner-setup-prod.md`; owner applies*
   - [x] 🟩 Runbooks: spend cap, Anthropic outage, safety miss, key rotation, delete user

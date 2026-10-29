@@ -1,0 +1,80 @@
+{
+  "version": "ev2-focus.v1",
+  "note": "EV-2 user-picked focus per user and session length (owner, 2026-10-29, D-60). Avoids groups each user trained in the last 2 days; cardio added in 4 of 15.",
+  "cases": {
+    "u1_full_gym_builder": {
+      "30": [
+        "legs",
+        "core",
+        "cardio"
+      ],
+      "45": [
+        "back",
+        "biceps"
+      ],
+      "60": [
+        "legs",
+        "shoulders"
+      ]
+    },
+    "u2_home_dumbbells_cut": {
+      "30": [
+        "legs",
+        "cardio"
+      ],
+      "45": [
+        "chest",
+        "triceps"
+      ],
+      "60": [
+        "chest",
+        "shoulders",
+        "triceps"
+      ]
+    },
+    "u3_bands_mat_first": {
+      "30": [
+        "back",
+        "biceps"
+      ],
+      "45": [
+        "legs",
+        "core"
+      ],
+      "60": [
+        "chest",
+        "shoulders",
+        "cardio"
+      ]
+    },
+    "u4_bodyweight_regular": {
+      "30": [
+        "chest",
+        "triceps"
+      ],
+      "45": [
+        "back",
+        "biceps"
+      ],
+      "60": [
+        "legs",
+        "core",
+        "cardio"
+      ]
+    },
+    "u5_home_cardio": {
+      "30": [
+        "legs",
+        "core"
+      ],
+      "45": [
+        "chest",
+        "back"
+      ],
+      "60": [
+        "back",
+        "biceps"
+      ]
+    }
+  }
+}

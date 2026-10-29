@@ -1502,7 +1502,7 @@ const response = await anthropic.messages.parse(
 |-|-|
 | System (cached) | Role: identify gym equipment. Equipment table (`id`, `name`, `visual_hint`) for all active items. Rules: report only listed IDs; one entry per ID across all photos (de-duplicate); `confidence` = probability the item is present and usable, 0–1; ignore people, reflections and posters; if photos are unclear, return an empty list. Output contract. |
 | User | `Photo 1:` image, … `Photo n:` image (images before the text, labelled), then "Identify the equipment visible across all photos." |
-| Post-processing (code) | Drop IDs not in the active master list (FR-22, belt and braces). Keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (initial 0.70, tuned on EV-5, PRD §12.7). Take the max confidence per ID. 0 items → `PHOTO_NONE`; ≥ 1 → `PHOTO_PARTIAL {n}`. |
+| Post-processing (code) | Drop IDs not in the active master list (FR-22, belt and braces). Keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (initial 0.70; 0.55 after tuning on EV-5, 2026-10-29, PRD §12.7). Take the max confidence per ID. 0 items → `PHOTO_NONE`; ≥ 1 → `PHOTO_PARTIAL {n}`. |
 
 **AG-2 Input Guard:**
 
@@ -1683,7 +1683,7 @@ Per exercise **E** the user has done before:
 | Anything else (one of the last two rated *Hard*) | Same as `a1` | `hold` |
 
 - Sets from history are clamped to the **current** goal's sets range, in case the goal changed.
-- **Request overrides (PRD §8.9):** when an applied `adjust_volume` intent (preference or health) covers an item, V-7 replaces "equals the target" with "within the hard bounds (Appendix B) and moved in the requested direction from the target". Lighter means sets ≤ target and reps or time ≤ target, with at least one strictly lower; harder is the reverse.
+- **Request overrides (PRD §8.9):** when an applied `adjust_volume` intent (preference or health) covers an item, V-7 replaces "equals the target" with "within the hard bounds (Appendix B) and moved in the requested direction from the target". Lighter means sets ≤ target and reps or time ≤ target, with at least one strictly lower; harder is the reverse. Continuous cardio is not covered: it keeps its normal range (V-7 rule 2), since it has no target and its length fits the session (build notes §5.29).
 
 #### 8.6.4 Time model (`src/shared/time-model/time-model.ts`, shared with the client)
 - Reps card total = `sets × reps × seconds_per_rep + (sets − 1) × rest_s + setup_s`.
@@ -2526,7 +2526,8 @@ fitness-coach/
 │       └── key-rotation.md
 ├── evals/
 │   ├── datasets/
-│   │   ├── users.v1.json             # 5 fictional users with completed histories
+│   │   ├── users.v2.json             # 5 fictional users with completed histories (v2: home and condo gyms, D-60)
+│   │   ├── ev2-focus.v1.json         # EV-2 user-picked focus per user and length (D-60)
 │   │   ├── ag2-inputs.v1.json        # 20 labelled inputs (EV-3)
 │   │   ├── health-cases.v1.json      # 10 cases (EV-4)
 │   │   └── photos/                   # 10 cases, each a folder of 1–5 images + truth.json (EV-5)
@@ -2871,7 +2872,7 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | ID | Implementation | Data | Pass bar (PRD) |
 |-|-|-|-|
 | EV-1 | `evals/suites/ev1-rule-checks.ts`: runs the **production validator** over every plan generated in EV-2 and EV-4 | Generated plans | **100%** |
-| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt) scores 5 criteria from 1 to 5 | `users.v1.json` | No plan below 3; the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
+| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt, sees the eligible exercises) scores 5 criteria from 1 to 5 | `users.v2.json`, `ev2-focus.v1.json` | Every plan ≥ 3 on at least 4 of 5 criteria (D-60); the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
 | EV-3 | `ev3-input-guard.ts`: 20 labelled inputs → AG-2 → compare category, red flag and intents | `ag2-inputs.v1.json` | Red-flag recall **100%**; ≥ 90% correct; out-of-scope never changes a plan (**100%**), checked by running out-of-scope edits through API-11 with real agents and comparing the plans |
 | EV-4 | `ev4-health.ts`: 10 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v1.json` | No exercise straining the named area (**100%**) |
 | EV-5 | `ev5-photos.ts`: 10 cases → AG-1 → threshold | `photos/*` | A case passes if ≥ 80% of the true items are found; ≥ 90% of cases pass; ≤ 10% of detected items are wrong; unclear photos give `PHOTO_NONE` (**100%**) |
@@ -3460,6 +3461,8 @@ There is no paging for the pilot. Passive signals:
 | D-56 | The hosted dev database is rebuilt once from the migrations (`dev-rebuild.yml`; it had been set up by pasting the schema) and from then on every push to `main` applies migrations, seed and images to dev (`deploy-dev.yml`), without the eval gate, which stays on production. No hosted database is changed by hand | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md`, owner runbooks |
 | D-57 | `db:seed` always upserts (unchanged rows are not rewritten) and records a hash of the loaded seed files in `app_private.seed_state`; readiness compares it with `SEED_HASH` in `src/server/config/dataset-version.ts` (`pnpm seed:version`, kept in sync by a unit test). Exercises and equipment missing from the files are deactivated, never deleted | **Approved** (owner) | 2026-10-29 | `reference-data-seed.md` |
 | D-58 | After each production deploy: wait for readiness, then a smoke test with a dedicated account that logs in, sees its equipment, gets one real plan (a few cents) and resets it, and opens History (`tests/e2e/prod-smoke.spec.ts`) | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md` |
+| D-59 | EV-5's case pass bar is **≥ 80% of clear cases** (was 90%); the other EV-5 bars are unchanged (≥ 80% of true items per case, ≤ 10% wrong items, `PHOTO_NONE` on 100% of unclear photos). With 8 clear cases, 90% allowed no miss, and one borderline item (EV-5-06's pull-up bar, confidence 0.50–0.60 across runs) decided the suite. `PHOTO_CONFIDENCE_THRESHOLD` tuned to 0.55 on the same day | **Approved** (owner) | 2026-10-29 | PRD v1.4 §9, `evaluations.md` §3 |
+| D-60 | EV-2 changes: (1) a plan passes with **≥ 3 on at least 4 of the 5 criteria** (was: no criterion below 3); (2) the judge also receives `eligible_exercises`, the planner's own candidate list (equipment, experience level and avoided areas already applied) restricted to the plan's focus groups, and judges balance and choice against it (prompt `judge.v2`; `CoreResult.candidateIds` carries the list); (3) the user-picked focus comes from a fixed table (`ev2-focus.v1.json`) that rotates logical group pairs, adds cardio to 4 of 15 and avoids groups trained in the last 2 days, instead of each user's least-recent pair (which was chest + shoulders for most); (4) fixture users u3, u4 and u5 train in a home or condominium gym (`users.v2.json`). The first full run had 16 of 30 plans fail on balance, mostly for limited-equipment users | **Approved** (owner) | 2026-10-29 | PRD v1.5 §9, `evaluations.md` §2.1, §3, §4 |
 
 ## Appendix B. Configuration constants
 
@@ -3489,7 +3492,7 @@ There is no paging for the pilot. Passive signals:
 | `HISTORY_SUMMARY_MAX_WORKOUTS`, `HISTORY_SUMMARY_DAYS` | 5, 28 | §8.5.2 | `server/config/app-config.ts` |
 | `PHOTO_MAX_LONG_EDGE_PX`, `PHOTO_JPEG_QUALITY` | 1568, 0.85 | D-01 | `shared/constants.ts` |
 | `PHOTO_MAX_FILE_BYTES`, `PHOTO_MAX_TOTAL_BYTES` | 1.5 MB, 4 MB | D-01 (Vercel 4.5 MB body limit) | `shared/constants.ts` |
-| `PHOTO_CONFIDENCE_THRESHOLD` | 0.70 initial; tuned on EV-5 | PRD §12.7 | `server/agents/agent-config.ts` |
+| `PHOTO_CONFIDENCE_THRESHOLD` | 0.55 (tuned on EV-5 2026-10-29; 0.70 initial) | PRD §12.7 | `server/agents/agent-config.ts` |
 | `STILL_WORKING_AFTER_MS` | 8000 | D-10 | `shared/constants.ts` |
 | `GENERATION_DEADLINE_MS`, `SCAN_DEADLINE_MS` | 20000, 30000 | D-10 | `server/config/app-config.ts` |
 | `CLIENT_TIMEOUT_GENERATE_MS`, `CLIENT_TIMEOUT_SCAN_MS` | 25000, 35000 | D-10 | `shared/constants.ts` |

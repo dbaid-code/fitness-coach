@@ -13,7 +13,7 @@ const DEFAULT_AG1: FakeAg1 = {
   detections: [
     { equipment_id: 'dumbbells', confidence: 0.92 },
     { equipment_id: 'adjustable_bench', confidence: 0.81 },
-    { equipment_id: 'stability_ball', confidence: 0.55 },
+    { equipment_id: 'stability_ball', confidence: 0.45 }, // below PHOTO_CONFIDENCE_THRESHOLD (0.55): dropped
   ],
 };
 

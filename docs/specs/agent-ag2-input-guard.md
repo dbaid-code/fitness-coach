@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Implements** | AG-2; FR-33, FR-51, FR-54; PRD §8.11; engineering doc §8.3 (AG-2), §8.4.2, §8.8 rows 1–3, §8.12; D-19, D-26 |
-| **Model** | `claude-haiku-5-5`, effort `medium`, `max_tokens` 8 192, no refusal fallback (none exists for Haiku 5.5), prompt `ag2.v1` |
+| **Model** | `claude-haiku-5-5`, effort `medium`, `max_tokens` 8 192, no refusal fallback (none exists for Haiku 5.5), prompt `ag2.v2` (v2, 2026-10-29: a time or length part of a message is non-actionable, length comes from the picker; owner rule for EV-3-01, 2026-10-27) |
 | **Files** | `src/server/agents/input-guard/input-guard.agent.ts`, `input-guard.schema.ts`, `post-process.ts`, `prompt.v1.md`; `src/shared/schemas/domain/intents.ts` |
 | **Called by** | `plan-generation.service` (mode `classify_note`), `plan-edit.service` (mode `classify_edit`) |
 | **Evaluated by** | EV-3 (red-flag recall 100%, ≥ 90% correct, out-of-scope never changes a plan) |

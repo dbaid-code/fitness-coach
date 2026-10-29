@@ -42,8 +42,28 @@ test.describe('FR-1 – FR-3 auth', () => {
     await page.getByLabel('Confirm password').fill('a-new-password-1');
     await page.getByRole('button', { name: 'Save password' }).click();
     await page.waitForURL(/\/(plan|onboarding)$/);
+    // Leave the app before signing out: on a live page the cleared session sends it to /log-in?next=…,
+    // which interrupted the next goto on WebKit (2026-10-29).
+    await page.goto('about:blank');
     await page.context().clearCookies();
     await logIn(page, { email: user.email, password: 'a-new-password-1' });
     await page.waitForURL('**/onboarding');
+  });
+
+  test('FR-1: fields filled before the page hydrates still enable Log in', async ({ page }) => {
+    // A slow phone or a password manager can fill the form before React attaches; the controlled state then
+    // stayed empty and Log in stayed disabled (WebKit CI, 2026-10-29). Hold the scripts back to force it.
+    let release!: () => void;
+    const held = new Promise<void>((r) => (release = r));
+    await page.route('**/_next/static/chunks/**', async (route) => {
+      await held;
+      await route.continue();
+    });
+    await page.goto('/log-in', { waitUntil: 'commit' });
+    await page.getByLabel('Email').fill('early@example.com');
+    await page.getByLabel('Password').fill('password123');
+    release();
+    await expect(page.getByRole('button', { name: 'Log in' })).toBeEnabled();
+    await expect(page.getByLabel('Email')).toHaveValue('early@example.com');
   });
 });

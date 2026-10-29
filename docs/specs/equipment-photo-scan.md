@@ -61,7 +61,7 @@
   2. Local day: `usage_date = today in (profile.timezone ?? body.timezone)`.
   3. Tx 1: spend guard (`spend-guard.service.assertUnderBudget`) → 503 `SPEND_CAP`; `usage.repo.get` with `photo_scans >= 5` → 429 `LIMIT_REACHED` (`PHOTO_LIMIT`). Load the current selection (profile edit).
   4. **AG-1** via `runAgent` with the images (base64, media type `image/jpeg`|`image/png`|`image/webp`) and the active equipment table (`agent-ag1-equipment-vision.md`).
-  5. Post-processing: drop IDs not in the active master list; keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (0.70); one entry per ID with the max confidence; sort by equipment `sort_order`.
+  5. Post-processing: drop IDs not in the active master list; keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (0.55, tuned on EV-5 2026-10-29); one entry per ID with the max confidence; sort by equipment `sort_order`.
   6. Proposed selection: `onboarding` → the detected IDs (replace); `profile_edit` → union of the current DB selection and the detected IDs, in `sort_order`.
   7. Tx 2: when AG-1 returned a usable response (outcome `ok`, `schema_invalid` or `max_tokens`; the last two are treated as "nothing detected") `usage.repo.incrementScans` (D-12). Outcomes `api_error`, `timeout` and `refusal` do not count (§8.11). In every case: event `photo_scan_completed {context, photo_count, detected_count, latency_ms}`; complete the idempotency key.
   8. Drop all buffers (no references kept).

@@ -31,6 +31,14 @@ export function v07Numbers(plan: Plan, ctx: ValidationContext): CheckResult {
       if (input && input.origin === 'user_edit' && sameNumbers(input, it)) return;
     }
 
+    // Continuous cardio is never progressed; its length fits the session (PRD Appendix B). A lighter or harder
+    // request therefore keeps the cardio range instead of the direction rule, which had no baseline for it and
+    // failed every coach plan with a lighter note (EV-4-10, 2026-10-29; build notes §5.29).
+    if (e.timedKind === 'continuous') {
+      if (it.sets !== 1 || !inRange(it.time_per_set_s, t.continuousCardioS)) add('cardio_out_of_range', i); // D-52: per-goal coach range
+      return;
+    }
+
     const volume = volumeIntentFor(plan, ctx, i);
     if (volume) {
       const target = ctx.progressionTargets.get(it.exercise_id);
@@ -49,11 +57,6 @@ export function v07Numbers(plan: Plan, ctx: ValidationContext): CheckResult {
           ? it.sets <= baseSets && v <= baseValue && (it.sets < baseSets || v < baseValue)
           : it.sets >= baseSets && v >= baseValue && (it.sets > baseSets || v > baseValue);
       if (!ok || !okBounds) add('override_wrong_direction', i);
-      return;
-    }
-
-    if (e.timedKind === 'continuous') {
-      if (it.sets !== 1 || !inRange(it.time_per_set_s, t.continuousCardioS)) add('cardio_out_of_range', i); // D-52: per-goal coach range
       return;
     }
 

@@ -52,7 +52,7 @@ export function validatePlan(output: unknown, ctx: ValidationContext): { passed:
 
 ## 3. V-7 in detail
 For each main item `i` with exercise `E`:
-1. **Exempt** when: an applied `adjust_volume` intent (current or session) covers it → instead apply the direction rule in `domain-progression.md` §4 (`override_wrong_direction` on failure); or edit mode and the matching input item has `origin = 'user_edit'` and is unchanged.
+1. **Exempt** when: an applied `adjust_volume` intent (current or session) covers it → instead apply the direction rule in `domain-progression.md` §4 (`override_wrong_direction` on failure), **except continuous cardio, which always takes rule 2** (it is never progressed and its length fits the session, PRD Appendix B; 2026-10-29, build notes §5.29); or edit mode and the matching input item has `origin = 'user_edit'` and is unchanged.
 2. `E.timed_kind = 'continuous'`: `sets = 1` and `time_per_set_s ∈ continuousCardioS`: [300, 1800], or [300, 600] for a coach-chosen Build muscle or Stay fit plan (D-52) (`cardio_out_of_range`).
 3. `progressionTargets.has(E)`: `sets`, `reps`, `time_per_set_s` equal the target exactly (`progression_mismatch`).
 4. Otherwise (new exercise, D-15): reps card → `sets ∈ goal.sets` (newbie: `= goal.sets.min`), `reps ∈ goal.reps`; hold → `sets` as reps card, `time_per_set_s = startingHoldS` (`start_out_of_range`).

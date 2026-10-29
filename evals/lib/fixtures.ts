@@ -3,7 +3,7 @@ import type { MuscleGroup } from '@/shared/constants';
 import type { Experience, Goal } from '@/shared/schemas/domain/enums';
 import type { CompletedWorkout } from '@/server/domain/types';
 import type { ReferenceData } from '@/server/services/reference-data.service';
-import users from '../datasets/users.v1.json';
+import users from '../datasets/users.v2.json';
 
 export type FixtureUser = (typeof users.users)[number];
 export const USERS: FixtureUser[] = users.users;

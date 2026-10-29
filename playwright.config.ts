@@ -10,6 +10,9 @@ export default defineConfig({
   testIgnore: process.env.E2E_PROD_SMOKE ? [] : ['**/prod-smoke.spec.ts'],
   fullyParallel: false,
   workers: 1,
+  // D-54: against a deployed preview every request crosses to bom1/ap-south-1 from a US runner; the WCAG walk
+  // (14 s locally) and account deletion ran past 30 s on the first hosted run (2026-10-29).
+  timeout: remote ? 90_000 : 30_000,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   globalTeardown: './tests/e2e/global-teardown.ts',

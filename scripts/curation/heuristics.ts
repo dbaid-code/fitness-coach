@@ -205,6 +205,120 @@ export const CUSTOM_BICEPS: CustomRow[] = [
   },
 ];
 
+/**
+ * Limited-equipment pools (option A, owner 2026-10-29): the first full eval run judged plans for bodyweight, band and
+ * home-cardio users poorly balanced (EV-2). free-exercise-db has no bodyweight row, pike push-up, band row or band
+ * curl, so these custom rows fill shoulders, back and biceps. Door, towel and floor are assumed available (D-53).
+ * Flagged for the owner's review.
+ */
+export type CustomFullRow = CustomRow &
+  Pick<SeedExercise, 'muscle_group' | 'mechanic' | 'level' | 'force' | 'primary_muscles' | 'required_equipment'>;
+
+export const CUSTOM_LIMITED: CustomFullRow[] = [
+  {
+    id: 'gc_pike_push_up',
+    name: 'Pike Push-Up',
+    muscle_group: 'shoulders',
+    mechanic: 'compound',
+    level: 'intermediate',
+    force: 'push',
+    primary_muscles: ['shoulders'],
+    required_equipment: [],
+    body_areas_stressed: ['shoulders', 'wrists', 'elbows'],
+    instructions: [
+      'Start in a push-up position, then walk your feet in and lift your hips so your body makes an upside-down V.',
+      'Keep your arms straight, hands shoulder-width apart, head between your arms.',
+      'Bend your elbows to lower the top of your head towards the floor between your hands.',
+      'Press back up to straight arms, keeping your hips high throughout.',
+    ],
+  },
+  {
+    id: 'gc_floor_y_raise',
+    name: 'Floor Y Raise',
+    muscle_group: 'shoulders',
+    mechanic: 'isolation',
+    level: 'beginner',
+    force: 'pull',
+    primary_muscles: ['shoulders'],
+    required_equipment: [],
+    body_areas_stressed: ['shoulders', 'upper_back'],
+    instructions: [
+      'Lie face down with your arms stretched overhead in a Y shape, thumbs pointing up.',
+      'Keep your forehead resting on the floor or just above it.',
+      'Squeeze your shoulder blades and lift both arms a few centimetres off the floor.',
+      'Pause for a second at the top, then lower your arms slowly.',
+    ],
+  },
+  {
+    id: 'gc_door_frame_towel_row',
+    name: 'Door Frame Towel Row',
+    muscle_group: 'back',
+    mechanic: 'compound',
+    level: 'beginner',
+    force: 'pull',
+    primary_muscles: ['middle back'],
+    required_equipment: [],
+    body_areas_stressed: ['shoulders', 'elbows'],
+    instructions: [
+      'Loop a towel around a sturdy door frame or post and hold one end in each hand.',
+      'Walk your feet towards the frame and lean back until your arms are straight and your body is in a line.',
+      'Pull your chest towards your hands, squeezing your shoulder blades together.',
+      'Lower yourself back slowly until your arms are straight. Stand more upright to make it easier.',
+    ],
+  },
+  {
+    id: 'gc_floor_w_pull',
+    name: 'Floor W Pull',
+    muscle_group: 'back',
+    mechanic: 'isolation',
+    level: 'beginner',
+    force: 'pull',
+    primary_muscles: ['middle back'],
+    required_equipment: [],
+    body_areas_stressed: ['upper_back', 'lower_back'],
+    instructions: [
+      'Lie face down with your arms stretched overhead, a little off the floor.',
+      'Pull your elbows down towards your ribs so your arms make a W, squeezing your shoulder blades.',
+      'Keep your chest slightly lifted and your eyes on the floor.',
+      'Reach your arms back overhead slowly and repeat.',
+    ],
+  },
+  {
+    id: 'gc_band_bent_over_row',
+    name: 'Band Bent-Over Row',
+    muscle_group: 'back',
+    mechanic: 'compound',
+    level: 'beginner',
+    force: 'pull',
+    primary_muscles: ['middle back'],
+    required_equipment: ['resistance_bands'],
+    body_areas_stressed: ['lower_back', 'elbows'],
+    instructions: [
+      'Stand on the middle of a band with your feet hip-width apart and hold one end in each hand.',
+      'Bend at your hips with a slight knee bend until your back is at about 45 degrees, back flat.',
+      'Pull your hands towards your lower ribs, elbows close to your body.',
+      'Lower your hands slowly until your arms are straight.',
+    ],
+  },
+  {
+    id: 'gc_band_biceps_curl',
+    name: 'Band Biceps Curl',
+    muscle_group: 'biceps',
+    mechanic: 'isolation',
+    level: 'beginner',
+    force: 'pull',
+    primary_muscles: ['biceps'],
+    required_equipment: ['resistance_bands'],
+    body_areas_stressed: ['elbows'],
+    instructions: [
+      'Stand on the middle of a band with your feet hip-width apart and hold one end in each hand, palms forward.',
+      'Keep your elbows by your sides.',
+      'Curl your hands up towards your shoulders.',
+      'Lower slowly until your arms are straight.',
+    ],
+  },
+];
+
 /** Bodyweight cardio rows added by curation (source = 'custom'). */
 export const CUSTOM_CARDIO: CustomRow[] = [
   {
