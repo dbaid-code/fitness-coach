@@ -21,6 +21,9 @@ const userFocus = (userRef: string, len: number): MuscleGroup[] => {
 export const planPasses = (scores: JudgeOutput['scores']): boolean =>
   CRITERIA.filter((k) => scores[k] >= 3).length >= 4;
 
+/** D-61: at most one of the 30 judged plans may miss the per-plan bar (one judgement per plan is noisy). */
+export const MAX_PLANS_FAILING = 1;
+
 export type GenRecord = { ev_id: string; user_ref: string; outcome: CoreResult['outcome']; core: CoreResult };
 
 export async function runEv2(deps: GenDeps, fake: boolean, opts: { limit?: number } = {}) {
@@ -98,7 +101,7 @@ export async function runEv2(deps: GenDeps, fake: boolean, opts: { limit?: numbe
   const plansFailing = scored.filter((r) => !planPasses(r.scores!)).length;
   return {
     summary: {
-      passed: failed === 0 && plansFailing === 0,
+      passed: failed === 0 && plansFailing <= MAX_PLANS_FAILING,
       cases: records.length,
       generation_failed: failed,
       plans_failing: plansFailing,

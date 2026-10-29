@@ -1,6 +1,6 @@
 {
-  "version": "health-cases.v1",
-  "review": "Cases reviewed and approved by the owner 2026-10-27 (OD-08).",
+  "version": "health-cases.v2",
+  "review": "Cases reviewed and approved by the owner 2026-10-27 (OD-08). 2026-10-29 (D-61, owner-approved): EV-4-03 focus becomes legs + shoulders (no shoulder-group exercise avoids the shoulders); EV-4-11 keeps the shoulders-only case and expects NOTE_RULES_OUT_FOCUS.",
   "cases": [
     {
       "ev_id": "EV-4-01",
@@ -36,6 +36,7 @@
       "focus": {
         "mode": "user",
         "groups": [
+          "legs",
           "shoulders"
         ]
       },
@@ -131,6 +132,22 @@
       },
       "note": "slept badly last night",
       "expected_avoided_areas": []
+    },
+    {
+      "ev_id": "EV-4-11",
+      "user_ref": "u2_home_dumbbells_cut",
+      "session_length_min": 45,
+      "focus": {
+        "mode": "user",
+        "groups": [
+          "shoulders"
+        ]
+      },
+      "note": "my shoulder is a bit achy",
+      "expected_avoided_areas": [
+        "shoulders"
+      ],
+      "expected_status": "NOTE_RULES_OUT_FOCUS"
     }
   ]
 }

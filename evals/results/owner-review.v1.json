@@ -1,0 +1,80 @@
+{
+  "version": "owner-review.v1",
+  "run_id": "2026-10-29T19-45-14Z",
+  "instructions": "Score each plan 1-5 per criterion (replace null). See owner-review.v1.md.",
+  "reviewer": "owner",
+  "reviewed_on": "2026-10-29",
+  "plans": [
+    {
+      "ev_id": "EV-2-u1_full_gym_builder-60-user",
+      "scores": {
+        "focus_fit": 5,
+        "balance": 3,
+        "order": 4,
+        "goal_level_fit": 4,
+        "continuity_variety": 3
+      },
+      "notes": ""
+    },
+    {
+      "ev_id": "EV-2-u2_home_dumbbells_cut-45-user",
+      "scores": {
+        "focus_fit": 5,
+        "balance": 4,
+        "order": 5,
+        "goal_level_fit": 4,
+        "continuity_variety": 4
+      },
+      "notes": ""
+    },
+    {
+      "ev_id": "EV-2-u3_bands_mat_first-30-user",
+      "scores": {
+        "focus_fit": 4,
+        "balance": 4,
+        "order": 4,
+        "goal_level_fit": 5,
+        "continuity_variety": 3
+      },
+      "notes": ""
+    },
+    {
+      "ev_id": "EV-2-u4_bodyweight_regular-60-coach",
+      "scores": {
+        "focus_fit": 5,
+        "balance": 3,
+        "order": 4,
+        "goal_level_fit": 4,
+        "continuity_variety": 4
+      },
+      "notes": ""
+    },
+    {
+      "ev_id": "EV-2-u5_home_cardio-45-coach",
+      "scores": {
+        "focus_fit": 5,
+        "balance": 3,
+        "order": 4,
+        "goal_level_fit": 4,
+        "continuity_variety": 4
+      },
+      "notes": ""
+    },
+    {
+      "ev_id": "EV-2-u2_home_dumbbells_cut-30-coach",
+      "scores": {
+        "focus_fit": 5,
+        "balance": 4,
+        "order": 5,
+        "goal_level_fit": 4,
+        "continuity_variety": 5
+      },
+      "notes": ""
+    }
+  ],
+  "agreement": {
+    "within_1": 1.0,
+    "exact": 0.7333333333333333,
+    "mean_owner_minus_judge": 0.13
+  }
+}

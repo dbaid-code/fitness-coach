@@ -13,7 +13,7 @@ import { setActivePlan } from '@/features/plan/plan-cache';
 export type SuggestResult =
   | { kind: 'plan_ready'; status: StatusMessage | null }
   | { kind: 'red_flag' }
-  | { kind: 'generation_failed' }
+  | { kind: 'generation_failed'; code: 'GENERATION_FAILED' | 'NOTE_RULES_OUT_FOCUS' }
   | { kind: 'blocked'; code: 'PLAN_LIMIT' | 'SPEND_CAP' }
   | { kind: 'none' };
 
@@ -42,7 +42,11 @@ export function useSuggestWorkout(onResult: (r: SuggestResult) => void) {
         setActivePlan(qc, r.plan);
         onResult({ kind: 'plan_ready', status: r.status });
       } else if (r.outcome === 'red_flag') onResult({ kind: 'red_flag' });
-      else onResult({ kind: 'generation_failed' });
+      else
+        onResult({
+          kind: 'generation_failed',
+          code: r.status?.code === 'NOTE_RULES_OUT_FOCUS' ? 'NOTE_RULES_OUT_FOCUS' : 'GENERATION_FAILED', // D-61
+        });
     } catch (err) {
       if (err instanceof NetworkError) {
         networkToast(() => void run(body, true));
@@ -50,7 +54,7 @@ export function useSuggestWorkout(onResult: (r: SuggestResult) => void) {
         return;
       }
       keyRef.current = null;
-      if (err instanceof ClientTimeoutError) return onResult({ kind: 'generation_failed' });
+      if (err instanceof ClientTimeoutError) return onResult({ kind: 'generation_failed', code: 'GENERATION_FAILED' });
       if (err instanceof ApiError) {
         if (err.code === 'ACTIVE_PLAN_EXISTS') {
           await refetchPlanner();

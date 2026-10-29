@@ -34,6 +34,7 @@ const KIND: Partial<Record<MessageCode | 'STILL_WORKING' | 'EMAIL_VERIFIED' | 'L
   EXPIRED: 'outline-clock',
   STILL_WORKING: 'outline-clock',
   GENERATION_FAILED: 'outline-info',
+  NOTE_RULES_OUT_FOCUS: 'outline-info',
   LINK_INVALID: 'outline-info',
 };
 

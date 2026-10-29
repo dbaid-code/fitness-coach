@@ -41,7 +41,7 @@ export const logger = {
 |-|-|-|
 | `planner_opened` | API-19 (client) | `{}` |
 | `plan_generated` | API-08 tx 2 | `{ session_length_min: 30\|45\|60, focus_mode: 'coach'\|'user', focus_groups: MuscleGroup[], attempts: 1\|2, latency_ms: int, after_reset: boolean, short_session: boolean }` |
-| `generation_failed` | API-08 failure path | `{ session_length_min, focus_mode, reason: 'validation'\|'api'\|'deadline', latency_ms }` |
+| `generation_failed` | API-08 failure path | `{ session_length_min, focus_mode, reason: 'validation'\|'api'\|'deadline', latency_ms }`. Not written for `NOTE_RULES_OUT_FOCUS` (D-61: AG-3 never ran) |
 | `text_edit_submitted` | API-11 (whenever the edit is counted) | `{ edit_index: 1..5, latency_ms, plan_changed: boolean }` |
 | `plan_reset` | API-12 | `{ reset_reason: ResetReason \| null, from_status: 'draft'\|'accepted' }` |
 | `plan_accepted` | API-13 | `{}` |
@@ -141,7 +141,7 @@ Then: compare `llm_cost_monthly` with the Anthropic Console (both workspaces); r
 |-|-|-|
 | `spend-cap.md` | `SPEND_CAP` shown or spend near budget | 1. `select * from metrics.llm_cost_monthly` for the month. 2. Top users: `select user_id, sum(cost_usd) from app.agent_logs where created_at >= date_trunc('month', now()) group by 1 order by 2 desc limit 10`. 3. Check for abuse (many calls from one user). 4. Owner decides whether to raise `LLM_MONTHLY_BUDGET_USD` (Vercel env + redeploy) and the Console limit together. |
 | `anthropic-outage.md` | `api_error` spike | 1. Check status.anthropic.com. 2. `select date_trunc('hour', created_at), outcome, count(*) from app.agent_logs where created_at > now() - interval '24 hours' group by 1, 2`. 3. Nothing to toggle: the app degrades by itself (§8.11). |
-| `safety-miss.md` | A missed red flag or unsafe exercise | 1. Capture the input without personal details. 2. Add it to `evals/datasets/ag2-inputs.v1.json` (EV-3) or `health-cases.v1.json` (EV-4) with the owner's label. 3. Fix the prompt, tags or rules. 4. `pnpm evals:full`. 5. Release. 6. Log date, case and fix in the file. |
+| `safety-miss.md` | A missed red flag or unsafe exercise | 1. Capture the input without personal details. 2. Add it to `evals/datasets/ag2-inputs.v1.json` (EV-3) or `health-cases.v2.json` (EV-4) with the owner's label. 3. Fix the prompt, tags or rules. 4. `pnpm evals:full`. 5. Release. 6. Log date, case and fix in the file. |
 | `key-rotation.md` | Suspected leak or scheduled rotation | Anthropic: create key → update Vercel env (Production or Preview) → redeploy → revoke old key. Supabase secret key: create a new secret key in the dashboard → update Vercel → redeploy → delete the old one. `gc_app`: `alter role gc_app with password '<new>'` → update `DATABASE_URL` → redeploy. GitHub secrets updated likewise. |
 | `delete-user.md` | User asks the owner to delete data | Supabase dashboard → Authentication → Users → delete; the cascade applies; logs expire within 30 days. |
 

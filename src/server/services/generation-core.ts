@@ -120,7 +120,7 @@ export type CoreResult = {
   /** AG-2 classified the text (any category); edits count from here (D-13). */
   guardClassified: boolean;
   planner: PlannerSummary;
-  failureReason: 'validation' | 'api' | 'deadline' | null;
+  failureReason: 'validation' | 'api' | 'deadline' | 'focus_ruled_out' | null;
   plan: BuiltPlan | null;
   status: StatusMessage | null;
   outcome: 'plan_ready' | 'red_flag' | 'generation_failed' | 'updated' | 'unchanged' | 'discarded';
@@ -265,7 +265,7 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     max: HISTORY_SUMMARY_MAX_WORKOUTS,
     days: HISTORY_SUMMARY_DAYS,
   });
-  const cand = buildCandidates({
+  const candidateInput = {
     exercises,
     profileEquipment: input.profile.equipmentIds,
     experience: input.profile.experience,
@@ -276,7 +276,8 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     history: input.history,
     now: input.now,
     rule48hHours: RULE_48H_HOURS,
-  });
+  };
+  const cand = buildCandidates(candidateInput);
   const progressionInput = {
     goal: input.profile.goal,
     experience: input.profile.experience,
@@ -405,7 +406,25 @@ export async function runGenerationCore(input: CoreInput): Promise<CoreResult> {
     });
   };
 
-  if (candidates.length === 0) return fail('validation');
+  if (candidates.length === 0) {
+    // D-61: the note's body areas, not the equipment or levels, rule out every exercise in the chosen focus.
+    // A retry would fail the same way, so say why instead of GENERATION_FAILED.
+    const ruledOutByNote =
+      suggest &&
+      cand.effectiveFocus.mode === 'user' &&
+      cand.avoidedBodyAreas.size > 0 &&
+      buildCandidates({ ...candidateInput, intents: allIntents.filter((i) => i.type !== 'avoid_body_area') }).candidates
+        .length > 0;
+    if (!ruledOutByNote) return fail('validation');
+    return done({
+      planner: { kind: 'not_called' },
+      failureReason: 'focus_ruled_out',
+      plan: null,
+      status: { code: 'NOTE_RULES_OUT_FOCUS' },
+      outcome: 'generation_failed',
+      sessionIntents: input.sessionIntents,
+    });
+  }
 
   // Step 4 — AG-3, one validator retry.
   let accepted: WorkoutPlannerOutput | null = null;

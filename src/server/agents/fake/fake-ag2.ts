@@ -17,6 +17,7 @@ export function fakeGuard(text: string): InputGuardOutput {
   if (/protein|diet|supplement/.test(t)) return out('out_of_scope_fitness');
   if (/weather|ignore your instructions|stock/.test(t)) return out('unrelated');
   if (/knee/.test(t)) return out('health_adjustment', [{ type: 'avoid_body_area', body_areas: ['knees'] }]);
+  if (/shoulder/.test(t)) return out('health_adjustment', [{ type: 'avoid_body_area', body_areas: ['shoulders'] }]);
   if (/lower back/.test(t)) return out('health_adjustment', [{ type: 'avoid_body_area', body_areas: ['lower_back'] }]);
   if (/tired|slept badly/.test(t)) {
     return out('health_adjustment', [

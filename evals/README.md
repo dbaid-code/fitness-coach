@@ -19,12 +19,12 @@ commit the `latest.json` from its artifact.
 - `users.v2.json`: 5 fictional users covering the three goals, three experience levels and five equipment setups (v2: u3–u5 in home or condo gyms, D-60).
 - `ev2-focus.v1.json`: EV-2's user-picked focus for each user and session length (D-60).
 - `ag2-inputs.v1.json`: 20 labelled AG-2 inputs (EV-3); disjoint from the prompt examples (a unit test checks).
-- `health-cases.v1.json`: 10 health notes (EV-4), every body area plus one "slept badly" case.
+- `health-cases.v2.json`: 11 health notes (EV-4), every body area plus one "slept badly" case; EV-4-11 expects `NOTE_RULES_OUT_FOCUS` (D-61).
 - `photos/`: 10 EV-5 cases (CC0 / public-domain photos from Wikimedia Commons, no people); truth lists approved by
   the owner on 2026-10-28. See `photos/README.md` and `photos/SOURCES.md`.
 
 Labels were written by the coding agent and need the owner's review (PRD §9.1). EV-2's owner check:
-score 6 judged plans (20%, stratified by user) in `results/owner-review.v1.json`; agreement must be ≥ 80%.
+score 6 judged plans (20%, stratified by user): read `results/owner-review.v1.md`, fill `results/owner-review.v1.json`; the judge's scores are in `results/owner-review.judge.v1.json` (open after scoring). Agreement (owner within ±1 of the judge) must be ≥ 80%.
 
 ## EV-1 note
 The generation core only returns a plan that the production validator accepted, so EV-1 holds by

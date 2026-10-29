@@ -116,23 +116,26 @@ export async function suggest(
     }
     const focusMode = body.focus.mode;
     if (core.outcome === 'generation_failed' || !core.plan) {
-      await withUserTx(claims, (tx) =>
-        eventRepo.insert(tx, {
-          userId,
-          eventType: 'generation_failed',
-          properties: {
-            session_length_min: body.session_length_min,
-            focus_mode: focusMode,
-            reason: core.failureReason ?? 'validation',
-            latency_ms: Date.now() - started,
-          },
-          occurredAt: now,
-        }),
-      );
+      // D-61: a note that rules out the focus is not a generation failure (AG-3 never ran), so it stays out of
+      // the generation-quality metrics; agent_logs keeps it under NOTE_RULES_OUT_FOCUS.
+      if (core.failureReason !== 'focus_ruled_out')
+        await withUserTx(claims, (tx) =>
+          eventRepo.insert(tx, {
+            userId,
+            eventType: 'generation_failed',
+            properties: {
+              session_length_min: body.session_length_min,
+              focus_mode: focusMode,
+              reason: core.failureReason ?? 'validation',
+              latency_ms: Date.now() - started,
+            },
+            occurredAt: now,
+          }),
+        );
       return {
         outcome: 'generation_failed',
         plan: null,
-        status: { code: 'GENERATION_FAILED' },
+        status: core.status ?? { code: 'GENERATION_FAILED' }, // D-61: NOTE_RULES_OUT_FOCUS
         plans_remaining_today: remaining,
       };
     }

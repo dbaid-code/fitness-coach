@@ -1,5 +1,5 @@
 // EV-4 health adjustments (evaluations.md §3).
-import data from '../datasets/health-cases.v1.json';
+import data from '../datasets/health-cases.v2.json';
 import { userByRef } from '../lib/fixtures';
 import { generate, pool, type GenDeps } from '../lib/generate';
 
@@ -19,12 +19,16 @@ export async function runEv4(deps: GenDeps, opts: { limit?: number } = {}) {
     const unsafe = mains.filter((i) =>
       deps.ref.exercises.get(i.exerciseId!)?.bodyAreasStressed.some((a) => c.expected_avoided_areas.includes(a)),
     );
-    const statusOk = core.status !== null && OK_STATUS.has(core.status.code);
+    // D-61: a case with `expected_status` expects that message and no plan (the note rules out the whole focus).
+    const expected = 'expected_status' in c ? c.expected_status : null;
+    const statusOk = expected
+      ? core.status?.code === expected && core.plan === null
+      : core.status !== null && OK_STATUS.has(core.status.code);
     return {
       ev_id: c.ev_id,
       outcome: core.outcome,
       status: core.status,
-      area_safe: core.plan !== null && unsafe.length === 0,
+      area_safe: (expected ? true : core.plan !== null) && unsafe.length === 0,
       status_ok: statusOk,
       unsafe: unsafe.map((i) => i.exerciseId),
       core,

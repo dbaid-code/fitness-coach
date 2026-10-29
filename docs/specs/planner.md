@@ -37,7 +37,7 @@
 
 ## 3. `PlannerForm`
 Top to bottom (handoff "Planner"):
-1. Status banners, stacked: `EXPIRED` (when `recently_expired_plan_id` is set and not dismissed for that ID), `SPEND_CAP` (when `spend_cap_reached`), `PLAN_LIMIT` (when `plans_remaining_today = 0`), `RED_FLAG` (after a red-flag response), `GENERATION_FAILED` (after a failed generation).
+1. Status banners, stacked: `EXPIRED` (when `recently_expired_plan_id` is set and not dismissed for that ID), `SPEND_CAP` (when `spend_cap_reached`), `PLAN_LIMIT` (when `plans_remaining_today = 0`), `RED_FLAG` (after a red-flag response), `GENERATION_FAILED` or `NOTE_RULES_OUT_FOCUS` (after a failed generation; the response's `status.code`, D-61).
 2. Title "Plan today's workout".
 3. **Session length** — `SessionLengthPicker`, 3 segments 30/45/60, initial = `defaults.session_length_min` (FR-12).
 4. **Focus** — `FocusPicker`: "Let coach choose" + Chest, Back, Shoulders, Biceps, Triceps, Legs, Core, Cardio (`aria-pressed` toggles). "Let coach choose" is selected on every visit (FR-31). Selecting any group unselects it; clearing every group re-selects it. Any number of groups.
@@ -54,7 +54,7 @@ Top to bottom (handoff "Planner"):
 4. Outcomes:
    - `plan_ready` → `setQueryData(['plan', plan.id], plan)`, update `['planner']` (`active_plan = plan`, `plans_remaining_today`), clear `afterResetOf`, show `status` as a banner in `PlanView`, move focus to the plan header.
    - `red_flag` → banner `RED_FLAG`; `redFlagNote = note`; no plan; counter unchanged.
-   - `generation_failed` → banner `GENERATION_FAILED`; form keeps its values.
+   - `generation_failed` → banner `status.code` (`GENERATION_FAILED`, or `NOTE_RULES_OUT_FOCUS` when the note rules out the whole focus, D-61); form keeps its values.
    - 409 `ACTIVE_PLAN_EXISTS` → refetch `['planner']` (shows the active plan).
    - 409 `REQUEST_IN_PROGRESS` → wait 2 s, refetch `['planner']`.
    - 429 `PLAN_LIMIT`, 503 `SPEND_CAP` → banner; refetch `['planner']`.
