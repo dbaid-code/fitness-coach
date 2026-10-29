@@ -187,9 +187,12 @@ describe('F-09 Suggest Workout (API-08)', () => {
       plans_remaining_today: 10,
     });
     expect(fakeAgents.calls('ag3_workout_planner')).toHaveLength(0);
-    const [ev] =
-      await adminSql`select properties from app.app_events where user_id = ${u.id} and event_type = 'generation_failed'`;
-    expect(ev!.properties.reason).toBe('focus_ruled_out');
+    // Not a generation failure: no event (it would count in metrics.generation_quality); agent_logs has the code.
+    const events =
+      await adminSql`select 1 from app.app_events where user_id = ${u.id} and event_type = 'generation_failed'`;
+    expect(events).toHaveLength(0);
+    const [log] = await adminSql`select status_code from app.agent_logs where user_id = ${u.id}`;
+    expect(log!.status_code).toBe('NOTE_RULES_OUT_FOCUS');
 
     // Another group still in the focus → a plan without shoulder work.
     const v = await createUser({ onboard: true });

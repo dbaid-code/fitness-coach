@@ -41,7 +41,7 @@ export const logger = {
 |-|-|-|
 | `planner_opened` | API-19 (client) | `{}` |
 | `plan_generated` | API-08 tx 2 | `{ session_length_min: 30\|45\|60, focus_mode: 'coach'\|'user', focus_groups: MuscleGroup[], attempts: 1\|2, latency_ms: int, after_reset: boolean, short_session: boolean }` |
-| `generation_failed` | API-08 failure path | `{ session_length_min, focus_mode, reason: 'validation'\|'api'\|'deadline', latency_ms }` |
+| `generation_failed` | API-08 failure path | `{ session_length_min, focus_mode, reason: 'validation'\|'api'\|'deadline', latency_ms }`. Not written for `NOTE_RULES_OUT_FOCUS` (D-61: AG-3 never ran) |
 | `text_edit_submitted` | API-11 (whenever the edit is counted) | `{ edit_index: 1..5, latency_ms, plan_changed: boolean }` |
 | `plan_reset` | API-12 | `{ reset_reason: ResetReason \| null, from_status: 'draft'\|'accepted' }` |
 | `plan_accepted` | API-13 | `{}` |
