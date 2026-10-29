@@ -17,7 +17,7 @@ export const AGENT_CONFIG = {
     model: 'claude-haiku-5-5',
     effort: 'medium',
     maxTokens: 8_192,
-    promptVersion: 'ag2.v1',
+    promptVersion: 'ag2.v2',
     refusalFallback: false,
   },
   ag3_workout_planner: {

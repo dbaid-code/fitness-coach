@@ -162,7 +162,7 @@ export type Effort = 'low' | 'medium' | 'high';
 
 export const AGENT_CONFIG = {
   ag1_equipment_vision: { model: 'claude-sonnet-5-5', effort: 'high',   maxTokens: 8_192,  promptVersion: 'ag1.v1', refusalFallback: true },
-  ag2_input_guard:      { model: 'claude-haiku-5-5',  effort: 'medium', maxTokens: 8_192,  promptVersion: 'ag2.v1', refusalFallback: false },
+  ag2_input_guard:      { model: 'claude-haiku-5-5',  effort: 'medium', maxTokens: 8_192,  promptVersion: 'ag2.v2', refusalFallback: false },
   ag3_workout_planner:  { model: 'claude-sonnet-5-5', effort: 'high',   maxTokens: 16_000, promptVersion: 'ag3.v1', refusalFallback: true },
 } as const;
 
