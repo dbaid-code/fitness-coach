@@ -5,7 +5,7 @@
 1. Capture the input **without personal details** (rewrite names, places and anything identifying).
 2. Add it as a case:
    - missed red flag or misclassified text → `evals/datasets/ag2-inputs.v1.json` (EV-3), with the owner's label;
-   - unsafe exercise for a body area → `evals/datasets/health-cases.v1.json` (EV-4).
+   - unsafe exercise for a body area → `evals/datasets/health-cases.v2.json` (EV-4).
 3. Fix the cause: the AG-2 prompt examples, the exercise's `body_areas_stressed` tags in `data/seed/exercises.v2.json`, or the rules.
 4. Run `pnpm evals:full` (dev key) and commit `evals/results/latest.json`; the `eval-gate` CI job must pass.
 5. Release.

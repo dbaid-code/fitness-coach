@@ -16,7 +16,7 @@
 export const MESSAGE_CODES = [
   'SIGNUP_NOTICE', 'APPLIED', 'NOTE_APPLIED', 'APPLIED_HEALTH_AREA', 'APPLIED_HEALTH_LIGHTER', 'PARTIAL', 'NOT_POSSIBLE',
   'NOT_UNDERSTOOD', 'NOT_UNDERSTOOD_NOTE', 'OUT_OF_SCOPE_EDIT', 'OUT_OF_SCOPE_NOTE', 'RED_FLAG', 'EDIT_LIMIT', 'PLAN_LIMIT',
-  'PHOTO_LIMIT', 'PHOTO_NONE', 'PHOTO_PARTIAL', 'GENERATION_FAILED', 'SPEND_CAP', 'EXPIRED', 'DISCARD_CONFIRM',
+  'PHOTO_LIMIT', 'PHOTO_NONE', 'PHOTO_PARTIAL', 'GENERATION_FAILED', 'NOTE_RULES_OUT_FOCUS', 'SPEND_CAP', 'EXPIRED', 'DISCARD_CONFIRM',
   'OVER_TIME_WARNING', 'HEADER_USER', 'HEADER_COACH', 'HEADER_FIRST', 'RECENCY_STRIP',
 ] as const;
 export type MessageCode = (typeof MESSAGE_CODES)[number];
@@ -42,6 +42,7 @@ export type MessageCode = (typeof MESSAGE_CODES)[number];
 | `PHOTO_NONE` | — | I couldn't identify equipment in those photos. Please pick from the list. |
 | `PHOTO_PARTIAL` | `n: number` (≥ 1) | Found {n} items. Check the list and add anything I missed. (n = 1: "Found 1 item. Check the list and add anything I missed.") |
 | `GENERATION_FAILED` | — | I couldn't build a plan this time. Try again or change your inputs. |
+| `NOTE_RULES_OUT_FOCUS` | — | Your note rules out every exercise for that focus. Pick another focus or change the note. (D-61) |
 | `SPEND_CAP` | — | Coach is resting right now. Please try again later. |
 | `EXPIRED` | — | This workout expired. Plan a new one when you're ready. |
 | `DISCARD_CONFIRM` | — | Discard your current workout? |
@@ -82,7 +83,7 @@ export function formatList(names: string[]): string;   // 'A' | 'A & B' | 'A, B 
 | Warning | `OVER_TIME_WARNING` (sticky footer) | `warning` bg, `TriangleAlert` |
 | Danger | `RED_FLAG` | `danger` bg, `OctagonAlert` |
 | Outline (blocking) | `SPEND_CAP`, `PLAN_LIMIT`, `EDIT_LIMIT`, `PHOTO_LIMIT`, `EXPIRED`, `STILL_WORKING` | white, `input` outline, `Clock` |
-| Outline (error) | `GENERATION_FAILED` | white, `input` outline, `Info` |
+| Outline (error) | `GENERATION_FAILED`, `NOTE_RULES_OUT_FOCUS` | white, `input` outline, `Info` |
 
 All banners: `role="status"`, `aria-live="polite"`. `EXPIRED` has a 44 px dismiss button (`aria-label="Dismiss"`); dismissal is stored in `localStorage` key `gc.expired-dismissed.<planId>` (read and write wrapped in `try/catch`).
 

@@ -22,7 +22,7 @@ export type PlannerFormState = {
   afterResetOf: string | null;
 };
 
-export type PlannerBannerCode = 'RED_FLAG' | 'GENERATION_FAILED' | 'PLAN_LIMIT' | 'SPEND_CAP';
+export type PlannerBannerCode = 'RED_FLAG' | 'GENERATION_FAILED' | 'NOTE_RULES_OUT_FOCUS' | 'PLAN_LIMIT' | 'SPEND_CAP';
 
 /** Planner (planner.md §3). The generating state replaces the form body while a request is in flight. */
 export function PlannerForm({

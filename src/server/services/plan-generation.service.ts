@@ -132,7 +132,7 @@ export async function suggest(
       return {
         outcome: 'generation_failed',
         plan: null,
-        status: { code: 'GENERATION_FAILED' },
+        status: core.status ?? { code: 'GENERATION_FAILED' }, // D-61: NOTE_RULES_OUT_FOCUS
         plans_remaining_today: remaining,
       };
     }

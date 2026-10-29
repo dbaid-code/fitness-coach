@@ -58,7 +58,7 @@ export function PlanScreen({ initialData }: { initialData: PlannerBootstrap }) {
     } else if (r.kind === 'red_flag') {
       setBanner('RED_FLAG');
       setForm((f) => ({ ...f, redFlagNote: f.note }));
-    } else if (r.kind === 'generation_failed') setBanner('GENERATION_FAILED');
+    } else if (r.kind === 'generation_failed') setBanner(r.code);
     else if (r.kind === 'blocked') setBanner(r.code);
   }, []);
   const { busy, suggest } = useSuggestWorkout(onResult);

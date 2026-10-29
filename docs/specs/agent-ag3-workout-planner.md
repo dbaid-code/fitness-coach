@@ -3,8 +3,8 @@
 | | |
 |-|-|
 | **Implements** | AG-3; FR-40, FR-42, FR-44, FR-53, FR-56, FR-57; PRD §8.4, §8.5, §8.8 – §8.11; engineering doc §8.3 (AG-3), §8.4.3, §8.5, §8.7 (retry) |
-| **Model** | `claude-sonnet-5-5`, effort `high`, `max_tokens` 16 000 (includes thinking), refusal fallback on (D-08), prompt `ag3.v2` (v2, 2026-10-29: coach cardio for every goal within `max_cardio_items` and `continuous_cardio_s`, as D-52 and the rulebook already said; v1 still limited it to Lose weight) |
-| **Files** | `src/server/agents/workout-planner/workout-planner.agent.ts`, `workout-planner.schema.ts`, `render-context.ts`, `prompt.v1.md` |
+| **Model** | `claude-sonnet-5-5`, effort `high`, `max_tokens` 16 000 (includes thinking), refusal fallback on (D-08), prompt `ag3.v3` (v3, 2026-10-29: order and variety rules, D-61; v2, 2026-10-29: coach cardio for every goal within `max_cardio_items` and `continuous_cardio_s`, as D-52 and the rulebook already said; v1 still limited it to Lose weight) |
+| **Files** | `src/server/agents/workout-planner/workout-planner.agent.ts`, `workout-planner.schema.ts`, `render-context.ts`, `prompt.v<N>.md` (current `prompt.v3.md`) |
 | **Called by** | `plan-generation.service` (mode `generate`), `plan-edit.service` (mode `edit`) |
 | **Evaluated by** | EV-1, EV-2, EV-4 |
 
@@ -75,11 +75,12 @@ export const WorkoutPlannerOutput = z.object({
 }).strict();
 ```
 
-## 5. System prompt (`prompt.v1.md`) — required content, in this order
+## 5. System prompt (`prompt.v3.md`) — required content, in this order
 Placeholders: `{{RULEBOOK}}` (rendered from `rulebook.v3.ts`), `{{MUSCLE_GROUPS}}`, `{{BODY_AREAS}}`.
 1. **Role:** "You build one gym workout as JSON. Use only exercises from `<candidates>` and routines from `<routines>`, by ID. Never invent IDs. You never write text for the user."
 2. **Training rulebook v3** (`{{RULEBOOK}}`): sets × reps by goal; level by experience; newbies at the minimum of the sets range (the full range when the minimum can't fill the session, D-49); starting holds; order warm-up → compound → isolation → cardio → cool-down; warm-up and cool-down always included (5 min each); time window 85–100%; continuity (keep about half the exercises when the focus overlaps a recent workout); after-Reset rules; cardio when Cardio is picked or the coach chooses (any goal; Build muscle and Stay fit at most one cardio exercise of up to 10 min, D-52); progression caps (for understanding — the numbers come from `<progression_targets>`).
 3. **Focus rules:** user mode → main exercises only from those groups, covering as many groups as fit, least recently trained first. Coach mode → pick from the groups present in `<candidates>` (recently trained groups were already removed), use `<frequency>.style`: `full_body` covers more groups per session, `split` focuses on 1–3 related groups; first workout → choose from goal and experience. Cardio main exercises only if `cardio` is in the focus, or in coach mode when the goal is `lose_weight` (as a block before the cool-down).
+3a. **Order and variety (v3, D-61):** compounds before isolations, core after the other groups, cardio last; with several focus groups the larger group's compounds first; at most 2 exercises of one movement pattern while `<candidates>` offer another pattern for that group (biceps: vary grip and position); share the exercises across the focus groups.
 4. **Numbers:** an exercise with an entry in `<progression_targets>` uses exactly those numbers, unless a current or session `adjust_volume` intent covers it (then move in the requested direction within the hard bounds: sets 1–10, reps 1–50, time 5–3600 s). New exercises use `<rulebook_targets>` (newbies: minimum sets unless `<rulebook_targets>` gives the full range, D-49; reps within the range; holds start at `starting_hold_s`). Continuous cardio: `sets` 1 and `time_per_set_s` within `continuous_cardio_s` (D-52) chosen to fit the time.
 5. **Time sizing:** card time = `sets × reps × seconds_per_rep + (sets − 1) × rest_s + setup_s` (reps) or `sets × time_per_set_s + (sets − 1) × rest_s + setup_s` (timed). The sum of main items must be inside `main_time_window_s`; aim for the upper part unless the reset reason is `too_long` (then near the minimum, with fewer exercises).
 6. **Requests:** apply each `intents.current` item; report every current `intent_id` exactly once in `applied_intents` or `unapplied_intents` (`not_available`: nothing in the candidates fits; `time`: it does not fit the window). `equipment_today` and `avoid_body_area` are already enforced by the candidate list: report them as applied. Match `replacement_term`, `target_term` and `exercise_term` to candidates **by meaning** (synonyms, abbreviations, e.g. "skull crushers" = lying triceps extension); if nothing matches, report `not_available`. Keep honouring `intents.session`.
@@ -106,6 +107,8 @@ Placeholders: `{{RULEBOOK}}` (rendered from `rulebook.v3.ts`), `{{MUSCLE_GROUPS}
 | Validator fails, or `schema_invalid` | If `deadline.remainingMs() > DB_WRITE_RESERVE_MS + 1000`: call again with `attempt = 2` and `<previous_attempt>` holding the failed output (or `{"raw_text": …}` for schema-invalid) and the failed checks. Otherwise `GENERATION_FAILED`. |
 | `api_error`, `timeout`, `refusal`, `max_tokens` | `GENERATION_FAILED` (no validator retry) |
 | `spend_cap` | 503 `SPEND_CAP` |
+
+No candidates at all → AG-3 is not called. Suggest returns `GENERATION_FAILED`, or `NOTE_RULES_OUT_FOCUS` when the focus is user-picked and the note's avoided body areas are what emptied it (D-61).
 
 Second attempt fails for any reason → `GENERATION_FAILED`: Suggest creates no plan; edit keeps the plan unchanged. Neither attempt counts toward FR-80. Both attempts are logged with their validator results.
 

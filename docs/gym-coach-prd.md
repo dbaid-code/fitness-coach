@@ -3,7 +3,7 @@
 | | |
 |-|-|
 | **Product** | Gym Coach |
-| **Version** | 1.5 (2026-10-29) — EV-2 passes a plan with ≥ 3 on at least 4 of 5 criteria; the judge sees the eligible exercises (D-60). 1.4 (2026-10-29) — the EV-5 case pass bar is 80% of clear cases, not 90% (D-59). 1.3 (2026-10-28) — equipment master list grows to 62 items found by analysing every exercise, with a list of items assumed available everywhere (D-53). 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
+| **Version** | 1.6 (2026-10-29) — a note that rules out every exercise in the chosen focus gets its own message, `NOTE_RULES_OUT_FOCUS`; EV-2 allows 1 of 30 plans below the bar; EV-4 has 11 cases (D-61). 1.5 (2026-10-29) — EV-2 passes a plan with ≥ 3 on at least 4 of 5 criteria; the judge sees the eligible exercises (D-60). 1.4 (2026-10-29) — the EV-5 case pass bar is 80% of clear cases, not 90% (D-59). 1.3 (2026-10-28) — equipment master list grows to 62 items found by analysing every exercise, with a list of items assumed available everywhere (D-53). 1.2 (2026-10-27) — newbies get the full sets range when the minimum can't fill a session (D-49); sessions the available exercises can't fill are allowed shorter, with `SHORT_SESSION` (D-50, FR-44); drops the "never add rehab exercises" health-adjustment rule and its EV-4 check (D-51); cardio for every goal when the coach chooses the focus, limited for Build muscle and Stay fit (D-52). 1.1 — UI labels and placements from the owner-approved Claude Design handoff (2026-10-25). No behaviour changes. 1.0 was approved by the owner on 2026-10-24. |
 | **Design** | `docs/design/handoff/README.md` defines layout, look and feel. If it disagrees with this document on behaviour, this document wins. |
 | **Author / owner** | Deepak Baid |
 | **Date** | 2026-10-23 |
@@ -536,7 +536,7 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | Claude API error or timeout | The SDK's standard retries, then `GENERATION_FAILED` (or `NOT_UNDERSTOOD` for AG-2, `PHOTO_NONE` for AG-1) |
 | AG-2 returns output that doesn't match the schema | Treated as `NOT_UNDERSTOOD`; plan unchanged |
 | Spend cap reached | `SPEND_CAP`; no LLM calls; viewing plans and history and completing workouts still work |
-| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Code checks first. A newbie gets the goal's full sets range if the minimum can't fill it (D-49). If even that can't reach 85%, the plan may be shorter: it must reach 85% of what the candidates allow and shows `SHORT_SESSION` in the outcome area (D-50). A plan below that after the retry → `GENERATION_FAILED`. No main exercise at all → `GENERATION_FAILED` |
+| No candidates can fill the session (e.g., very limited equipment and many areas to avoid) | Code checks first. A newbie gets the goal's full sets range if the minimum can't fill it (D-49). If even that can't reach 85%, the plan may be shorter: it must reach 85% of what the candidates allow and shows `SHORT_SESSION` in the outcome area (D-50). A plan below that after the retry → `GENERATION_FAILED`. No main exercise at all → `GENERATION_FAILED`, except when the note's body areas rule out every exercise in a user-picked focus → `NOTE_RULES_OUT_FOCUS`, without calling the planner (D-61) |
 | No history, or too little | Rulebook defaults; first-workout header; never refuse to plan |
 
 ---
@@ -554,9 +554,9 @@ No agent can confirm, accept, complete or delete on the user's behalf.
 | ID | Suite | Pass bar |
 |-|-|-|
 | **EV-1** | Rule checks: run the validator's checks (section 8.13) over all generated plans in the test set | **100%** |
-| **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | Every plan scores ≥ 3 on at least 4 of the 5 criteria (D-60). The owner reviews 20% of judged cases and agrees with ≥ 80% |
+| **EV-2** | Plan quality, scored by an LLM judge (section 9.3) on 5 users × 3 session lengths × {user-picked focus, coach choice} = 30 plans | Every plan scores ≥ 3 on at least 4 of the 5 criteria (D-60); at most 1 of the 30 may fall below that (D-61). The owner reviews 20% of judged cases and agrees with ≥ 80% |
 | **EV-3** | AG-2 sorting and request extraction, including synonyms (20 inputs) | Red-flag recall **100%**; ≥ 90% labelled correctly overall; out-of-scope input never changes a plan (**100%**) |
-| **EV-4** | Health adjustment (10 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**) |
+| **EV-4** | Health adjustment (11 cases, e.g., "knee is sore" + Legs) | No exercise straining the named area (**100%**); a note that rules out the whole chosen focus gives `NOTE_RULES_OUT_FOCUS` (D-61) |
 | **EV-5** | Equipment photos (10 cases) | A case passes if it finds ≥ 80% of the true items; ≥ 80% of cases pass; ≤ 10% of all detected items are wrong; unclear photos take the `PHOTO_NONE` path (**100%**) (D-59) |
 | **EV-6** | Lifecycle and memory rules (automated tests): drafts, discarded, expired and uncompleted plans never reach history; health details never saved outside logs | **100%** |
 | **EV-7** | Progression engine unit tests (every row of section 8.9) | **100%** |
@@ -875,6 +875,7 @@ These weren't decided explicitly in the interview. The owner confirmed them when
 | `PHOTO_NONE` | Nothing detected confidently | "I couldn't identify equipment in those photos. Please pick from the list." |
 | `PHOTO_PARTIAL` | Some items detected | "Found {n} items. Check the list and add anything I missed." |
 | `GENERATION_FAILED` | Validation failed twice, or API error | "I couldn't build a plan this time. Try again or change your inputs." |
+| `NOTE_RULES_OUT_FOCUS` | The note's body areas rule out every exercise in the user-picked focus (D-61) | "Your note rules out every exercise for that focus. Pick another focus or change the note." |
 | `SPEND_CAP` | Production spend cap reached | "Coach is resting right now. Please try again later." |
 | `EXPIRED` | Plan expired | "This workout expired. Plan a new one when you're ready." |
 | `DISCARD_CONFIRM` | Reset on an accepted workout | "Discard your current workout?" |

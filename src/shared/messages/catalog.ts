@@ -20,6 +20,7 @@ export const MESSAGE_CODES = [
   'PHOTO_NONE',
   'PHOTO_PARTIAL',
   'GENERATION_FAILED',
+  'NOTE_RULES_OUT_FOCUS',
   'SPEND_CAP',
   'EXPIRED',
   'DISCARD_CONFIRM',
@@ -53,6 +54,8 @@ export const STATIC_TEMPLATES = {
   PHOTO_LIMIT: "You've used today's 5 photo scans. Pick your equipment from the list instead.",
   PHOTO_NONE: "I couldn't identify equipment in those photos. Please pick from the list.",
   GENERATION_FAILED: "I couldn't build a plan this time. Try again or change your inputs.",
+  // D-61 (owner-approved wording, 2026-10-29).
+  NOTE_RULES_OUT_FOCUS: 'Your note rules out every exercise for that focus. Pick another focus or change the note.',
   SPEND_CAP: 'Coach is resting right now. Please try again later.',
   EXPIRED: "This workout expired. Plan a new one when you're ready.",
   DISCARD_CONFIRM: 'Discard your current workout?',

@@ -178,6 +178,29 @@ describe('F-09 Suggest Workout (API-08)', () => {
     expect((await go({ after_reset_of: draft })).json.error.code).toBe('RESET_CONTEXT_INVALID');
   });
 
+  it('D-61: a note that rules out every exercise in the chosen focus → NOTE_RULES_OUT_FOCUS, no AG-3 call', async () => {
+    const r = await go({ focus: { mode: 'user', groups: ['shoulders'] }, note: 'my shoulder is a bit achy' });
+    expect(r.json.data).toMatchObject({
+      outcome: 'generation_failed',
+      plan: null,
+      status: { code: 'NOTE_RULES_OUT_FOCUS' },
+      plans_remaining_today: 10,
+    });
+    expect(fakeAgents.calls('ag3_workout_planner')).toHaveLength(0);
+    const [ev] =
+      await adminSql`select properties from app.app_events where user_id = ${u.id} and event_type = 'generation_failed'`;
+    expect(ev!.properties.reason).toBe('focus_ruled_out');
+
+    // Another group still in the focus → a plan without shoulder work.
+    const v = await createUser({ onboard: true });
+    const ok = await go(
+      { focus: { mode: 'user', groups: ['legs', 'shoulders'] }, note: 'my shoulder is a bit achy' },
+      crypto.randomUUID(),
+      v,
+    );
+    expect(ok.json.data.outcome).toBe('plan_ready');
+  });
+
   it('D-17: note health text appears only in agent_logs', async () => {
     await go({ note: 'my knee is sore today zq-sentinel' });
     const hits =

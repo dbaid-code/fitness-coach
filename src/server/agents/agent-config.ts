@@ -24,7 +24,7 @@ export const AGENT_CONFIG = {
     model: 'claude-sonnet-5-5',
     effort: 'high',
     maxTokens: 16_000,
-    promptVersion: 'ag3.v2',
+    promptVersion: 'ag3.v3',
     refusalFallback: true,
   },
 } as const satisfies Record<

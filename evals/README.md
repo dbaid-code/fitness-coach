@@ -19,7 +19,7 @@ commit the `latest.json` from its artifact.
 - `users.v2.json`: 5 fictional users covering the three goals, three experience levels and five equipment setups (v2: u3–u5 in home or condo gyms, D-60).
 - `ev2-focus.v1.json`: EV-2's user-picked focus for each user and session length (D-60).
 - `ag2-inputs.v1.json`: 20 labelled AG-2 inputs (EV-3); disjoint from the prompt examples (a unit test checks).
-- `health-cases.v1.json`: 10 health notes (EV-4), every body area plus one "slept badly" case.
+- `health-cases.v2.json`: 11 health notes (EV-4), every body area plus one "slept badly" case; EV-4-11 expects `NOTE_RULES_OUT_FOCUS` (D-61).
 - `photos/`: 10 EV-5 cases (CC0 / public-domain photos from Wikimedia Commons, no people); truth lists approved by
   the owner on 2026-10-28. See `photos/README.md` and `photos/SOURCES.md`.
 

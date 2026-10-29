@@ -2529,7 +2529,7 @@ fitness-coach/
 │   │   ├── users.v2.json             # 5 fictional users with completed histories (v2: home and condo gyms, D-60)
 │   │   ├── ev2-focus.v1.json         # EV-2 user-picked focus per user and length (D-60)
 │   │   ├── ag2-inputs.v1.json        # 20 labelled inputs (EV-3)
-│   │   ├── health-cases.v1.json      # 10 cases (EV-4)
+│   │   ├── health-cases.v2.json      # 11 cases (EV-4; v2, D-61)
 │   │   └── photos/                   # 10 cases, each a folder of 1–5 images + truth.json (EV-5)
 │   ├── suites/
 │   │   ├── ev1-rule-checks.ts
@@ -2872,10 +2872,10 @@ Tool-default names at the repository root, in TypeScript where the tool supports
 | ID | Implementation | Data | Pass bar (PRD) |
 |-|-|-|-|
 | EV-1 | `evals/suites/ev1-rule-checks.ts`: runs the **production validator** over every plan generated in EV-2 and EV-4 | Generated plans | **100%** |
-| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt, sees the eligible exercises) scores 5 criteria from 1 to 5 | `users.v2.json`, `ev2-focus.v1.json` | Every plan ≥ 3 on at least 4 of 5 criteria (D-60); the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
+| EV-2 | `ev2-plan-quality.ts`: 5 users × 3 lengths × {user-picked, coach} = 30 plans → judge (`claude-sonnet-5-5`, separate prompt, sees the eligible exercises) scores 5 criteria from 1 to 5 | `users.v2.json`, `ev2-focus.v1.json` | Every plan ≥ 3 on at least 4 of 5 criteria (D-60), at most 1 of 30 below that (D-61); the owner reviews 20% (6 plans) with ≥ 80% agreement, otherwise switch the judge to `claude-opus-5-5` |
 | EV-3 | `ev3-input-guard.ts`: 20 labelled inputs → AG-2 → compare category, red flag and intents | `ag2-inputs.v1.json` | Red-flag recall **100%**; ≥ 90% correct; out-of-scope never changes a plan (**100%**), checked by running out-of-scope edits through API-11 with real agents and comparing the plans |
-| EV-4 | `ev4-health.ts`: 10 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v1.json` | No exercise straining the named area (**100%**) |
-| EV-5 | `ev5-photos.ts`: 10 cases → AG-1 → threshold | `photos/*` | A case passes if ≥ 80% of the true items are found; ≥ 90% of cases pass; ≤ 10% of detected items are wrong; unclear photos give `PHOTO_NONE` (**100%**) |
+| EV-4 | `ev4-health.ts`: 11 cases (e.g., "knee is sore" + Legs) → full generation | `health-cases.v2.json` | No exercise straining the named area (**100%**); a note that rules out the whole focus gives `NOTE_RULES_OUT_FOCUS` (D-61) |
+| EV-5 | `ev5-photos.ts`: 10 cases → AG-1 → threshold | `photos/*` | A case passes if ≥ 80% of the true items are found; ≥ 80% of clear cases pass (D-59); ≤ 10% of detected items are wrong; unclear photos give `PHOTO_NONE` (**100%**) |
 | EV-6 | Vitest integration (§13.3, lifecycle) | Fixtures | **100%** |
 | EV-7 | Vitest unit (`progression.test.ts`) | Fixtures | **100%** |
 | EV-8 | Vitest unit and integration (limits, catalog) | Fixtures | **100%** |
@@ -3463,6 +3463,7 @@ There is no paging for the pilot. Passive signals:
 | D-58 | After each production deploy: wait for readiness, then a smoke test with a dedicated account that logs in, sees its equipment, gets one real plan (a few cents) and resets it, and opens History (`tests/e2e/prod-smoke.spec.ts`) | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md` |
 | D-59 | EV-5's case pass bar is **≥ 80% of clear cases** (was 90%); the other EV-5 bars are unchanged (≥ 80% of true items per case, ≤ 10% wrong items, `PHOTO_NONE` on 100% of unclear photos). With 8 clear cases, 90% allowed no miss, and one borderline item (EV-5-06's pull-up bar, confidence 0.50–0.60 across runs) decided the suite. `PHOTO_CONFIDENCE_THRESHOLD` tuned to 0.55 on the same day | **Approved** (owner) | 2026-10-29 | PRD v1.4 §9, `evaluations.md` §3 |
 | D-60 | EV-2 changes: (1) a plan passes with **≥ 3 on at least 4 of the 5 criteria** (was: no criterion below 3); (2) the judge also receives `eligible_exercises`, the planner's own candidate list (equipment, experience level and avoided areas already applied) restricted to the plan's focus groups, and judges balance and choice against it (prompt `judge.v2`; `CoreResult.candidateIds` carries the list); (3) the user-picked focus comes from a fixed table (`ev2-focus.v1.json`) that rotates logical group pairs, adds cardio to 4 of 15 and avoids groups trained in the last 2 days, instead of each user's least-recent pair (which was chest + shoulders for most); (4) fixture users u3, u4 and u5 train in a home or condominium gym (`users.v2.json`). The first full run had 16 of 30 plans fail on balance, mostly for limited-equipment users | **Approved** (owner) | 2026-10-29 | PRD v1.5 §9, `evaluations.md` §2.1, §3, §4 |
+| D-61 | Plan quality and a clear message when a note rules out the whole focus: (1) AG-3 prompt `ag3.v3` adds order and variety rules (compounds before isolations, the larger group's compounds first, at most 2 exercises of one movement pattern while another is available); (2) EV-2 passes with **at most 1 of the 30 plans** below the per-plan bar (was 0); (3) when the note's body areas leave no candidate in a user-picked focus, but the focus has candidates without them, Suggest returns `generation_failed` with **`NOTE_RULES_OUT_FOCUS`** ("Your note rules out every exercise for that focus. Pick another focus or change the note.") instead of `GENERATION_FAILED`, without calling AG-3 (event reason `focus_ruled_out`); (4) EV-4 dataset v2: EV-4-03 becomes legs + shoulders (no shoulder-group exercise avoids the shoulders) and EV-4-11 keeps the shoulders-only case, expecting `NOTE_RULES_OUT_FOCUS`. The post-merge full run on 2026-10-29 failed EV-2 on one plan (four overhead presses before the leg lifts) and EV-4-03 (empty pool once the neck isometrics were deactivated) | **Approved** (owner) | 2026-10-29 | PRD v1.6 §6, §9, Appendix A; `messages-and-ui-copy.md`; `evaluations.md` §2.3, §3 |
 
 ## Appendix B. Configuration constants
 
