@@ -9,6 +9,7 @@ import { BODY_AREAS, type MuscleGroup } from '../src/shared/constants';
 import {
   CUSTOM_BACK,
   CUSTOM_BICEPS,
+  CUSTOM_LIMITED,
   CUSTOM_CARDIO,
   bodyAreasStressed,
   cardShape,
@@ -159,6 +160,9 @@ const rows: SeedExercise[] = raw.exercises.map((e) => {
     group === null ||
     e.instructions.length === 0 ||
     e.category === 'stretching' ||
+    // Owner 2026-10-29 (option A): neck-only exercises are not shoulder exercises; the map files neck under
+    // shoulders, so the planner offered neck isometrics as shoulder work (EV-2).
+    e.primaryMuscles.every((m) => m === 'neck') ||
     // D-53: plate-loaded leverage machines are not on the equipment list, so their exercises stay inactive.
     e.name.startsWith('Leverage ') ||
     // Kept rows don't carry the draft's `unmappable` flag, so an inactive kept row stays inactive (--refresh it to
@@ -177,7 +181,7 @@ const rows: SeedExercise[] = raw.exercises.map((e) => {
     secondary_muscles: e.secondaryMuscles,
     instructions: e.instructions,
     image_paths: e.images,
-    // Neck exercises have no group; they stay inactive and are filed under shoulders to satisfy the column.
+    // Neck exercises stay inactive (see above) and are filed under shoulders to satisfy the column.
     muscle_group: group ?? 'shoulders',
     required_equipment: equipment ?? [],
     body_areas_stressed: d.body_areas_stressed,
@@ -247,6 +251,17 @@ for (const c of CUSTOM_BACK) {
     muscle_group: 'back',
     body_areas_stressed: c.body_areas_stressed,
     timed_kind: 'hold',
+  });
+}
+
+for (const c of CUSTOM_LIMITED) {
+  rows.push({
+    ...rows.find((r) => r.id === CUSTOM_CARDIO[0]!.id)!,
+    ...c,
+    category: 'strength',
+    secondary_muscles: [],
+    card_type: 'reps',
+    timed_kind: null,
   });
 }
 
