@@ -19,24 +19,26 @@ Free Supabase projects pause after inactivity; resume the dev project from the d
 ## 2. One-time setup (owner prerequisites, §19.1)
 | # | Task | Details |
 |-|-|-|
-| P-1 | Supabase **dev** project | Region `ap-south-1`; apply the schema (§2.1); set the `gc_app` password; Auth settings (`auth.md` §2); `pnpm db:seed --env dev`; `pnpm seed:images --env dev` |
+| P-1 | Supabase **dev** project | Region `ap-south-1`; Auth settings, Resend SMTP and templates (`auth.md` §2, D-55); `gc_app` login with a password; schema, seed and images by `dev-rebuild.yml` once, then `deploy-dev.yml` on every push to `main` (§2.1, D-56) |
 | P-2 | Vercel project | Linked to `dbaid-code/fitness-coach`; framework Next.js; Node 24; function region `bom1` (`vercel.json`); Preview env vars (§3); automatic production deploys off (`git.deploymentEnabled.main = false`) |
 | P-3 | Anthropic workspaces | `gym-coach-dev` ($25/month limit, D-39) and `gym-coach-prod` ($60/month); one API key each; spend notifications at 50% and 80% |
-| P-4 | Owner production account | Sign up in prod with the Supabase organisation login email (the built-in sender only delivers to org members); settle OD-06 before Phase 1 |
+| P-4 | Owner production account | Sign up in prod (Resend SMTP, D-55); create the smoke-test account (D-58) |
 | P-5 | Supabase **prod** project | Region `ap-south-1`; same steps as P-1 with `--env prod`; upgrade to Pro just before Phase 1 |
 | P-6 | GitHub | Secrets (§3) and environment `production` with the owner as required reviewer |
 
 ### 2.1 Applying the schema to a hosted project
-Each hosted project is built one way only:
+Each hosted project is built one way only, by a workflow; nothing is changed by hand (D-56):
 - **Normal path (from M1):** `supabase db push --db-url "$SUPABASE_DB_URL_<ENV>"` applies `supabase/migrations/` (which reproduce `docs/specs/supabase-schema.sql`, checked by the parity job).
-- **Before the migrations exist:** paste `docs/specs/supabase-schema.sql` into the SQL editor of the fresh project once. When the migrations land, record them as already applied instead of re-running them: `supabase migration repair --db-url "$SUPABASE_DB_URL_<ENV>" --status applied <each migration version>`, then use the normal path from then on.
+- **Dev (D-56):** it was set up by pasting the schema and never recorded, so `dev-rebuild.yml` (manual, `wipe-dev`) drops the app schemas and cron jobs once and rebuilds from the migrations, seed and images. `deploy-dev.yml` then applies migrations, seed and images on every push to `main`. `e2e-hosted.yml` runs the e2e suite against each preview once `/api/v1/health` reports `ready` (D-54).
+- **Prod:** never pasted. The owner creates the `gc_app` login with its password; the first `deploy` run applies everything else.
+- *Historical, before the migrations existed:* paste `docs/specs/supabase-schema.sql` into the SQL editor of the fresh project once. When the migrations land, record them as already applied instead of re-running them: `supabase migration repair --db-url "$SUPABASE_DB_URL_<ENV>" --status applied <each migration version>`, then use the normal path from then on.
 
 ## 3. Variables per place
 **Vercel — Preview:** `NEXT_PUBLIC_SUPABASE_URL` (dev), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (dev), `SUPABASE_SECRET_KEY` (dev), `DATABASE_URL` (dev transaction pooler, `gc_app`), `ANTHROPIC_API_KEY` (dev), `LLM_MONTHLY_BUDGET_USD=24`, `APP_ENV=preview`, `AGENTS_MODE=real`. `NEXT_PUBLIC_SITE_URL` unset (derived from `VERCEL_URL`). "Automatically expose System Environment Variables" on.
 
 **Vercel — Production:** the prod equivalents, `NEXT_PUBLIC_SITE_URL=https://<prod domain>`, `LLM_MONTHLY_BUDGET_USD=58`, `APP_ENV=production`, `AGENTS_MODE=real`.
 
-**GitHub Actions secrets:** `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_URL_DEV`, `SUPABASE_DB_URL_PROD` (session pooler :5432, role `postgres`), `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `ANTHROPIC_API_KEY_EVALS` (dev key). `SUPABASE_DB_URL_PROD` and the Vercel secrets live in the `production` environment.
+**GitHub Actions secrets:** `SUPABASE_DB_URL_DEV`, `SUPABASE_URL_DEV`, `SUPABASE_SECRET_KEY_DEV`, `VERCEL_AUTOMATION_BYPASS_SECRET` (D-54, D-56), `SUPABASE_DB_URL_PROD` (session pooler :5432, role `postgres`), `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `ANTHROPIC_API_KEY_EVALS` (dev key). `SUPABASE_DB_URL_PROD`, `SUPABASE_URL_PROD`, `SUPABASE_SECRET_KEY_PROD`, `PROD_SMOKE_EMAIL`, `PROD_SMOKE_PASSWORD` (D-58) and the Vercel secrets live in the `production` environment, with the variable `PROD_SITE_URL`. No `SUPABASE_ACCESS_TOKEN` (build notes §6).
 
 ## 4. CI (`.github/workflows/ci.yml`)
 ```yaml
@@ -164,6 +166,8 @@ jobs:
 The developer commits the produced `evals/results/latest.json` to satisfy `eval-gate`.
 
 ## 6. Deploy (`.github/workflows/deploy.yml`)
+*As built (build notes §6, D-56, D-58):* manual `workflow_dispatch` from `main` only; production job only (dev is `deploy-dev.yml`); eval gate → `db push` → seed → images → Vercel deploy → wait for `ready` → `prod-smoke.spec.ts` → tag. The sketch below is the original design.
+
 ```yaml
 name: deploy
 on:

@@ -1,7 +1,8 @@
 // Loads reference data (reference-data-seed.md §10). Role postgres (bypasses RLS); one transaction.
-// Usage: pnpm db:seed --env local|dev|prod [--force] [--write-version]
-import { writeFileSync } from 'node:fs';
+// Usage: pnpm db:seed --env local|dev|prod
+// D-57: always upserts (unchanged rows are not rewritten) and records the seed hash that /api/v1/health checks.
 import postgres from 'postgres';
+import { seedHash } from './seed/hash';
 import { loadSeed } from './seed/load';
 
 const args = process.argv.slice(2);
@@ -12,7 +13,7 @@ const urls: Record<string, string | undefined> = {
   prod: process.env.SUPABASE_DB_URL_PROD,
 };
 if (!envName || !(envName in urls)) {
-  console.error('Usage: pnpm db:seed --env local|dev|prod [--force] [--write-version]');
+  console.error('Usage: pnpm db:seed --env local|dev|prod');
   process.exit(1);
 }
 const url = urls[envName];
@@ -23,22 +24,10 @@ if (!url) {
 
 const seed = loadSeed();
 const version = seed.exercises.dataset_version;
-
-if (args.includes('--write-version')) {
-  writeFileSync(
-    'src/server/config/dataset-version.ts',
-    `// Written by scripts/seed-reference-data.ts --write-version from data/seed/exercises.v2.json.\nexport const DATASET_VERSION = '${version}';\n`,
-  );
-}
+const hash = seedHash(seed);
 
 const sql = postgres(url, { max: 1, onnotice: () => {} });
 try {
-  const [current] = await sql<{ v: string | null }[]>`select max(dataset_version) as v from app.exercises`;
-  if (current?.v === version && !args.includes('--force')) {
-    console.warn(`dataset already at ${version}`);
-    process.exit(0);
-  }
-
   await sql.begin(async (tx) => {
     for (const e of seed.equipment.items) {
       await tx`
@@ -105,9 +94,18 @@ try {
                  values (${r.id}, ${i + 1}, ${m.exercise_id}, ${m.duration_s})`;
       }
     }
+
+    // Rows no longer in the file are deactivated, like exercises (user_equipment keeps referencing them).
+    const equipmentIds = seed.equipment.items.map((e) => e.id);
+    await tx`update app.equipment set is_active = false where is_active and id <> all(${equipmentIds})`;
+
+    await tx`
+      insert into app_private.seed_state (id, seed_hash, dataset_version) values (true, ${hash}, ${version})
+      on conflict (id) do update set seed_hash = excluded.seed_hash, dataset_version = excluded.dataset_version,
+        applied_at = now()`;
   });
   console.warn(
-    `Seeded ${envName}: ${seed.equipment.items.length} equipment, ${seed.exercises.exercises.length} exercises, ${seed.routines.routines.length} routines (${version}).`,
+    `Seeded ${envName}: ${seed.equipment.items.length} equipment, ${seed.exercises.exercises.length} exercises, ${seed.routines.routines.length} routines (${version}, seed ${hash.slice(0, 12)}).`,
   );
 } finally {
   await sql.end();

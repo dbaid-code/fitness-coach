@@ -21,9 +21,21 @@ describe('api-conventions §4 apiHandler pipeline', () => {
   it('API-21: health answers ok with db ok and no auth', async () => {
     const r = await callRoute(health);
     expect(r.status).toBe(200);
-    expect(r.json).toEqual({ data: { ok: true, version: 'local', db: 'ok' } });
+    expect(r.json).toEqual({ data: { ok: true, version: 'local', db: 'ok', ready: true, not_ready: [] } });
     expect(r.headers.get('cache-control')).toBe('no-store');
     expect(r.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it('D-54: health names the seed when the database holds another seed', async () => {
+    const [saved] = await adminSql`select seed_hash from app_private.seed_state`;
+    await adminSql`update app_private.seed_state set seed_hash = 'stale'`;
+    try {
+      const r = await callRoute(health);
+      expect(r.status).toBe(200);
+      expect(r.json.data).toMatchObject({ db: 'ok', ready: false, not_ready: ['seed'] });
+    } finally {
+      await adminSql`update app_private.seed_state set seed_hash = ${saved!.seed_hash}`;
+    }
   });
 
   it('CSRF: wrong Origin or Content-Type → 403 FORBIDDEN_ORIGIN', async () => {

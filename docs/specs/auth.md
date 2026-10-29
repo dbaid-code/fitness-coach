@@ -19,14 +19,14 @@
 
 | Setting | Dev project | Prod project |
 |-|-|-|
-| Site URL | the preview URL under review (owner updates it when testing auth emails on a preview) | `https://<prod domain>` |
-| Redirect URLs | `https://*-<vercel-team-slug>.vercel.app/auth/confirm`, `http://localhost:3000/auth/confirm` | `https://<prod domain>/auth/confirm` |
+| Site URL | any stable dev URL (only the fallback when a redirect isn't allow-listed; D-55) | `https://<prod domain>` |
+| Redirect URLs | `https://*-<vercel-team-slug>.vercel.app`, `http://localhost:3000` | `https://<prod domain>` |
 | Email provider | enabled, **Confirm email on** | same |
 | Other providers | all disabled | all disabled |
 | Minimum password length | 8 | 8 |
 | JWT signing keys | asymmetric (default on new projects) | same |
 | Email templates | §3 (paste the HTML) | same |
-| SMTP | built-in sender (no custom SMTP) | same until OD-06 is settled before Phase 1 |
+| SMTP | Resend (D-55): host `smtp.resend.com`, port 465, user `resend`, password = a sending-only Resend API key, sender `no-reply@<mail subdomain>` | same, with its own key |
 
 **Local stack (`supabase/config.toml`, relevant parts):**
 ```toml
@@ -63,18 +63,20 @@ port = 54324
 ```
 
 ## 3. Email templates (`supabase/templates/`)
+The app sends its own origin as the redirect (`siteUrl()`), so `{{ .RedirectTo }}` is the preview, prod or local origin the user signed up on. If that origin isn't in the redirect allow-list, Supabase uses the Site URL instead and the link still works (D-55).
+
 `confirmation.html`:
 ```html
 <h2>Confirm your email</h2>
 <p>Tap the button to confirm your Gym Coach account. Then log in with your email and password.</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup">Confirm my email</a></p>
+<p><a href="{{ .RedirectTo }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup">Confirm my email</a></p>
 <p>If you didn't create an account, you can ignore this email.</p>
 ```
 `recovery.html`:
 ```html
 <h2>Reset your password</h2>
 <p>Tap the button to set a new Gym Coach password.</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password">Set a new password</a></p>
+<p><a href="{{ .RedirectTo }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password">Set a new password</a></p>
 <p>If you didn't ask for this, you can ignore this email.</p>
 ```
 
@@ -117,13 +119,13 @@ API routes are not redirected; `apiHandler` returns 401 instead.
 ## 7. Browser auth calls
 | ID | Call | Request validation (Zod, client) | Success | Error → UI copy key |
 |-|-|-|-|-|
-| AUTH-01 | `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL + '/auth/confirm' } })` | `email: z.email()`, `password: z.string().min(8).max(72)`, `confirm_password` equal | Store the email in `sessionStorage['gc.pending-email']` (try/catch); `router.push('/verify-email')` | `weak_password` → `auth.weakPassword`; `over_request_rate_limit` / `over_email_send_rate_limit` → `auth.rateLimited`; other → `toast.unexpected` |
+| AUTH-01 | `supabase.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL } })` | `email: z.email()`, `password: z.string().min(8).max(72)`, `confirm_password` equal | Store the email in `sessionStorage['gc.pending-email']` (try/catch); `router.push('/verify-email')` | `weak_password` → `auth.weakPassword`; `over_request_rate_limit` / `over_email_send_rate_limit` → `auth.rateLimited`; other → `toast.unexpected` |
 | AUTH-02 | `GET /auth/confirm` (§8) | — | see §8 | → `/log-in?error=link_invalid` |
 | AUTH-03 | `supabase.auth.signInWithPassword({ email, password })` | `email`, `password` non-empty | `router.replace(next ?? '/')` (`next` validated as in §8) | `invalid_credentials` → `logIn.invalidCredentials`; `email_not_confirmed` → `logIn.unverified` + **Resend verification email** button (AUTH-07); rate limit → `auth.rateLimited` |
 | AUTH-04 | `supabase.auth.signOut()` (Log out on `/profile`) | — | `queryClient.clear()`; `router.replace('/log-in')` | — |
-| AUTH-05 | `supabase.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL + '/auth/confirm?next=/update-password' })` | `email` | Always show the "Check your inbox" state with `forgot.sentBody` | rate limit → `auth.rateLimited`; anything else still shows the sent state |
+| AUTH-05 | `supabase.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL })` | `email` | Always show the "Check your inbox" state with `forgot.sentBody` | rate limit → `auth.rateLimited`; anything else still shows the sent state |
 | AUTH-06 | `supabase.auth.updateUser({ password })` on `/update-password` | `password` 8–72, confirm equal | `router.replace('/plan')` | `weak_password` → `auth.weakPassword`; no session → redirect `/log-in?error=link_invalid` |
-| AUTH-07 | `supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: SITE_URL + '/auth/confirm' } })` | `email` | Toast `verifyEmail.sentToast` | rate limit → `auth.rateLimited` |
+| AUTH-07 | `supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: SITE_URL } })` | `email` | Toast `verifyEmail.sentToast` | rate limit → `auth.rateLimited` |
 
 `/verify-email` reads the email from `sessionStorage['gc.pending-email']`; if it is unavailable it renders `{email}` as "your email" and shows an email field for **Resend email**. Emails never go in URLs.
 

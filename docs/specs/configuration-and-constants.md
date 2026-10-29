@@ -177,7 +177,7 @@ export { RULEBOOK_VERSION } from '@/server/domain/rulebook/rulebook.v3';
 export { DATASET_VERSION } from '@/server/config/dataset-version';  // generated from data/seed header by the seed script
 ```
 
-`src/server/config/dataset-version.ts` is written by `scripts/seed-reference-data.ts --write-version` from the `dataset_version` field of `data/seed/exercises.v2.json` and committed (`export const DATASET_VERSION = 'exercises.v2';`).
+`src/server/config/dataset-version.ts` is written by `pnpm seed:version` (`scripts/write-seed-version.ts`) from the seed files and committed: `DATASET_VERSION` (the `dataset_version` field of `data/seed/exercises.v2.json`) and `SEED_HASH` (D-57, checked by `/api/v1/health`). `src/server/config/migration-version.ts` holds `EXPECTED_MIGRATION`, the newest file in `supabase/migrations/` (D-54); a unit test keeps each in sync.
 
 ## 5. Rulebook constants (`src/server/domain/rulebook/rulebook.v3.ts`)
 Values are in `domain-time-model-and-rulebook.md` §3. Exported names: `RULEBOOK_VERSION = 'rulebook.v3'`, `SETS_REPS_BY_GOAL`, `LEVELS_BY_EXPERIENCE`, `STARTING_HOLD_S`, `REP_STEP = 2`, `HOLD_STEP_S = 10`, `REP_CAP = 15`, `HOLD_CAP_S = 60`, `REP_MIN = 6`, `HOLD_MIN_S = 15`, `CONTINUOUS_CARDIO_S = { min: 300, max: 1800 }`, `COACH_CARDIO_BY_GOAL` (D-52).

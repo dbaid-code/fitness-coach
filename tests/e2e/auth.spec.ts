@@ -1,11 +1,17 @@
+import { authLinkFor, testEmail } from '../helpers/emails';
 import { latestEmailTo, extractLink } from '../helpers/mailpit';
-import { createUser, expect, logIn, test } from './fixtures';
+import { createUser, expect, hosted, logIn, test } from './fixtures';
+
+// Locally the link comes from the mail in Mailpit (proves the template); on a deployed preview from the
+// stored token, since the mail goes to a test inbox (D-54).
+const emailLink = async (email: string, type: 'signup' | 'recovery') =>
+  hosted ? authLinkFor(email, type) : extractLink(await latestEmailTo(email));
 
 test.describe('FR-1 – FR-3 auth', () => {
   test('FR-1: sign-up shows the notice, the email link verifies, log-in leads to onboarding @smoke', async ({
     page,
   }) => {
-    const email = `e2e-${crypto.randomUUID()}@test.local`;
+    const email = testEmail('e2e');
     await page.goto('/sign-up');
     await expect(page.getByText(/not medical advice/)).toBeVisible();
     await page.getByLabel('Email').fill(email);
@@ -18,7 +24,7 @@ test.describe('FR-1 – FR-3 auth', () => {
     await logIn(page, { email, password: 'password123' });
     await expect(page.getByText('Verify your email first')).toBeVisible();
 
-    await page.goto(extractLink(await latestEmailTo(email)));
+    await page.goto(await emailLink(email, 'signup'));
     await page.waitForURL('**/log-in?verified=1');
     await logIn(page, { email, password: 'password123' });
     await page.waitForURL('**/onboarding');
@@ -30,7 +36,7 @@ test.describe('FR-1 – FR-3 auth', () => {
     await page.getByLabel('Email').fill(user.email);
     await page.getByRole('button', { name: 'Send reset link' }).click();
     await expect(page.getByText(/we sent a link to reset your password/)).toBeVisible();
-    await page.goto(extractLink(await latestEmailTo(user.email)));
+    await page.goto(await emailLink(user.email, 'recovery'));
     await page.waitForURL('**/update-password');
     await page.getByLabel('New password').fill('a-new-password-1');
     await page.getByLabel('Confirm password').fill('a-new-password-1');

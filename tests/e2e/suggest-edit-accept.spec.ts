@@ -1,8 +1,9 @@
-import { expect, suggest, test, totalText } from './fixtures';
+import { allowPreview, expect, suggest, test, totalText } from './fixtures';
 
 test('UF-6 – UF-11: suggest → offline direct edit → over time → AI edit → accept → still accepted elsewhere @smoke', async ({
   page,
   browser,
+  baseURL,
   onboarded,
 }) => {
   await suggest(page, { focus: 'Chest' });
@@ -36,6 +37,7 @@ test('UF-6 – UF-11: suggest → offline direct edit → over time → AI edit 
   await page.getByRole('button', { name: 'Accept' }).click();
   await expect(page.getByRole('button', { name: 'Workout completed' })).toBeVisible();
   const other = await browser.newContext({ storageState: await page.context().storageState() });
+  await allowPreview(other, baseURL);
   const p2 = await other.newPage();
   await p2.goto('/plan');
   await expect(p2.getByText('Accepted', { exact: true })).toBeVisible();

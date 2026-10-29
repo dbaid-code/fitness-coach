@@ -83,6 +83,16 @@ Every integration file calls `truncateUserData()` and `fakeAgents.reset()` in `b
 | `limits-spend.spec.ts` | `PLAN_LIMIT` and `SPEND_CAP` banners disable the right controls | |
 | `account-deletion.spec.ts` | Delete → cannot log in | |
 | `a11y.spec.ts` | axe on every page and every open sheet or dialog: 0 serious/critical | |
+| `prod-smoke.spec.ts` | Production only (D-58, `E2E_PROD_SMOKE=1`): smoke account logs in → equipment listed → one real plan → reset → History | — |
+
+### 5.1 Against deployed previews (D-54, `e2e-hosted.yml`)
+The same specs run against each successful Vercel preview deployment and the hosted dev project (chromium only, report-only), after `/api/v1/health` reports `ready`.
+- `E2E_BASE_URL` = the preview URL; Playwright starts no local server.
+- `VERCEL_AUTOMATION_BYPASS_SECRET`: added as `x-vercel-protection-bypass` to requests to the app origin only (`fixtures.ts`).
+- `E2E_ADMIN_DB_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY`: the fixtures create users and data in the dev project.
+- `E2E_EMAIL_DOMAIN=resend.dev`, `E2E_EMAIL_PREFIX=delivered+`: real mail goes to Resend's test inbox; `auth.spec.ts` takes the confirm and reset links from the stored token (`tests/helpers/emails.ts`) instead of Mailpit. The template text itself is checked locally (Mailpit) and by the owner's manual sign-up.
+- The preview must run `AGENTS_MODE=fake`; several specs rely on the fakes' fixed output.
+- `global-teardown.ts` deletes the run's test users. A PR that adds a migration fails until `deploy-dev.yml` applies it after merge.
 
 ## 6. Naming and traceability (§12.9, §14.2)
 - Test names start with the requirement ID: `describe('FR-62 one active plan', …)`, `it('V-9: relaxes to available candidates (D-05)', …)`, `describe('EV-7 progression', …)`.
@@ -98,5 +108,6 @@ Every integration file calls `truncateUserData()` and `fakeAgents.reset()` in `b
 | E2E smoke (Chromium) | ✅ | — |
 | E2E full (Chromium + WebKit) + axe | — | ✅ |
 | `pnpm build` + client bundle scan | ✅ | ✅ |
+| `e2e-hosted.yml` on the Vercel preview (report-only, D-54) | ✅ | — |
 | `eval-gate` | from M6 (required) | from M6 |
 | `pnpm audit --prod` (high+) and gitleaks | ✅ | ✅ |

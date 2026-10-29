@@ -30,6 +30,7 @@
     "seed:curate": "tsx scripts/curate-exercises.ts",
     "seed:validate": "tsx scripts/validate-seed.ts",
     "seed:images": "tsx scripts/upload-exercise-images.ts",
+    "seed:version": "tsx scripts/write-seed-version.ts",
     "evals:smoke": "tsx --conditions react-server evals/run-evals.ts --smoke",
     "evals:full": "tsx --conditions react-server evals/run-evals.ts --full",
     "evals:check": "tsx evals/manifest.ts --check",

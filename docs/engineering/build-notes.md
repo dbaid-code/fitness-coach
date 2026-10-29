@@ -87,7 +87,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 after the owner's first pass through the runbook):
 - Preview runs `AGENTS_MODE=fake` until M3.
 - **No `SUPABASE_ACCESS_TOKEN`.** Every hosted-database step connects with `SUPABASE_DB_URL_*`.
-- **The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews. Each milestone PR carries the preview's `/api/v1/health` link, and the owner confirms `"db":"ok"`. Vercel Authentication stays on for previews.
+- ~~**The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews.~~ **Corrected 2026-10-29:** Vercel's docs list Protection Bypass for Automation on all plans, Hobby included. `e2e-hosted.yml` uses it to run the e2e suite on every preview (D-54); Vercel Authentication stays on for everyone else.
 - **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are created at M7, not M0.
 - **The Claude cloud environment holds the dev key as `GC_ANTHROPIC_API_KEY`** (2026-10-27). An `ANTHROPIC_API_KEY` set there never reached the session. `scripts/curate-exercises.ts` and `evals/lib/env.ts` fall back to it; `env.ts`, Vercel and CI keep `ANTHROPIC_API_KEY`.
@@ -106,5 +106,7 @@ Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 aft
 | M7 | Prepared | `deploy.yml`, `owner-setup-prod.md`, runbooks | P-3 prod, P-4, P-5; no deploy by design |
 
 2026-10-27: D-49 / D-50 implemented (§5.24).
+
+2026-10-29: **Deployed environments are now built and tested by the pipeline (D-54 – D-58).** The owner's manual preview test found the sign-up link reported "expired or already used" and onboarding listed no equipment. Cause: the hosted dev project had never been touched by a workflow. Its schema was pasted by hand (without `rls-policies.sql`, so no migrations 9–10), `migration repair` never ran, no seed or images were loaded (`deploy.yml` had 0 runs and its dev job was blocked by the eval gate), and Auth still used Supabase's default email and templates. The default link lets Supabase confirm the address itself and then reach `/auth/confirm` without a `token_hash`, hence `link_invalid` followed by a working log-in. CI could not see any of this because it builds its own stack. Fixes: readiness in `/api/v1/health` (migration 11, `app_private.readiness()`, `app_private.seed_state`); `db:seed` always upserts and stores a seed hash (it used to skip when the version was unchanged, which is how the v1 edits never reached dev); `dev-rebuild.yml` once, then `deploy-dev.yml` on every push to `main`; `e2e-hosted.yml` on every preview; Resend SMTP and `{{ .RedirectTo }}` templates; production readiness + smoke with one real plan. Owner steps: `owner-setup-dev.md` "Email, hosted tests and the dev rebuild".
 
 Details: `docs/engineering/validation-report.md`.
