@@ -143,7 +143,7 @@ Why: the preview's sign-up link failed and onboarding showed no equipment becaus
    | `VERCEL_AUTOMATION_BYPASS_SECRET` | the value from step 3 |
    | `SUPABASE_URL_DEV` | `supabase-dev-url` |
    | `SUPABASE_SECRET_KEY_DEV` | `supabase-dev-secret` (or a new secret key named `github-actions`) |
-5. **Rebuild dev once** (after the PR with these workflows is merged). GitHub → Actions → **dev-rebuild** → Run workflow on `main`, type `wipe-dev`. It drops the app schemas and cron jobs, then applies every migration, the seed and the images. Accounts in Supabase Auth survive; their profiles and plans don't. From then on **deploy-dev** runs on every push to `main`.
+5. **Rebuild dev once** (after the PR with these workflows is merged). GitHub → Actions → **dev-rebuild** → Run workflow on `main`, type `wipe-dev`. It drops the app schemas and cron jobs, then applies every migration, the seed and the images. Accounts in Supabase Auth survive; their profiles and plans don't. From then on **deploy-dev** runs on every push to `main`. Once the `supabase db push` step has passed, don't run dev-rebuild again: if a later step fails, re-run **deploy-dev**, which repeats the seed and images without wiping.
 6. **Check:** open a preview's `/api/v1/health` while signed in to Vercel: `"ready":true` and `"not_ready":[]`. Then sign up on the preview with a real address that isn't your Supabase login: the email should arrive from `no-reply@mail.<yourdomain>`, the link should open the same preview and log-in should lead to onboarding with 62 items.
 
 ## When you're done
