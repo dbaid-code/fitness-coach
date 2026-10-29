@@ -24,7 +24,7 @@ commit the `latest.json` from its artifact.
   the owner on 2026-10-28. See `photos/README.md` and `photos/SOURCES.md`.
 
 Labels were written by the coding agent and need the owner's review (PRD §9.1). EV-2's owner check:
-score 6 judged plans (20%, stratified by user) in `results/owner-review.v1.json`; agreement must be ≥ 80%.
+score 6 judged plans (20%, stratified by user): read `results/owner-review.v1.md`, fill `results/owner-review.v1.json`; the judge's scores are in `results/owner-review.judge.v1.json` (open after scoring). Agreement (owner within ±1 of the judge) must be ≥ 80%.
 
 ## EV-1 note
 The generation core only returns a plan that the production validator accepted, so EV-1 holds by
