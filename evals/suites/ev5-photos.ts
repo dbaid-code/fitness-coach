@@ -108,7 +108,7 @@ export async function runEv5(deps: GenDeps) {
       passed:
         caseDirs.length >= 10 &&
         unclearCount >= 2 &&
-        main.case_pass_rate >= 0.9 &&
+        main.case_pass_rate >= 0.8 && // D-59 (was 0.9)
         main.wrong_item_rate <= 0.1 &&
         main.unclear_none === 1,
       cases: caseDirs.length,

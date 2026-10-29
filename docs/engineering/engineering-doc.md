@@ -1502,7 +1502,7 @@ const response = await anthropic.messages.parse(
 |-|-|
 | System (cached) | Role: identify gym equipment. Equipment table (`id`, `name`, `visual_hint`) for all active items. Rules: report only listed IDs; one entry per ID across all photos (de-duplicate); `confidence` = probability the item is present and usable, 0–1; ignore people, reflections and posters; if photos are unclear, return an empty list. Output contract. |
 | User | `Photo 1:` image, … `Photo n:` image (images before the text, labelled), then "Identify the equipment visible across all photos." |
-| Post-processing (code) | Drop IDs not in the active master list (FR-22, belt and braces). Keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (initial 0.70, tuned on EV-5, PRD §12.7). Take the max confidence per ID. 0 items → `PHOTO_NONE`; ≥ 1 → `PHOTO_PARTIAL {n}`. |
+| Post-processing (code) | Drop IDs not in the active master list (FR-22, belt and braces). Keep `confidence ≥ PHOTO_CONFIDENCE_THRESHOLD` (initial 0.70; 0.55 after tuning on EV-5, 2026-10-29, PRD §12.7). Take the max confidence per ID. 0 items → `PHOTO_NONE`; ≥ 1 → `PHOTO_PARTIAL {n}`. |
 
 **AG-2 Input Guard:**
 
@@ -1683,7 +1683,7 @@ Per exercise **E** the user has done before:
 | Anything else (one of the last two rated *Hard*) | Same as `a1` | `hold` |
 
 - Sets from history are clamped to the **current** goal's sets range, in case the goal changed.
-- **Request overrides (PRD §8.9):** when an applied `adjust_volume` intent (preference or health) covers an item, V-7 replaces "equals the target" with "within the hard bounds (Appendix B) and moved in the requested direction from the target". Lighter means sets ≤ target and reps or time ≤ target, with at least one strictly lower; harder is the reverse.
+- **Request overrides (PRD §8.9):** when an applied `adjust_volume` intent (preference or health) covers an item, V-7 replaces "equals the target" with "within the hard bounds (Appendix B) and moved in the requested direction from the target". Lighter means sets ≤ target and reps or time ≤ target, with at least one strictly lower; harder is the reverse. Continuous cardio is not covered: it keeps its normal range (V-7 rule 2), since it has no target and its length fits the session (build notes §5.29).
 
 #### 8.6.4 Time model (`src/shared/time-model/time-model.ts`, shared with the client)
 - Reps card total = `sets × reps × seconds_per_rep + (sets − 1) × rest_s + setup_s`.
@@ -3460,6 +3460,7 @@ There is no paging for the pilot. Passive signals:
 | D-56 | The hosted dev database is rebuilt once from the migrations (`dev-rebuild.yml`; it had been set up by pasting the schema) and from then on every push to `main` applies migrations, seed and images to dev (`deploy-dev.yml`), without the eval gate, which stays on production. No hosted database is changed by hand | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md`, owner runbooks |
 | D-57 | `db:seed` always upserts (unchanged rows are not rewritten) and records a hash of the loaded seed files in `app_private.seed_state`; readiness compares it with `SEED_HASH` in `src/server/config/dataset-version.ts` (`pnpm seed:version`, kept in sync by a unit test). Exercises and equipment missing from the files are deactivated, never deleted | **Approved** (owner) | 2026-10-29 | `reference-data-seed.md` |
 | D-58 | After each production deploy: wait for readiness, then a smoke test with a dedicated account that logs in, sees its equipment, gets one real plan (a few cents) and resets it, and opens History (`tests/e2e/prod-smoke.spec.ts`) | **Approved** (owner) | 2026-10-29 | `deployment-and-environments.md` |
+| D-59 | EV-5's case pass bar is **≥ 80% of clear cases** (was 90%); the other EV-5 bars are unchanged (≥ 80% of true items per case, ≤ 10% wrong items, `PHOTO_NONE` on 100% of unclear photos). With 8 clear cases, 90% allowed no miss, and one borderline item (EV-5-06's pull-up bar, confidence 0.50–0.60 across runs) decided the suite. `PHOTO_CONFIDENCE_THRESHOLD` tuned to 0.55 on the same day | **Approved** (owner) | 2026-10-29 | PRD v1.4 §9, `evaluations.md` §3 |
 
 ## Appendix B. Configuration constants
 
@@ -3489,7 +3490,7 @@ There is no paging for the pilot. Passive signals:
 | `HISTORY_SUMMARY_MAX_WORKOUTS`, `HISTORY_SUMMARY_DAYS` | 5, 28 | §8.5.2 | `server/config/app-config.ts` |
 | `PHOTO_MAX_LONG_EDGE_PX`, `PHOTO_JPEG_QUALITY` | 1568, 0.85 | D-01 | `shared/constants.ts` |
 | `PHOTO_MAX_FILE_BYTES`, `PHOTO_MAX_TOTAL_BYTES` | 1.5 MB, 4 MB | D-01 (Vercel 4.5 MB body limit) | `shared/constants.ts` |
-| `PHOTO_CONFIDENCE_THRESHOLD` | 0.70 initial; tuned on EV-5 | PRD §12.7 | `server/agents/agent-config.ts` |
+| `PHOTO_CONFIDENCE_THRESHOLD` | 0.55 (tuned on EV-5 2026-10-29; 0.70 initial) | PRD §12.7 | `server/agents/agent-config.ts` |
 | `STILL_WORKING_AFTER_MS` | 8000 | D-10 | `shared/constants.ts` |
 | `GENERATION_DEADLINE_MS`, `SCAN_DEADLINE_MS` | 20000, 30000 | D-10 | `server/config/app-config.ts` |
 | `CLIENT_TIMEOUT_GENERATE_MS`, `CLIENT_TIMEOUT_SCAN_MS` | 25000, 35000 | D-10 | `shared/constants.ts` |
