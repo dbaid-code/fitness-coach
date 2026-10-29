@@ -22,7 +22,7 @@ Key architectural/implementation choices, from the engineering doc and the owner
 ## Next (2026-10-29)
 Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands between the code and production:
 1. **Dev:** owner's runbook step 6 check; find why `e2e-hosted` never runs; fix the WebKit E2E failures on `main` (Step 9).
-2. **Before the evals:** the eval manifest hashes prompts, `agent-config.ts`, the rulebook and `data/seed/`. Any later change to them (such as the rulebook items deferred to Phase 0) needs a new full run (Step 9).
+2. **Before the evals:** the eval manifest hashes prompts, `agent-config.ts`, the rulebook and `data/seed/`. Any later change to them needs a new full run (Step 9). The owner kept the rulebook items and thin bodyweight pools deferred to Phase 0 (2026-10-29), so they will cost one more run when picked up.
 3. **Evals:** smoke → EV-5 alone to pick the photo threshold → full run, fix and re-run → owner scores 6 judged plans → commit `latest.json` (eval-gate green).
 4. **Prod setup (owner):** choose the production URL; P-3 prod, P-5, GitHub `production` environment, Vercel production variables (`owner-setup-prod.md`).
 5. **Before the first deploy:** `prod-smoke.spec.ts` and the Vercel steps of `deploy.yml` have never run. Rehearse the smoke spec on a dev preview with real agents.
@@ -32,7 +32,7 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
 
 - [ ] 🟨 **Step 1: Approvals and owner setup**
   - [x] 🟩 Owner approved the engineering doc; bumped to v1.0 with the other 2026-10-25 decisions recorded (D-38 full evals at the end of development, D-39 $25 dev cap with Phase 1 limits up to $110, D-40 Supabase Pro just before Phase 1)
-  - [x] 🟩 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment — *the dev key has been in the build container since 2026-10-27 as `GC_ANTHROPIC_API_KEY` (build notes §6; an `ANTHROPIC_API_KEY` set there never arrived); it ran the LLM seed curation and the F-16 spend-limit capture on 2026-10-28. Dev secrets for `deploy-dev` and `dev-rebuild` are set. Not confirmed: the `ANTHROPIC_API_KEY_EVALS` secret (the `evals` workflow has never run) and `VERCEL_AUTOMATION_BYPASS_SECRET` (`e2e-hosted` has never run)*
+  - [x] 🟩 Owner prerequisites for M0: P-1 Supabase dev project (`ap-south-1`), P-2 Vercel project (`bom1`), P-3 Anthropic dev workspace ($25 cap, alerts at 50% and 80%), P-6 GitHub secrets and the `production` environment — *the dev key has been in the build container since 2026-10-27 as `GC_ANTHROPIC_API_KEY` (build notes §6; an `ANTHROPIC_API_KEY` set there never arrived); it ran the LLM seed curation and the F-16 spend-limit capture on 2026-10-28. Dev secrets for `deploy-dev` and `dev-rebuild` are set. `ANTHROPIC_API_KEY_EVALS` and `VERCEL_AUTOMATION_BYPASS_SECRET` are set (owner, 2026-10-29)*
 
 - [x] 🟩 **Step 2: Design in Claude Design (runs alongside Steps 3–4)**
   - [x] 🟩 Design brief v0.2 used as the input to Claude Design (now superseded by the handoff)
@@ -90,7 +90,7 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
 
 - [ ] 🟨 **Step 10: M7 Release readiness (F-20)**
   - [ ] 🟥 Owner: P-5 Supabase prod project (`ap-south-1`, free tier until Phase 1), P-3 Anthropic prod workspace ($60 cap), P-4 sign up with the Supabase organisation email
-  - [ ] 🟨 Hosted dev built and tested by the pipeline (D-54 – D-58): `dev-rebuild` once, then `deploy-dev` on every push to `main`; Resend SMTP; `e2e-hosted` on every preview — *dev rebuilt from the migrations and seeded 2026-10-29 (second `dev-rebuild` run; images finished by `deploy-dev`); sign-up email through Resend works after the SMTP sender was moved onto the key's verified subdomain (2026-10-29). Open: owner's runbook step 6 check (link back to the same preview, onboarding lists 62 items, `"ready":true`); `e2e-hosted` has never run (0 runs), cause unknown*
+  - [ ] 🟨 Hosted dev built and tested by the pipeline (D-54 – D-58): `dev-rebuild` once, then `deploy-dev` on every push to `main`; Resend SMTP; `e2e-hosted` on every preview — *dev rebuilt from the migrations and seeded 2026-10-29 (second `dev-rebuild` run; images finished by `deploy-dev`); sign-up email through Resend works after the SMTP sender was moved onto the key's verified subdomain (2026-10-29). Open: owner's runbook step 6 check (link back to the same preview, onboarding lists 62 items, `"ready":true`); `e2e-hosted` has never run (0 runs) although its bypass secret is set; cause unknown*
   - [x] 🟩 `deploy.yml`: migrate prod → seed if the dataset changed → `vercel deploy --prod` behind owner approval → smoke check; Vercel's automatic production deploys turned off — *prepared, not run*
   - [ ] 🟨 Production config: env vars (`LLM_MONTHLY_BUDGET_USD = 58`), Auth settings and templates, exercise images in Storage, security headers and CSP — *documented in `docs/runbooks/owner-setup-prod.md`; owner applies*
   - [x] 🟩 Runbooks: spend cap, Anthropic outage, safety miss, key rotation, delete user

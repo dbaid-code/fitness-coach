@@ -99,11 +99,13 @@ Keys are grouped by screen. `{x}` is a placeholder filled by the component.
 | `toast.networkRetry` | Retry |
 | `toast.unexpected` | Something went wrong. Try again. |
 | `toast.requestId` | Ref: {requestId} |
+| `toast.rateLimited` | Too many attempts, try again later |
 | `errorBoundary.title` | Something went wrong. |
 | `errorBoundary.reload` | Reload |
 | `notFound.title` | Page not found. |
 | `notFound.action` | Go to Plan |
 | `common.cancel` / `common.save` / `common.dismiss` | Cancel / Save / Dismiss |
+| `common.close` | Close |
 
 **Auth**
 | Key | Text |
@@ -204,6 +206,7 @@ Keys are grouped by screen. `{x}` is a placeholder filled by the component.
 | `plan.incReps` / `plan.decReps` | Increase reps for {name} / Decrease reps for {name} |
 | `plan.incTime` / `plan.decTime` | Increase time per set for {name} / Decrease time per set for {name} |
 | `plan.moveUp` / `plan.moveDown` | Move {name} up / Move {name} down |
+| `plan.drag` | Drag {name} |
 | `plan.delete` | Delete |
 | `plan.deleteAria` | Delete {name} |
 | `plan.removedToast` | {name} removed |
