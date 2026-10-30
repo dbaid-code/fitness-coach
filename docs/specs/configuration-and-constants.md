@@ -61,7 +61,7 @@ export const env = {
 | `ANTHROPIC_API_BASE_URL` | **no** | optional | unset | unset |
 | `LLM_MONTHLY_BUDGET_USD` | **no** | `24` | `24` | `58` |
 | `APP_ENV` | **no** | `local` (also in CI) | `preview` | `production` |
-| `AGENTS_MODE` | **no** | `real` or `fake` (`fake` in CI) | `real` | `real` |
+| `AGENTS_MODE` | **no** | `real` or `fake` (`fake` in CI) | `fake` (D-62) | `real` |
 
 Client code reads only `process.env.NEXT_PUBLIC_*`. The browser-side site URL is `process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin` (`src/lib/site-url.ts`).
 

@@ -87,7 +87,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 9. OD-08 reviews don't block the next milestone; findings are fixed as they come in.
 
 Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 after the owner's first pass through the runbook):
-- Preview runs `AGENTS_MODE=fake` until M3.
+- Preview runs `AGENTS_MODE=fake`, permanently (D-62): `e2e-hosted` relies on the fakes. Real agents run only in production.
 - **No `SUPABASE_ACCESS_TOKEN`.** Every hosted-database step connects with `SUPABASE_DB_URL_*`.
 - ~~**The owner checks preview health by hand.** Vercel Hobby has no protection bypass, so CI can't reach protected previews.~~ **Corrected 2026-10-29:** Vercel's docs list Protection Bypass for Automation on all plans, Hobby included. `e2e-hosted.yml` uses it to run the e2e suite on every preview (D-54); Vercel Authentication stays on for everyone else.
 - **No required reviewer on `production`.** GitHub limits that to public repos or Enterprise. The M7 `deploy.yml` is `workflow_dispatch`-only, restricted to `main`; with the owner as the only writer, the manual run is the approval. This affects the M7 runbook and §17.

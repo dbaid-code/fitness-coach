@@ -19,14 +19,14 @@ Key architectural/implementation choices, from the engineering doc and the owner
 - Email: Supabase's built-in sender for M7 and Phase 0 (D-28); OD-06 must be settled before Phase 1.
 - **LLM budget (owner, 2026-10-25):** the dev Anthropic cap rises from $15 to $25 (app guard 24) and stays there through Phase 1. That covers the one-time seed curation (M1), the final eval runs (M6) and fix-and-re-run rounds during the pilot. Prod stays at $60 (guard 58). In Phase 1 the limits total up to $110 a month ($60 + $25 + $25 for Supabase Pro). The owner accepts this deviation from the PRD's $100 (PRD §12.4). Recorded as D-39.
 
-## Next (2026-10-29)
-Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands between the code and production:
-1. **Dev:** owner's runbook step 6 check; find why `e2e-hosted` never runs (the owner runs it once by hand with a preview URL: GitHub returns 403 to the build's dispatch); confirm the WebKit fix on `main` (Step 9).
-2. **Before the evals:** the eval manifest hashes prompts, `agent-config.ts`, the rulebook and `data/seed/`. Any later change to them needs a new full run (Step 9). The owner kept the rulebook items and thin bodyweight pools deferred to Phase 0 (2026-10-29), so they will cost one more run when picked up.
-3. **Evals:** smoke → EV-5 alone to pick the photo threshold → full run, fix and re-run → owner scores 6 judged plans → commit `latest.json` (eval-gate green).
-4. **Prod setup (owner):** choose the production URL; P-3 prod, P-5, GitHub `production` environment, Vercel production variables (`owner-setup-prod.md`).
-5. **Before the first deploy:** `prod-smoke.spec.ts` and the Vercel steps of `deploy.yml` have never run. Rehearse the smoke spec on a dev preview with real agents.
-6. **Go live:** the first `deploy` run is expected to stop at the smoke step (the smoke account only exists after the first deploy, P-4); create the accounts, run `deploy` again, then the Phase 0 entry checklist.
+## Next (2026-10-30)
+Code for M0–M6 is done and the eval gate is green (third full run 2026-10-29). M7 is prepared. Owner decision (D-62): production on the default `*.vercel.app` domain, PR previews stay on fake agents, and real agents first run on a deployed build in production. The step-by-step release is `docs/runbooks/owner-setup-prod.md`:
+1. **Pre-flight:** `ci` (with `eval-gate`) and `deploy-dev` green on `main`; the `production` environment exists; note the production domain.
+2. **Owner setup:** P-3 prod (Anthropic), P-5 (Supabase prod, Resend SMTP, templates), Vercel production variables and token, GitHub `production` secrets.
+3. **Deploy #1:** expected to stop at the smoke step (the smoke account only exists after the first deploy, P-4).
+4. **P-4:** owner and smoke accounts; owner receives verification and reset emails; smoke credentials stored.
+5. **Deploy #2:** smoke with one real plan → first `release-YYYYMMDD-N` tag; owner's real-agent checks and the `agent_logs` cost and latency query.
+6. **Dev, not blocking:** owner's runbook step 6 check on a preview; `e2e-hosted` starting on its own; WebKit E2E green on `main`.
 
 ## Tasks:
 
@@ -63,9 +63,9 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
   - [x] 🟩 *(UI)* Sign-up, verify-email, log-in, forgot and update password, onboarding wizard, profile and equipment pages
   - [x] 🟩 E2E: sign-up → Mailpit → log in → onboarding; deleted account can't log in; E2E smoke job added to CI
 
-- [ ] 🟨 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
+- [x] 🟩 **Step 6: M3 Agents and generation (F-08, F-06, F-09, F-10)**
   - [x] 🟩 Agent runtime: Anthropic client, `runAgent` (deadline, outcome mapping, logging, cost), pricing, agent config, fake agents
-  - [ ] 🟨 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); first real-model smoke run 2026-10-29 ($0.33): EV-1, EV-2 and EV-4 pass; EV-3 4/5, missing EV-3-01 ("keep it short on time" became a lighter-volume intent instead of a non-actionable part); prompt to be fixed before the full run*
+  - [x] 🟩 AG-2 Input Guard prompt and schema; owner reviews the EV-3 labels; checked with the smoke subset (full EV-3 in Step 9) — *built; EV-3 labels reviewed by the owner 2026-10-27 (EV-3-01 relabelled mixed); first real-model smoke run 2026-10-29 ($0.33): EV-1, EV-2 and EV-4 pass; EV-3 4/5, missing EV-3-01 ("keep it short on time" became a lighter-volume intent instead of a non-actionable part); prompt to be fixed before the full run. Fixed in AG-2 v2; EV-3 passes in the full runs from 2026-10-29*
   - [x] 🟩 Suggest Workout (API-08): AG-2 → engines → AG-3 → validator → one retry → persist, with deadline and idempotency
   - [x] 🟩 *(UI)* Planner screen (API-07), plan cards, header, status banner, total-time bar, how-to sheets (API-17, API-18)
   - [x] 🟩 Eval runner, manifest and smoke subset (`pnpm evals:smoke`); no full runs yet — *plumbing verified with fakes only*
@@ -77,13 +77,13 @@ Code for M0–M5 is done, M6's harness is done and M7 is prepared. What stands b
   - [x] 🟩 Accept, expiry (cron and lazy), complete with rating, history list and delete (API-13 to API-16)
   - [x] 🟩 E2E for UF-8 to UF-14 pass; EV-6 passes
 
-- [ ] 🟨 **Step 8: M5 Photos (F-05)**
+- [x] 🟩 **Step 8: M5 Photos (F-05)**
   - [x] 🟩 *(UI)* Photo sheet with on-phone resize and EXIF stripping; API-06; AG-1 prompt and schema; replace-vs-add; scan limit
-  - [ ] 🟨 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth lists approved by the owner 2026-10-28; threshold tuning in Step 9 (EV-5 alone, before the full run)*
+  - [x] 🟩 Photo-privacy integration test (no Storage or file writes); owner reviews the photo truth lists (EV-5 and threshold tuning in Step 9) — *test done; EV-5 photos in place (10 cases), truth lists approved by the owner 2026-10-28; threshold tuned to 0.55 on EV-5 (2026-10-29); EV-5 8/8 in the passing full run*
 
 - [ ] 🟨 **Step 9: M6 Evals, logs and metrics (F-18, F-19)**
   - [x] 🟩 Writers for `agent_logs`, `server_errors` and `app_events`; purge jobs; `metrics` views with fixture tests; `weekly-review.sql`
-  - [ ] 🟨 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 truth lists 2026-10-28*
+  - [x] 🟩 Complete the eval datasets and suites EV-1 to EV-8 (including EV-4 health) — *suites and datasets built, including the 10 EV-5 photo cases; EV-3 labels and EV-4 cases reviewed by the owner 2026-10-27; EV-5 truth lists 2026-10-28*
   - [x] 🟩 First full real-model run of EV-1 to EV-5; fix and re-run until every bar passes; tune and record the photo threshold on EV-5; owner reviews 20% of judged plans with ≥ 80% agreement — *first full run 2026-10-29 ($1.92): EV-1 and EV-3 pass; EV-2 16/30 below 3 (balance, limited-equipment users), EV-4 9/10 (V-7 cardio bug), EV-5 7/8. Since then: AG-2 v2, photo threshold 0.55, V-7 fix (§5.29), seed option A (§5.30), D-59 (EV-5 80%), D-60 (EV-2: 4 of 5 criteria, judge sees eligible exercises, focus table, users.v2), AG-3 v2 (D-52 coach cardio). Re-run waits for the owner's go. Third full run 2026-10-29 after D-61 (AG-3 v3, `NOTE_RULES_OUT_FOCUS`, EV-4 v2; $2.68): **every suite passes** (EV-2 0/30 below the bar, lowest score 3; EV-4 11/11; EV-5 8/8). Owner review of 6 judged plans 2026-10-29: 30/30 scores within ±1 of the judge (100%; 22/30 exact; the judge is slightly stricter, mean owner − judge +0.13), so the Sonnet 5.5 judge stays.*
   - [x] 🟩 Commit `evals/results/latest.json` and add the eval-gate to CI as a blocking check — *eval-gate job blocking; passing latest.json from run 2026-10-29T19-45-14Z committed*
   - [ ] 🟨 Full E2E (Chromium and WebKit) with axe running on `main` — *CI job runs on `main` and is red on WebKit: 2 failed (FR-3 password reset, FR-83 spend-cap banner) and 3 flaky ([run 40832805755](https://github.com/dbaid-code/fitness-coach/actions/runs/40832805755)); cause found 2026-10-29: text filled before hydration stayed out of the controlled state, so Log in stayed disabled (a real slow-phone/autofill bug, reproduced in Chromium with delayed scripts). `TextField` now adopts pre-hydration values; new E2E `FR-1: fields filled before the page hydrates…`; the FR-3 test leaves the app before clearing cookies. Chromium suite green locally (17/17); WebKit can't be downloaded in the container, so it is confirmed on `main` after merge*
