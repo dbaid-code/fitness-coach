@@ -11,8 +11,8 @@
 |-|-|-|-|-|-|-|
 | Local | `pnpm dev` (localhost:3000) | Supabase CLI local stack (Docker) | dev key or none | Mailpit (54324) | `local` | `real` or `fake` |
 | CI | `next start` in GitHub Actions | Supabase CLI local stack | none (tests); `ANTHROPIC_API_KEY_EVALS` in `evals.yml` only | Mailpit | `local` | `fake` |
-| Preview | Vercel Preview per PR (`bom1`) | **Dev** project (free, `ap-south-1`) | dev workspace key | built-in sender (org members only) | `preview` | `real` |
-| Production | Vercel Production (`bom1`) | **Prod** project (`ap-south-1`; free in Phase 0, **Pro before Phase 1**, D-40) | prod workspace key | built-in sender (D-28); Phase 1 per OD-06 | `production` | `real` |
+| Preview | Vercel Preview per PR (`bom1`) | **Dev** project (free, `ap-south-1`) | dev workspace key (unused while fake) | Resend (D-55) | `preview` | `fake` (D-62) |
+| Production | Vercel Production (`bom1`) | **Prod** project (`ap-south-1`; free in Phase 0, **Pro before Phase 1**, D-40) | prod workspace key | Resend (D-55) | `production` | `real` |
 
 Free Supabase projects pause after inactivity; resume the dev project from the dashboard before a preview review.
 
@@ -34,7 +34,7 @@ Each hosted project is built one way only, by a workflow; nothing is changed by 
 - *Historical, before the migrations existed:* paste `docs/specs/supabase-schema.sql` into the SQL editor of the fresh project once. When the migrations land, record them as already applied instead of re-running them: `supabase migration repair --db-url "$SUPABASE_DB_URL_<ENV>" --status applied <each migration version>`, then use the normal path from then on.
 
 ## 3. Variables per place
-**Vercel — Preview:** `NEXT_PUBLIC_SUPABASE_URL` (dev), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (dev), `SUPABASE_SECRET_KEY` (dev), `DATABASE_URL` (dev transaction pooler, `gc_app`), `ANTHROPIC_API_KEY` (dev), `LLM_MONTHLY_BUDGET_USD=24`, `APP_ENV=preview`, `AGENTS_MODE=real`. `NEXT_PUBLIC_SITE_URL` unset (derived from `VERCEL_URL`). "Automatically expose System Environment Variables" on.
+**Vercel — Preview:** `NEXT_PUBLIC_SUPABASE_URL` (dev), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (dev), `SUPABASE_SECRET_KEY` (dev), `DATABASE_URL` (dev transaction pooler, `gc_app`), `ANTHROPIC_API_KEY` (dev), `LLM_MONTHLY_BUDGET_USD=24`, `APP_ENV=preview`, `AGENTS_MODE=fake` (D-62: the hosted e2e specs rely on the fakes, D-54). `NEXT_PUBLIC_SITE_URL` unset (derived from `VERCEL_URL`). "Automatically expose System Environment Variables" on.
 
 **Vercel — Production:** the prod equivalents, `NEXT_PUBLIC_SITE_URL=https://<prod domain>`, `LLM_MONTHLY_BUDGET_USD=58`, `APP_ENV=production`, `AGENTS_MODE=real`.
 
