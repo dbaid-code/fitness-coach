@@ -44,8 +44,8 @@ Order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. About 2–2.5 hours in
 |-|-|
 | `supabase-prod-url` | Project URL, `https://<ref>.supabase.co` |
 | `supabase-prod-publishable` | Publishable key, `sb_publishable_…` |
-| `supabase-prod-secret-vercel` | Secret keys → **New secret key** named `vercel-prod` |
-| `supabase-prod-secret-gha` | Secret keys → **New secret key** named `github-actions` |
+| `supabase-prod-secret-vercel` | Secret keys → **New secret key** named `vercel_prod` (Supabase allows only letters, digits and underscores) |
+| `supabase-prod-secret-gha` | Secret keys → **New secret key** named `github_actions` |
 | `prod-database-url` | **Transaction pooler** string (port 6543): change `postgres.` to `gc_app.`, password = `supabase-prod-gc-app-password` |
 | `prod-db-url-admin` | **Session pooler** string (port 5432): keep `postgres.`, password = `supabase-prod-db-password` |
 
