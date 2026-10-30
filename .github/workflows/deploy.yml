@@ -5,6 +5,7 @@ name: deploy
 # - no SUPABASE_ACCESS_TOKEN: every hosted-database step uses SUPABASE_DB_URL_*;
 # - pinned Vercel CLI (G-9) and the repo's own Supabase CLI (devDependency) instead of an extra action.
 # - D-56: dev is no longer deployed here; deploy-dev.yml migrates and seeds it on every push to main.
+# - D-63: Vercel builds the deployment (`vercel deploy --prod`), so Secret-type variables are available.
 # - D-58: after the deploy, wait for readiness, then a smoke test with a dedicated account (one real plan).
 # Prepared in M7 and NOT run by the build (no deploy, no tags).
 on:
@@ -57,10 +58,10 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY_PROD }}
-      - run: pnpm dlx "$VERCEL_CLI" pull --yes --environment=production --token "$VERCEL_TOKEN"
-      - run: pnpm dlx "$VERCEL_CLI" build --prod --token "$VERCEL_TOKEN"
+      # D-63: built on Vercel, not here. Secret-type variables reach Vercel's builders but not `vercel pull`,
+      # so a local `vercel build` saw placeholders and env.ts refused them (first deploy, 2026-10-30).
       - id: deploy
-        run: echo "url=$(pnpm dlx "$VERCEL_CLI" deploy --prebuilt --prod --token "$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(pnpm dlx "$VERCEL_CLI" deploy --prod --yes --token "$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
       # The smoke runs on the production domain: the CSRF check accepts only NEXT_PUBLIC_SITE_URL there.
       - name: Wait for readiness (D-54)
         env: { URL: '${{ vars.PROD_SITE_URL }}' }

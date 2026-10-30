@@ -65,6 +65,7 @@ Order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. About 2–2.5 hours in
 | `APP_ENV` | `production` |
 | `AGENTS_MODE` | `real` (`env.ts` refuses `fake` in production) |
 
+   Type: **Secret** only for `SUPABASE_SECRET_KEY`, `DATABASE_URL` and `ANTHROPIC_API_KEY`; **Config** for the other seven. Secret values are available only to Vercel's own builders, which is why `deploy` builds there (D-63).
    Then check that the Preview rows still point at dev and Preview `AGENTS_MODE` is still `fake` (D-62).
 2. Automatic production deploys stay **off** (`vercel.json` → `git.deploymentEnabled.main = false`); production only comes from the `deploy` workflow. Nothing to do.
 3. Deployment Protection stays at Standard. From memory, it covers previews and leaves the production domain public; step 7.2 checks this.
