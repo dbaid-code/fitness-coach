@@ -15,7 +15,7 @@ Order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. About 2–2.5 hours in
 ## 1. Pre-flight (10 min)
 1. GitHub → Actions: on the latest `main` commit, `ci` is green **including `eval-gate`**, and `deploy-dev` is green. A red WebKit E2E job on `main` doesn't block production (the smoke runs on Chromium), but tell me.
 2. GitHub → Settings → **Environments**: `production` exists and only `main` may deploy to it (P-6). If there's no Environments page, your GitHub plan doesn't offer environments on private repositories. Tell me, and I'll move `deploy.yml` to repository secrets with the same names.
-3. Vercel → Project → Settings → **Domains**: note the production domain (`<project>.vercel.app`, or `<project>-<team slug>.vercel.app` if the short name is taken). **Record:** `prod-site-url` = `https://<that domain>`, with no trailing slash. Use this exact string everywhere below. Never use a per-deployment URL (`…-abc123-….vercel.app`): in production the CSRF check accepts only `NEXT_PUBLIC_SITE_URL`.
+3. Vercel → Project → Settings → **Domains**: note the production domain (`<project>.vercel.app`, or `<project>-<team slug>.vercel.app` if the short name is taken). **Record:** `prod-site-url` = `https://<that domain>`, with no trailing slash. **Phase 0 value (2026-10-30): `https://fitness-coach-three-lac.vercel.app`.** Use this exact string everywhere below. Never use a per-deployment URL (`…-abc123-….vercel.app`): in production the CSRF check accepts only `NEXT_PUBLIC_SITE_URL`.
 
 ## 2. P-3 (prod) Anthropic production workspace (10 min)
 1. console.anthropic.com → Settings → Workspaces → create `gym-coach-prod`.
