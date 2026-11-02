@@ -130,6 +130,7 @@ Keys are grouped by screen. `{x}` is a placeholder filled by the component.
 | `logIn.unverified` | Verify your email first |
 | `logIn.resendVerification` | Resend verification email |
 | `logIn.linkInvalid` | That link has expired or was already used. |
+| `logIn.viewDemo` | Access demo account *(D-64, temporary; shown only while the demo window is open)* |
 | `auth.weakPassword` | Use at least 8 characters |
 | `auth.rateLimited` | Too many attempts, try again later |
 | `forgot.title` | Reset your password |

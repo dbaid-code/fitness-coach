@@ -18,6 +18,9 @@ const Raw = z.object({
   VERCEL_URL: z.string().optional(),
   VERCEL_BRANCH_URL: z.string().optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
+  // D-64: temporary demo access. Both set → "Access demo account" until the instant given (ISO 8601 with offset).
+  DEMO_EMAIL: z.email().optional(),
+  DEMO_ENABLED_UNTIL: z.iso.datetime({ offset: true }).optional(),
 });
 
 /** Empty strings count as unset (an `.env` line like `ANTHROPIC_API_BASE_URL=` must not fail `url()`). */
@@ -36,6 +39,9 @@ export function parseEnv(source: Readonly<Record<string, string | undefined>>) {
   }
   if (raw.AGENTS_MODE === 'real' && !raw.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is required when AGENTS_MODE=real');
+  }
+  if (raw.DEMO_ENABLED_UNTIL && !raw.DEMO_EMAIL) {
+    throw new Error('DEMO_EMAIL is required when DEMO_ENABLED_UNTIL is set');
   }
   if (raw.APP_ENV !== 'preview' && !raw.NEXT_PUBLIC_SITE_URL) {
     throw new Error('NEXT_PUBLIC_SITE_URL is required outside preview');

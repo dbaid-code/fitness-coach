@@ -10,7 +10,7 @@
 - Base path `/api/v1`. JSON bodies, except API-06 (`multipart/form-data`).
 - Field and query names are `snake_case`. Timestamps are ISO-8601 UTC strings (`2026-11-03T09:15:00.000Z`). User-data IDs are UUID strings; reference IDs are text slugs.
 - Every Zod request schema uses `.strict()`: unknown keys fail with 400.
-- Auth levels: **none** (API-21 only), **user** (valid Supabase session), **profile** (session + completed onboarding).
+- Auth levels: **none** (API-21, and API-22 while D-64 is in force), **user** (valid Supabase session), **profile** (session + completed onboarding).
 - Every Route Handler: `export const runtime = 'nodejs';` and is wrapped in `apiHandler`.
 
 ## 2. Response envelope
@@ -221,6 +221,7 @@ export const HistoryEntryDto = z.object({
 | API-19 | `POST /api/v1/events` | user | — | default | `observability-and-metrics.md` |
 | API-20 | `DELETE /api/v1/account` | user | — | default | `account-deletion-and-data-isolation.md` |
 | API-21 | `GET /api/v1/health` | none | — | default | `project-foundation.md` |
+| API-22 | `POST /api/v1/demo-login` (no body; 204 + session cookies; 404 outside the demo window) | none | — | default | eng doc D-64 (temporary) |
 
 Path params: `planId` is `z.uuid()`; `exerciseId` matches `^[A-Za-z0-9_\-]{1,120}$`; `routineId` matches `^(warmup|cooldown)_[a-z0-9_]{2,40}$`.
 
