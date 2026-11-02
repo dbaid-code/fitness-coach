@@ -81,4 +81,11 @@ describe('F-01 env.ts', () => {
     );
     expect(() => parseEnv({ ...base, NEXT_PUBLIC_DB_PASSWORD: 'x' })).toThrow(/Secret-looking/);
   });
+
+  it('D-64: accepts the demo variables and requires DEMO_EMAIL with DEMO_ENABLED_UNTIL', () => {
+    const env = parseEnv({ ...base, DEMO_EMAIL: 'demo@test.local', DEMO_ENABLED_UNTIL: '2026-11-30T23:59:59+05:30' });
+    expect(env.DEMO_ENABLED_UNTIL).toBe('2026-11-30T23:59:59+05:30');
+    expect(() => parseEnv({ ...base, DEMO_ENABLED_UNTIL: '2026-11-30T23:59:59+05:30' })).toThrow(/DEMO_EMAIL/);
+    expect(() => parseEnv({ ...base, DEMO_EMAIL: 'demo@test.local', DEMO_ENABLED_UNTIL: '30 Nov' })).toThrow();
+  });
 });

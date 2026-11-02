@@ -25,7 +25,8 @@ const fromDto = (p: ProfileDto): ProfileFieldsValue => ({
 });
 
 // UF-15 (FR-11, D-35): Save changes under Equipment, disabled until a field changes; Log out / Delete account links.
-export function ProfileForm({ initial }: { initial: ProfileDto }) {
+// D-64: Delete account is greyed out for everyone while the demo window is open (the API is unchanged).
+export function ProfileForm({ initial, deleteDisabled = false }: { initial: ProfileDto; deleteDisabled?: boolean }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: profile } = useProfile(initial);
@@ -92,8 +93,9 @@ export function ProfileForm({ initial }: { initial: ProfileDto }) {
         </span>
         <button
           type="button"
+          disabled={deleteDisabled}
           onClick={() => setDeleting(true)}
-          className="h-11 rounded-md px-1 text-[15px] text-destructive underline underline-offset-3 hover:bg-danger"
+          className="h-11 rounded-md px-1 text-[15px] text-destructive underline underline-offset-3 hover:bg-danger disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline disabled:hover:bg-transparent"
         >
           {uiText('profile.deleteAccount')}
         </button>

@@ -8,8 +8,10 @@ import { CopyBanner } from '@/components/common/status-banner';
 import { TextField } from '@/components/form/field';
 import { Screen, ScreenTitle } from '@/components/layout/screen';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api-client';
 import { safeNextPath } from '@/lib/security/safe-redirect';
 import { siteUrl } from '@/lib/site-url';
+import { toastForError } from '@/lib/toasts';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import { uiText } from '@/shared/messages/ui-copy';
 import { SAFE_NEXT_PREFIXES } from '@/shared/routes';
@@ -17,7 +19,8 @@ import { EMAIL_RE, authErrorCopy } from './auth-errors';
 import { FormError } from './form-error';
 
 // AUTH-03 (FR-1): log in; unverified users get a resend action (AUTH-07). `next` goes through safeNextPath (S-4).
-export function LogInForm() {
+// D-64: while the demo window is open, "View the demo" signs in to the shared demo account (API-22).
+export function LogInForm({ demo = false }: { demo?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState('');
@@ -39,6 +42,20 @@ export function LogInForm() {
     }
     router.replace(safeNextPath(params.get('next'), '/', SAFE_NEXT_PREFIXES));
     router.refresh();
+  }
+
+  async function viewDemo() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api('POST', '/api/v1/demo-login');
+      router.replace('/');
+      router.refresh();
+    } catch (err) {
+      setBusy(false);
+      toastForError(err, () => void viewDemo());
+    }
   }
 
   async function resend() {
@@ -65,6 +82,11 @@ export function LogInForm() {
             <Button type="submit" width="full" disabled={!email || !password} loading={busy}>
               {uiText('logIn.submit')}
             </Button>
+            {demo ? (
+              <Button type="button" variant="outline" width="full" disabled={busy} onClick={() => void viewDemo()}>
+                {uiText('logIn.viewDemo')}
+              </Button>
+            ) : null}
             <Button asChild variant="ghost" width="full">
               <Link href="/sign-up">{uiText('logIn.toSignUp')}</Link>
             </Button>
