@@ -46,7 +46,7 @@ export const UI_COPY = {
   'logIn.unverified': 'Verify your email first',
   'logIn.resendVerification': 'Resend verification email',
   'logIn.linkInvalid': 'That link has expired or was already used.',
-  'logIn.viewDemo': 'View the demo', // D-64, temporary
+  'logIn.viewDemo': 'Access demo account', // D-64, temporary
   'auth.weakPassword': 'Use at least 8 characters',
   'auth.rateLimited': 'Too many attempts, try again later',
   'forgot.title': 'Reset your password',

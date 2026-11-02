@@ -18,7 +18,7 @@ const Raw = z.object({
   VERCEL_URL: z.string().optional(),
   VERCEL_BRANCH_URL: z.string().optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
-  // D-64: temporary demo access. Both set → "View the demo" until the instant given (ISO 8601 with offset).
+  // D-64: temporary demo access. Both set → "Access demo account" until the instant given (ISO 8601 with offset).
   DEMO_EMAIL: z.email().optional(),
   DEMO_ENABLED_UNTIL: z.iso.datetime({ offset: true }).optional(),
 });

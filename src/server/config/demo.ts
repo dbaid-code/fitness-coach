@@ -3,7 +3,7 @@ import { clock } from '@/server/clock';
 import { env } from './env';
 
 // D-64: temporary demo access, controlled by DEMO_EMAIL and DEMO_ENABLED_UNTIL. While the window is open the
-// log-in page shows "View the demo" (API-22) and Profile greys out Delete account; afterwards both revert
+// log-in page shows "Access demo account" (API-22) and Profile greys out Delete account; afterwards both revert
 // without a deploy because the check runs on every request.
 
 export type DemoSettings = { email?: string | undefined; until?: string | undefined };

@@ -19,7 +19,7 @@ import { EMAIL_RE, authErrorCopy } from './auth-errors';
 import { FormError } from './form-error';
 
 // AUTH-03 (FR-1): log in; unverified users get a resend action (AUTH-07). `next` goes through safeNextPath (S-4).
-// D-64: while the demo window is open, "View the demo" signs in to the shared demo account (API-22).
+// D-64: while the demo window is open, "Access demo account" signs in to the shared demo account (API-22).
 export function LogInForm({ demo = false }: { demo?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
