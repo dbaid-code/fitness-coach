@@ -105,7 +105,9 @@ Code enforces every fact. A plan that fails validation gets one retry, then `GEN
 - **Requirement IDs everywhere** (§12.9). Code comments cite the rule they enforce (`// FR-62: one active plan`). Test names start with the ID (`describe('FR-62 one active plan', …)`, `it('V-9: …')`). Commits are Conventional Commits with IDs: `feat(plans): enforce one active plan [FR-62]`. ID prefixes: PRD `FR-`, `AG-`, `EV-`; eng doc `UF-`, `F-`, `API-`, `V-`, `D-`, `OD-`, `R-`; security plan `S-`, `G-`.
 - **Naming** is in §12. Files are kebab-case. Suffixes: `*.service.ts`, `*.repo.ts`, `*.agent.ts`, `*.schema.ts`, `prompt.v<N>.md`. Versioned data is `name.v<N>.ext`. JSON fields are snake_case. DB names follow `idx_`/`uq_`/`ck_`/`trg_` and policies `<table>_<action>_own`.
 - **Tests:** unit tests sit beside the source as `*.test.ts(x)`. Integration tests are `tests/integration/*.int.test.ts` (local Supabase, fake agents, `truncateUserData()` and `fakeAgents.reset()` in `beforeEach`). E2E tests are `tests/e2e/*.spec.ts`.
-- **Git:** one branch and PR per milestone, each stacked on the previous one. Branches are named `feat/…`, `fix/…`, `chore/…` or `docs/…`.
+- **Git (§12.8, D-65):** one short-lived branch and PR per change, cut from the latest `main` and never stacked. Merge only with CI green.
+  - Names: `feat/…`, `fix/…`, `chore/…` or `docs/…`. A Claude cloud session uses the `claude/<name>` branch it was assigned instead, because that is the only branch it can push to.
+  - Once a branch's PR has merged, it is done: start follow-up work from the latest `main` (restart the session branch from `main` if you have to), and delete the merged branch.
 - **Definition of Done** (§19.3): the feature's acceptance criteria are met with ID-named tests, CI is green, and the eng doc is updated in the same PR if a canonical contract changed.
 
 ## Working with the owner

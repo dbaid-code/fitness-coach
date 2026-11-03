@@ -83,7 +83,7 @@ Found during the build (2026-10-26); each is resolved in code unless marked **op
 5. Seed curation approved (about $2–4 on the dev key).
 6. Photo test set: I fetch public-domain photos (no people); the owner reviews the truth list.
 7. Icon generation approved; the owner reviews the result.
-8. One branch and PR per milestone, stacked on the previous one.
+8. ~~One branch and PR per milestone, stacked on the previous one.~~ Superseded 2026-11-03 by D-65: one short-lived branch and PR per change, from `main`, not stacked (§12.8).
 9. OD-08 reviews don't block the next milestone; findings are fixed as they come in.
 
 Deviations from `deployment-and-environments.md` §2–3 (revised 2026-10-26 after the owner's first pass through the runbook):
