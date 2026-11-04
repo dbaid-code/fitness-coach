@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-**Gym Coach**: a phone-first web app where AI agents plan gym workouts. It's an MVP for the owner and up to 20 friends, not a commercial product. The repo is **docs-first**. The product, architecture, specs and design are all written and approved, but the app hasn't been scaffolded yet. The only code so far:
+**Gym Coach**: a phone-first web app where AI agents plan gym workouts. It's an MVP for the owner and up to 20 friends, not a commercial product. The repo is **docs-first**: the product, architecture, specs and design were written and approved before any code, and the docs still govern every change.
 
-- `src/lib/security/*.ts`: pure, dependency-free security helpers with tests next to them (security plan §4)
-- `supabase/rls-policies.sql`: rate-limit table, policies and privileges. It becomes migration 9 (`20261101000800_security.sql`)
-- `docs/specs/supabase-schema.sql`: the full reference schema
+**Where the build stands:** milestones M0–M6 are built, and the eval gate is green. M7 (F-20) has shipped to production on Vercel's default domain (D-62, D-63). Releases are tagged `release-YYYYMMDD-N` and the first one is `release-20261030-1`. The live status is the markers in `docs/engineering/implementation-plan.md`. The milestone table in `docs/engineering/build-notes.md` §7 is a snapshot from 2026-10-26, so read the dated notes under it.
 
-There is no `package.json` yet. Milestone M0 (F-01) creates the Next.js scaffold, toolchain and CI. To see where the build stands, check the status markers in `docs/engineering/implementation-plan.md` and the milestone table in `docs/engineering/build-notes.md`.
+Layout: `src/app` (routes), `src/features`, `src/components`, `src/lib`, `src/server`, `src/shared`; `supabase/migrations` (11 migrations); `tests/{integration,e2e}`; `evals/`; `scripts/`; `data/` (seed); `docs/runbooks/` (operations). `docs/specs/supabase-schema.sql` + `supabase/rls-policies.sql` are the reference schema that `scripts/check-schema-parity.ts` compares the migrations against.
+
+**Next.js 16 has breaking changes:** read `AGENTS.md` and the guides in `node_modules/next/dist/docs/` before writing Next.js code. Don't remove the block in `AGENTS.md`, because `next dev` re-adds it.
 
 ## Document authority (read this before changing anything)
 
@@ -27,7 +27,7 @@ Also:
 
 ## Commands
 
-From `docs/specs/project-foundation.md` §4. They exist once M0 lands; the toolchain is Node 24 and pnpm 10.
+Scripts are in `package.json` (spec: `docs/specs/project-foundation.md` §4). The toolchain is Node 24 (`engines: >=24 <25`) and pnpm 10.
 
 ```bash
 pnpm dev                  # Next.js on http://localhost:3000
@@ -42,7 +42,7 @@ pnpm db:start             # Supabase CLI local stack (Docker), Mailpit on :54324
 pnpm db:reset             # apply migrations + seed
 pnpm db:generate          # drizzle-kit migration from the schema; db:migration <name> for hand-written SQL
 pnpm db:seed              # also seed:import / seed:curate / seed:validate / seed:images
-pnpm evals:smoke          # ~10 real-model cases on the dev key; evals:full only from M6
+pnpm evals:smoke          # ~10 real-model cases on the dev key; evals:full = full EV-1–EV-8 run; evals:check
 pnpm check:bundle         # client-bundle secret scan
 pnpm trace:specs          # lists FR-/AG-/EV- IDs that have no test
 ```
@@ -51,14 +51,23 @@ Run a single test:
 ```bash
 pnpm exec vitest run --project unit src/server/domain/progression/progression.test.ts
 pnpm exec vitest run --project unit -t "V-9"
-pnpm exec vitest run --project integration tests/integration/plans-lifecycle.int.test.ts
+pnpm exec vitest run --project integration tests/integration/plan-lifecycle.int.test.ts
 pnpm exec playwright test tests/e2e/auth.spec.ts --project=chromium-pixel7
 ```
 (`pnpm test` runs with coverage thresholds, so for a single file call vitest directly as above.)
 
-Until M0, nothing in the repo can run the `src/lib/security` tests. The 59 tests were checked through a `node:test` shim that isn't committed, and they use the vitest API unchanged.
+**CI and deploy** (`.github/workflows/`):
+- `ci.yml` runs on every PR and push. Its jobs are `quality` (lint, typecheck, unit, build, bundle scan), `integration` (local Supabase stack plus schema parity), `e2e` (smoke on PRs, full suite on `main`), `secrets` (gitleaks) and `eval-gate`.
+- `e2e-hosted.yml` runs the e2e suite against every Vercel preview through the protection bypass (D-54). Previews always use `AGENTS_MODE=fake` (D-62).
+- `deploy-dev.yml` runs on every push to `main`. `dev-rebuild.yml` rebuilds the hosted dev project from the migrations.
+- `deploy.yml` is the production release: `workflow_dispatch` only, from `main`, built on Vercel (D-63). The steps are in `docs/runbooks/owner-setup-prod.md`.
+- `evals.yml` runs the real-model evals.
 
-**Machine:** this Windows machine has Node 24 but no Docker, pnpm, Supabase CLI or gitleaks. The build runs in a Claude cloud container. That container pulls Supabase images from Docker Hub, because `public.ecr.aws` is blocked, and it can't reach hosted Supabase or Vercel. So hosted-database steps run in GitHub Actions, and the owner checks previews by hand (build notes §4, §6).
+**Machines:**
+- The owner's Windows machine has Node 24, but no Docker, pnpm, Supabase CLI or gitleaks.
+- The build runs in a Claude cloud container, which pulls Supabase images from Docker Hub because `public.ecr.aws` is blocked. The container can't reach hosted Supabase or Vercel, so hosted-database steps run in GitHub Actions.
+- The dev Anthropic key arrives in the container as `GC_ANTHROPIC_API_KEY` (build notes §4, §6).
+- Pushes from the container are scoped to the session's branch. Deleting branches and similar repo admin is done by the owner.
 
 ## Architecture
 
@@ -67,7 +76,7 @@ One Next.js 16 app (React 19, TypeScript strict, Tailwind v4 + shadcn/ui). It ru
 **Request path:**
 `src/proxy.ts` (session refresh, route guard, CSP nonce) → `apiHandler` (request ID, Origin and Content-Type check, auth, rate limit, body cap, Zod `.strict()`, idempotency, error envelope, one log line) → **service** → **pure domain engines** → **repositories** → Postgres.
 
-- **No Server Actions.** Every mutation is a REST call to `/api/v1/*` (API-01 to API-21; endpoint index in `api-conventions.md`). Server Components prefetch into TanStack Query.
+- **No Server Actions.** Every mutation is a REST call to `/api/v1/*` (API-01 to API-22; endpoint index in `api-conventions.md`). Server Components prefetch into TanStack Query.
 - **Services** (`src/server/services/*.service.ts`) are the only callers of agents and repositories. They own the transaction split: tx 1, then the LLM call **outside** any transaction, then tx 2.
 - **Domain engines** (`src/server/domain/**`) are pure: time model, rulebook, recency, candidate filter, progression, validator V-1 to V-11, status resolver, header, diff, plan state machine, limits policy. Lint bans Drizzle, the Anthropic SDK, Next and Supabase imports there. Coverage must be 100% (as for `src/shared/time-model` and `src/shared/messages`).
 - **Repositories** (`*.repo.ts`) are the only files that import Drizzle. Every query runs inside `withUserTx`: the server connects as `gc_app` (no privileges of its own) and switches to `authenticated` with the user's JWT claims, so RLS applies to every table and fails closed. A foreign ID returns 404.
@@ -81,7 +90,7 @@ One Next.js 16 app (React 19, TypeScript strict, Tailwind v4 + shadcn/ui). It ru
 - AG-2 Input Guard (Haiku 5.5): the **only** agent that sees user text, which is normalised and fenced (`normalizeUserText`, `fenceUserText`)
 - AG-3 Workout Planner (Sonnet 5.5): sees only AG-2's structured requests and candidates built by code, and returns IDs and numbers
 
-Code enforces every fact. A plan that fails validation gets one retry, then `GENERATION_FAILED`. A red flag produces no plan, only a fixed notice. A spend guard and the `llm_call` rate limit run before every call. `AGENTS_MODE=fake` (deterministic fakes, no Anthropic calls) is the default until M6, and `env.ts` refuses it in production.
+Code enforces every fact. A plan that fails validation gets one retry, then `GENERATION_FAILED`. A red flag produces no plan, only a fixed notice. A spend guard and the `llm_call` rate limit run before every call. `AGENTS_MODE` defaults to `real` in `env.ts`, which requires `ANTHROPIC_API_KEY` for `real` and refuses `fake` in production. `fake` (deterministic fakes in `src/server/agents/fake/`, no Anthropic calls) is used for integration tests, CI and every preview.
 
 **Invariants that are easy to break:**
 - **No agent free text ever reaches the UI (FR-46).** The UI renders only strings from `src/shared/messages/catalog.ts` (PRD Appendix A codes) and `ui-copy.ts` (`messages-and-ui-copy.md`) and names from the database.
@@ -89,13 +98,16 @@ Code enforces every fact. A plan that fails validation gets one retry, then `GEN
 - **Health input** lives only in `planning_context`, `agent_logs` and `idempotency_keys` (D-02). The EV-6 integration test scans every other table for it.
 - **Every Appendix B number** is read from `src/shared/constants.ts` or `src/server/config/app-config.ts`. Agent settings live in `agent-config.ts`.
 - **Env names** follow the newer Supabase keys (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`), not anon/service_role. Every variable is documented in `.env.example`. `env.ts` refuses secrets in `NEXT_PUBLIC_*`.
+- **Temporary demo access (D-64), until 2026-11-30 23:59 IST.** It covers API-22 `POST /api/v1/demo-login`, the "Access demo account" button and the greyed-out Delete account button. It turns itself off through `DEMO_ENABLED_UNTIL` and the server clock. Don't extend or widen it without a new owner decision. After the window closes, a follow-up PR removes the code.
 
 ## Conventions
 
 - **Requirement IDs everywhere** (§12.9). Code comments cite the rule they enforce (`// FR-62: one active plan`). Test names start with the ID (`describe('FR-62 one active plan', …)`, `it('V-9: …')`). Commits are Conventional Commits with IDs: `feat(plans): enforce one active plan [FR-62]`. ID prefixes: PRD `FR-`, `AG-`, `EV-`; eng doc `UF-`, `F-`, `API-`, `V-`, `D-`, `OD-`, `R-`; security plan `S-`, `G-`.
 - **Naming** is in §12. Files are kebab-case. Suffixes: `*.service.ts`, `*.repo.ts`, `*.agent.ts`, `*.schema.ts`, `prompt.v<N>.md`. Versioned data is `name.v<N>.ext`. JSON fields are snake_case. DB names follow `idx_`/`uq_`/`ck_`/`trg_` and policies `<table>_<action>_own`.
 - **Tests:** unit tests sit beside the source as `*.test.ts(x)`. Integration tests are `tests/integration/*.int.test.ts` (local Supabase, fake agents, `truncateUserData()` and `fakeAgents.reset()` in `beforeEach`). E2E tests are `tests/e2e/*.spec.ts`.
-- **Git:** one branch and PR per milestone, each stacked on the previous one. Branches are named `feat/…`, `fix/…`, `chore/…` or `docs/…`.
+- **Git (§12.8, D-65):** one short-lived branch and PR per change, cut from the latest `main` and never stacked. Merge only with CI green.
+  - Names: `feat/…`, `fix/…`, `chore/…` or `docs/…`. A Claude cloud session uses the `claude/<name>` branch it was assigned instead, because that is the only branch it can push to.
+  - Once a branch's PR has merged, it is done: start follow-up work from the latest `main` (restart the session branch from `main` if you have to), and delete the merged branch.
 - **Definition of Done** (§19.3): the feature's acceptance criteria are met with ID-named tests, CI is green, and the eng doc is updated in the same PR if a canonical contract changed.
 
 ## Working with the owner
